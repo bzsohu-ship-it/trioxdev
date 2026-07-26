@@ -32,7 +32,7 @@ Egy sikeres biztonsági mentés önmagában még nem garantálja, hogy rendszerh
 |---|---|---|
 | **Audit Restore Validation** | Ha az auditor kizárólag azt várja el, hogy a mentésekből az adatok visszaállíthatók | 4–6 mérnökóra |
 | **Irodai infrastruktúra teszt** | Active Directory és szerver infrastruktúra teljes működésének ellenőrzésére | 8–12 mérnökóra |
-| **Solarsoft rendszer teszt** | Solarsoft alkalmazás és adatbázis mentéseinek ellenőrzésére | 4–6 mérnökóra |
+| **Külső szállító rendszer teszt** | Külső szállító alkalmazás és adatbázis mentéseinek ellenőrzésére | 4–6 mérnökóra |
 | **Microsoft 365 teszt** | Exchange Online, SharePoint, OneDrive helyreállításának ellenőrzésére | 6–10 mérnökóra |
 | **Teljes Disaster Recovery teszt** | Ha teljes infrastruktúra-helyreállítási próbára van szükség | 24–40 mérnökóra |
 
@@ -76,16 +76,16 @@ Active Directory és szerver infrastruktúra teljes működésének ellenőrzés
 
 ---
 
-### 3. Solarsoft rendszer visszaállítási teszt
+### 3. Külső szállító rendszer visszaállítási teszt
 
-A Solarsoft alkalmazás és adatbázis mentéseinek ellenőrzése.
+A külső szállító alkalmazás és adatbázis mentéseinek ellenőrzése.
 
 **Tartalma**
 
 - alkalmazás visszaállítása
 - adatbázis visszaállítása
 - szolgáltatás működésének ellenőrzése
-- szükség esetén a Solarsoft alkalmazásszállító bevonása
+- szükség esetén a külső szállító bevonása
 
 **Becsült idő:** 4–6 mérnökóra
 
