@@ -1,0 +1,79 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base cim="Biztonság" leiras="Ügyfelenként dedikált hálózat, kétszintű szegmentálás, out-of-band management és enterprise backup — a Triox biztonsági megközelítése.">
+  <section class="band">
+    <div class="wrap prose">
+      <p class="eyebrow">Biztonság</p>
+      <h1>Izoláció, nem osztozás</h1>
+      <p class="lead">
+        Minden ügyfelünk saját hálózati szegmensen fut, egymástól elválasztva.
+      </p>
+    </div>
+  </section>
+
+  <section class="band band--mist">
+    <div class="wrap biz-grid">
+
+      <div class="biz-card">
+        <h2>Izoláció, nem osztozás</h2>
+        <p>Minden ügyfelünk saját hálózati szegmensen fut, egymástól elválasztva — VLAN-alapú vagy fizikai szegmentálással. Az érzékeny adatokat kezelő ügyfeleinknél már működő gyakorlat a teljesen zárt környezet: dedikált virtuális switch, privát alhálózat, az internetről egyáltalán nem elérhető rendszer.</p>
+      </div>
+
+      <div class="biz-card">
+        <h2>Dedikált gateway ügyfelenként</h2>
+        <p>Saját tűzfal- és NAT-szabályok, VPN-hozzáférés. A szabályrendszert az Ön igényeihez alakítjuk, nem egy közös, mindenkire vonatkozó sablont kap.</p>
+      </div>
+
+      <div class="biz-card">
+        <h2>Kétszintű hálózati szegmentálás</h2>
+        <p>A belső réteg (adatbázis, alkalmazás) és a publikus réteg (web, mail) élesen elválik. Egy publikus szolgáltatás kompromittálódása így nem nyit utat az adatbázisokhoz.</p>
+      </div>
+
+      <div class="biz-card">
+        <h2>Végpont- és hozzáférésvédelem</h2>
+        <p>Végpontvédelem a munkaállomásokon, központi jogosultságkezelés, többfaktoros hitelesítés, valamint biztonsági auditok a környezet rendszeres átvilágítására.</p>
+      </div>
+
+      <div class="biz-card">
+        <h2>Mentés és helyreállítás</h2>
+        <p>Enterprise szintű adatmentés, több egymástól független fizikai backup célpontra, több helyszínen. A kritikus terhelésekhez off-site VM replikációt biztosítunk, hogy egy helyszín kiesése ne jelentsen adatvesztést.</p>
+      </div>
+
+      <div class="biz-card">
+        <h2>Out-of-band management</h2>
+        <p>A menedzsment hálózatunk az internetről nem elérhető. A kezelőfelületek nem támadhatók kívülről.</p>
+      </div>
+
+      <div class="biz-card">
+        <h2>Megfelelés</h2>
+        <p>GDPR-konform adatkezelés, dokumentált folyamatok, rendszeres automatizált infrastruktúra-audit és riportálás.</p>
+      </div>
+
+    </div>
+  </section>
+</Base>
+
+<style>
+  .biz-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    gap: 1.5rem;
+  }
+  .biz-card {
+    background: var(--c-paper);
+    border: 1px solid var(--c-line);
+    border-radius: var(--r);
+    padding: 1.5rem;
+  }
+  .biz-card h2 {
+    font-size: 1.05rem;
+    margin-bottom: 0.5rem;
+  }
+  .biz-card p {
+    color: var(--c-steel);
+    font-size: 0.95rem;
+    margin: 0;
+  }
+</style>

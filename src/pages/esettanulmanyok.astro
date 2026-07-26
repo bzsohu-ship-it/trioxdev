@@ -1,0 +1,69 @@
+---
+import Base from '../layouts/Base.astro';
+
+const projektek = [
+  {
+    cim: 'Országos lefedettségű médiaszolgáltató',
+    leiras: 'Teljes belső hálózati, web- és adatinfrastruktúra kialakítása és üzemeltetése, migrációval a meglévő környezetből.',
+  },
+  {
+    cim: 'Biotechnológiai kutatólabor',
+    leiras: 'Teljesen izolált, az internetről nem elérhető IT infrastruktúra nagy adatmennyiséget kezelő kutatási terhelésekhez.',
+  },
+  {
+    cim: 'Pénzügyi szolgáltató',
+    leiras: 'Kétszintű, szegmentált alkalmazás-stack: az adatbázis- és alkalmazásréteg élesen elválasztva a publikus szolgáltatásoktól.',
+  },
+  {
+    cim: 'Kereskedelmi és szolgáltató cégek',
+    leiras: 'Web-, fájl- és címtárkörnyezetek kiszervezett üzemeltetése.',
+  },
+];
+---
+
+<Base cim="Esettanulmányok" leiras="Megvalósított projektek: hálózati infrastruktúra, izolált kutatói környezet, szegmentált pénzügyi stack és kiszervezett üzemeltetés.">
+  <section class="band">
+    <div class="wrap prose">
+      <p class="eyebrow">Esettanulmányok</p>
+      <h1>A megoldott feladat a főszereplő</h1>
+      <p class="lead">A partnereink nevét nem tesszük közzé.</p>
+    </div>
+  </section>
+
+  <section class="band band--mist">
+    <div class="wrap">
+      <div class="projektek">
+        {projektek.map((p) => (
+          <div class="projekt">
+            <h2>{p.cim}</h2>
+            <p>{p.leiras}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .projektek {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+    gap: 1.5rem;
+  }
+  .projekt {
+    background: var(--c-paper);
+    border: 1px solid var(--c-line);
+    border-left: 4px solid var(--c-brand);
+    border-radius: var(--r);
+    padding: 1.5rem;
+  }
+  .projekt h2 {
+    font-size: 1.05rem;
+    margin-bottom: 0.5rem;
+  }
+  .projekt p {
+    color: var(--c-steel);
+    font-size: 0.95rem;
+    margin: 0;
+  }
+</style>

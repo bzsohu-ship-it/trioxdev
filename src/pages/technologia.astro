@@ -1,0 +1,107 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base cim="Technológia" leiras="Enterprise virtualizáció, redundáns hálózat, ügyfél-izoláció és backup-megoldások — a Triox infrastruktúrájának technológiai alapjai.">
+  <section class="band">
+    <div class="wrap prose">
+      <p class="eyebrow">Technológia</p>
+      <h1>Amire az infrastruktúra épül</h1>
+      <p class="lead">Enterprise szintű komponensek, ügyfelenként dedikált konfigurációban.</p>
+
+      <div class="tech-tabla">
+        <div class="tech-sor tech-sor--fej">
+          <span>Terület</span>
+          <span>Amit adunk</span>
+        </div>
+        <div class="tech-sor">
+          <strong>Virtualizáció</strong>
+          <span>Microsoft Hyper-V, VMware, Proxmox</span>
+        </div>
+        <div class="tech-sor">
+          <strong>Hardver</strong>
+          <span>Enterprise szerverpark</span>
+        </div>
+        <div class="tech-sor">
+          <strong>Hálózat</strong>
+          <span>Nagysebességű, redundáns 2×10 Gbps gerinchálózat</span>
+        </div>
+        <div class="tech-sor">
+          <strong>Ügyfél-izoláció</strong>
+          <span>VLAN-alapú vagy fizikai szegmentálás, ügyfelenként dedikált szegmens</span>
+        </div>
+        <div class="tech-sor">
+          <strong>Gateway</strong>
+          <span>Ügyfelenként dedikált tűzfal, NAT és VPN endpoint</span>
+        </div>
+        <div class="tech-sor">
+          <strong>Backup</strong>
+          <span>Enterprise szintű adatmentési megoldások</span>
+        </div>
+        <div class="tech-sor">
+          <strong>Backup célpontok</strong>
+          <span>Több, egymástól független fizikai backup target, több helyszínen</span>
+        </div>
+        <div class="tech-sor">
+          <strong>Replikáció</strong>
+          <span>Off-site VM replika-célpont a kritikus terhelésekhez</span>
+        </div>
+        <div class="tech-sor">
+          <strong>Out-of-band management</strong>
+          <span>Dedikált, az internetről nem elérhető management hálózat</span>
+        </div>
+        <div class="tech-sor">
+          <strong>Publikus IP</strong>
+          <span>Dedikált publikus IPv4 cím ügyfelenként, saját címtartományból</span>
+        </div>
+        <div class="tech-sor">
+          <strong>Datacenter</strong>
+          <span>Két budapesti helyszín</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .tech-tabla {
+    margin-top: 2rem;
+    border: 1px solid var(--c-line);
+    border-radius: var(--r);
+    overflow: hidden;
+  }
+  .tech-sor {
+    display: grid;
+    grid-template-columns: 14rem 1fr;
+    gap: 1rem;
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid var(--c-line);
+    font-size: 0.95rem;
+    align-items: baseline;
+  }
+  .tech-sor:last-child {
+    border-bottom: none;
+  }
+  .tech-sor--fej {
+    background: var(--c-ink);
+    color: #e9ecf2;
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 0.82rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .tech-sor:not(.tech-sor--fej):nth-child(even) {
+    background: var(--c-mist);
+  }
+  .tech-sor strong {
+    font-family: var(--f-display);
+    font-weight: 600;
+  }
+  @media (max-width: 40rem) {
+    .tech-sor {
+      grid-template-columns: 1fr;
+      gap: 0.25rem;
+    }
+  }
+</style>

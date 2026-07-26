@@ -3,19 +3,48 @@ import Base from '../layouts/Base.astro';
 import Kapcsolatform from '../components/Kapcsolatform.astro';
 ---
 
-<Base cim="Kapcsolat" leiras="Írjon nekünk: felmérés, ajánlatkérés vagy támogatási igény — munkanapon belül válaszolunk.">
+<Base cim="Kapcsolat" leiras="Írjon nekünk: ajánlatkérés vagy infrastruktúra-felmérés — 2 munkanapon belül válaszolunk.">
   <section class="band">
     <div class="wrap kap">
       <div>
         <p class="eyebrow">Kapcsolat</p>
-        <h1>Mondja el, mi akadt el</h1>
+        <h1>Mondja el, mire van szüksége</h1>
         <p class="lead">
-          Írja le pár mondatban a helyzetet. Munkanapon belül válaszolunk, és ha kell,
-          egy rövid felméréssel kezdünk.
+          Írja le pár mondatban a helyzetet. 2 munkanapon belül visszajelzünk, és ha kell, egy rövid felméréssel kezdünk.
         </p>
-        <p>
-          E-mail: <a href="mailto:info@triox.hu">info@triox.hu</a><br />
-          Távsegítség: <a href="https://custom.teamviewer.com/63tk3jx">TeamViewer modul</a>
+
+        <div class="elerhetoseg">
+          <div>
+            <p class="elerh__cim">E-mail</p>
+            <p><a href="mailto:info@triox.hu">info@triox.hu</a></p>
+          </div>
+          <div>
+            <p class="elerh__cim">Telefon</p>
+            <p><!-- KITÖLTENDŐ: telefonszám --></p>
+          </div>
+          <div>
+            <p class="elerh__cim">Székhely</p>
+            <p>1106 Budapest, Kada utca 133.</p>
+          </div>
+          <div>
+            <p class="elerh__cim">Datacenter helyszínek</p>
+            <p>
+              1138 Budapest, Váci út 188.<br />
+              1132 Budapest, Victor Hugo utca 18–22.
+            </p>
+          </div>
+          <div>
+            <p class="elerh__cim">Cégjegyzékszám</p>
+            <p>01-09-449388</p>
+          </div>
+          <div>
+            <p class="elerh__cim">Adószám</p>
+            <p>13316460-2-42</p>
+          </div>
+        </div>
+
+        <p class="tamogatas-link">
+          Meglévő ügyfél? <a href="/tamogatas/">Hibabejelentés és távsegítség →</a>
         </p>
       </div>
       <Kapcsolatform />
@@ -30,8 +59,35 @@ import Kapcsolatform from '../components/Kapcsolatform.astro';
     gap: clamp(2rem, 5vw, 4rem);
     align-items: start;
   }
+  .elerhetoseg {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem 2rem;
+    margin-top: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  .elerh__cim {
+    font-family: var(--f-display);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--c-steel);
+    margin: 0 0 0.2rem;
+  }
+  .elerhetoseg p:not(.elerh__cim) {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+  .tamogatas-link {
+    font-size: 0.9rem;
+    color: var(--c-steel);
+  }
   @media (max-width: 52rem) {
     .kap {
+      grid-template-columns: 1fr;
+    }
+    .elerhetoseg {
       grid-template-columns: 1fr;
     }
   }

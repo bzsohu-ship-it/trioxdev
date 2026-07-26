@@ -3,33 +3,30 @@ const menu = [
   {
     cim: 'Szolgáltatások',
     al: [
-      { href: '/szolgaltatasok/it-rendszerfelugyelet/', cim: 'IT rendszerfelügyelet' },
-      { href: '/szolgaltatasok/felho-szolgaltatasok/', cim: 'Felhő szolgáltatások' },
-      { href: '/szolgaltatasok/adatmentes/', cim: 'Adatmentés' },
-      { href: '/szolgaltatasok/auditalas-it-dokumentacio/', cim: 'Auditálás és IT dokumentáció' },
-      { href: '/szolgaltatasok/drp/', cim: 'Katasztrófa-helyreállítás (DRP)' },
-      { href: '/szolgaltatasok/hoszting-szolgaltatasok/', cim: 'Hoszting szolgáltatások' },
+      { href: '/szolgaltatasok/iaas/', cim: 'IaaS – Bérelt infrastruktúra' },
+      { href: '/szolgaltatasok/dcaas/', cim: 'DCaaS – Datacenter as a Service' },
+      { href: '/szolgaltatasok/saas/', cim: 'SaaS – Alkalmazás-hosting' },
+      { href: '/szolgaltatasok/menedzselt-it-uzemeltetes/', cim: 'Menedzselt IT üzemeltetés' },
     ],
   },
   {
-    cim: 'Blog',
+    cim: 'Technológia',
     al: [
-      { href: '/blog/', cim: 'Összes bejegyzés' },
-      { href: '/blog/uj-honlap/', cim: 'Megújult a triox.hu' },
+      { href: '/technologia/', cim: 'Technológia áttekintés' },
     ],
   },
   {
-    cim: 'Támogatás',
+    cim: 'Biztonság',
     al: [
-      { href: '/tamogatas/', cim: 'Hibabejelentés' },
-      { href: 'https://custom.teamviewer.com/63tk3jx', cim: 'Távsegítség (TeamViewer)', kulso: true },
-      { href: 'mailto:info@triox.hu', cim: 'E-mail küldés' },
+      { href: '/biztonsag/', cim: 'Biztonsági megközelítés' },
+      { href: '/esettanulmanyok/', cim: 'Esettanulmányok' },
     ],
   },
   {
     cim: 'Kapcsolat',
     al: [
       { href: '/kapcsolat/', cim: 'Kapcsolati űrlap' },
+      { href: '/tamogatas/', cim: 'Támogatás (meglévő ügyfeleknek)' },
       { href: 'mailto:info@triox.hu', cim: 'E-mail küldés' },
     ],
   },
@@ -148,19 +145,16 @@ const most = Astro.url.pathname;
     color: var(--c-steel);
   }
 
-  /* Nav sor */
   .nav-fej {
     display: flex;
     align-items: center;
     gap: 0.25rem;
   }
 
-  /* Egy menüpont tartója */
   .nav-elem {
     position: relative;
   }
 
-  /* Trigger gomb */
   .nav-gomb {
     display: inline-flex;
     align-items: center;
@@ -189,7 +183,6 @@ const most = Astro.url.pathname;
     transform: rotate(180deg);
   }
 
-  /* Legördülő panel */
   .nav-panel[hidden] { display: none; }
   .nav-panel {
     position: absolute;

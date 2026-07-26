@@ -6,23 +6,41 @@ import Allapottabla from '../components/Allapottabla.astro';
 const szolgaltatasok = (await getCollection('szolgaltatasok')).sort(
   (a, b) => a.data.sorrend - b.data.sorrend
 );
+
+const allitasok = [
+  {
+    cim: 'Minden ügyfél saját hálózaton',
+    szoveg: 'Nem osztozik senkivel. VLAN-alapú vagy fizikai szegmentálás, ügyfelenként dedikált gateway saját tűzfal- és NAT-szabályokkal.',
+  },
+  {
+    cim: '99,99% rendelkezésre állás',
+    szoveg: 'Két budapesti datacenter, redundáns 2×10 Gbps gerinchálózat, több helyszínen tárolt, egymástól független mentések.',
+  },
+  {
+    cim: 'Nincs merev csomagkényszer',
+    szoveg: 'Nem sablonokat árulunk. Az infrastruktúrát az Ön terheléséhez szabjuk — a kis alkalmazás-stacktől a nagyvállalati méretű környezetig.',
+  },
+];
 ---
 
 <Base
-  cim="Professzionális IT üzemeltetés"
-  leiras="Triox Informatika Kft. — teljes körű IT üzemeltetés, felhő, adatmentés és rendszerfelügyelet kis- és középvállalkozásoknak."
+  cim="Menedzselt IT infrastruktúra és hosting"
+  leiras="Triox Informatika Kft. — menedzselt IT infrastruktúra és hosting magyar szakértőktől. Saját szervereken, ügyfelenként dedikált, izolált környezetben."
 >
   <section class="hero band">
     <div class="wrap hero__in">
       <div>
-        <p class="eyebrow">Professzionális IT üzemeltetés</p>
-        <h1>Ai Emberi intelligencia átültetése a digitális világba</h1>
+        <p class="eyebrow">Menedzselt IT infrastruktúra</p>
+        <h1>Nem várunk a leállásra.</h1>
         <p class="lead">
-          Gyorsabb hibaelhárítás, kevesebb állásidő, kiszámíthatóbb költségek. Ezt hozza az AI az IT üzemeltetésbe.
+          Folyamatos felügyelet, ami előre jelzi a bajt — nem utólag jelenti.
+        </p>
+        <p class="alcim">
+          Menedzselt IT infrastruktúra és hosting magyar szakértőktől. Saját szervereken, ügyfelenként dedikált, izolált környezetben.
         </p>
         <p>
-          <a class="btn" href="/kapcsolat/">Kérjen felmérést</a>
-          <a class="btn btn--ghost" href="/szolgaltatasok/">Szolgáltatások</a>
+          <a class="btn" href="/kapcsolat/">Kérjen ajánlatot</a>
+          <a class="btn btn--ghost" href="/kapcsolat/">Beszéljünk az infrastruktúrájáról</a>
         </p>
       </div>
       <Allapottabla />
@@ -30,6 +48,17 @@ const szolgaltatasok = (await getCollection('szolgaltatasok')).sort(
   </section>
 
   <section class="band band--mist">
+    <div class="wrap harom">
+      {allitasok.map((a) => (
+        <div>
+          <h3>{a.cim}</h3>
+          <p>{a.szoveg}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="band">
     <div class="wrap">
       <p class="eyebrow">Szolgáltatások</p>
       <h2>Amit átveszünk Öntől</h2>
@@ -48,39 +77,13 @@ const szolgaltatasok = (await getCollection('szolgaltatasok')).sort(
     </div>
   </section>
 
-  <section class="band">
-    <div class="wrap harom">
-      <div>
-        <h3>Technikai tapasztalat</h3>
-        <p>
-          Operációs rendszerek, hálózatok és adatbázisok — napi szinten azokkal a
-          technológiákkal dolgozunk, amelyekkel egy cég működése során találkozik.
-        </p>
-      </div>
-      <div>
-        <h3>Kiszámítható költség</h3>
-        <p>
-          A saját üzemeltetés drága és nehezen tervezhető. Kiszervezéssel a költség
-          átalánydíjjá válik, Ön pedig arra koncentrálhat, amiben a legjobb.
-        </p>
-      </div>
-      <div>
-        <h3>Elégedettségi garancia</h3>
-        <p>
-          Személyre szabott szolgáltatást adunk, nem sablont. Ha nem elégedett a
-          munkánkkal, azt orvosoljuk — ezért tudjuk vállalni a garanciát.
-        </p>
-      </div>
-    </div>
-  </section>
-
   <section class="band band--mist">
     <div class="wrap cta">
       <h2>Nézzük meg, hol áll most a rendszere</h2>
       <p class="lead">
-        Egy órás felmérésből kiderül, mi a legnagyobb kockázat, és mennyibe kerül megszüntetni.
+        Egy rövid felmérésből kiderül, mi a legnagyobb kockázat, és mennyibe kerül megszüntetni.
       </p>
-      <a class="btn" href="/kapcsolat/">Időpontot kérek</a>
+      <a class="btn" href="/kapcsolat/">Kérjen ajánlatot</a>
     </div>
   </section>
 </Base>
@@ -94,6 +97,11 @@ const szolgaltatasok = (await getCollection('szolgaltatasok')).sort(
   }
   .hero .btn {
     margin-right: 0.6rem;
+  }
+  .alcim {
+    color: var(--c-steel);
+    font-size: 0.95rem;
+    margin-top: -0.5rem;
   }
   .harom {
     display: grid;
