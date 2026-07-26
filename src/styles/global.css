@@ -1,0 +1,301 @@
+/* =========================================================
+   Triox Informatika — design tokenek
+   Márkakék #3358A7 a logóból, Montserrat a logó betűtípusa.
+   ========================================================= */
+
+:root {
+  /* Szín */
+  --c-brand: #3358a7;
+  --c-brand-deep: #223c73;
+  --c-brand-wash: #eef2fa;
+  --c-ink: #16181d;
+  --c-steel: #6c6d6d;
+  --c-line: #dfe3ea;
+  --c-mist: #f5f7fa;
+  --c-paper: #ffffff;
+  --c-up: #2e9e6b; /* "fut" állapot — a monitoring világából */
+
+  /* Betű */
+  --f-display: 'Montserrat Variable', 'Montserrat', system-ui, sans-serif;
+  --f-body: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  --f-util: 'JetBrains Mono Variable', ui-monospace, monospace;
+
+  /* Ritmus */
+  --w-max: 68rem;
+  --pad: clamp(1.25rem, 4vw, 3rem);
+  --gap: clamp(2.5rem, 7vw, 5.5rem);
+  --r: 4px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--c-paper);
+  color: var(--c-ink);
+  font-family: var(--f-body);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--f-display);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  margin: 0 0 0.6em;
+}
+
+h1 {
+  font-size: clamp(2.1rem, 5.2vw, 3.4rem);
+}
+h2 {
+  font-size: clamp(1.5rem, 3.2vw, 2.1rem);
+}
+h3 {
+  font-size: 1.2rem;
+}
+
+p {
+  margin: 0 0 1.1em;
+}
+
+a {
+  color: var(--c-brand);
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  color: var(--c-brand-deep);
+}
+
+:focus-visible {
+  outline: 2px solid var(--c-brand);
+  outline-offset: 3px;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* --- elrendezés --- */
+
+.wrap {
+  width: 100%;
+  max-width: var(--w-max);
+  margin-inline: auto;
+  padding-inline: var(--pad);
+}
+
+.band {
+  padding-block: var(--gap);
+}
+
+.band--mist {
+  background: var(--c-mist);
+  border-block: 1px solid var(--c-line);
+}
+
+/* --- eyebrow: mono, mert a rendszerek nyelve --- */
+
+.eyebrow {
+  font-family: var(--f-util);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--c-steel);
+  margin: 0 0 0.9rem;
+}
+
+.lead {
+  font-size: 1.15rem;
+  color: #343740;
+  max-width: 46ch;
+}
+
+/* --- gomb --- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.4rem;
+  border: 1px solid var(--c-brand);
+  border-radius: var(--r);
+  background: var(--c-brand);
+  color: #fff;
+  font-family: var(--f-display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.btn:hover {
+  background: var(--c-brand-deep);
+  border-color: var(--c-brand-deep);
+  color: #fff;
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--c-brand);
+}
+
+.btn--ghost:hover {
+  background: var(--c-brand-wash);
+  color: var(--c-brand-deep);
+}
+
+/* --- szolgáltatássor: adatlap, nem ikonos kártya --- */
+
+.rows {
+  border-top: 1px solid var(--c-line);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 3.5rem 1fr auto;
+  gap: 1.25rem;
+  align-items: baseline;
+  padding: 1.6rem 0;
+  border-bottom: 1px solid var(--c-line);
+  text-decoration: none;
+  color: inherit;
+}
+
+.row:hover {
+  background: var(--c-brand-wash);
+  color: inherit;
+}
+
+.row__idx {
+  font-family: var(--f-util);
+  font-size: 0.78rem;
+  color: var(--c-steel);
+}
+
+.row__title {
+  font-family: var(--f-display);
+  font-weight: 600;
+  font-size: 1.15rem;
+  margin: 0 0 0.25rem;
+}
+
+.row__desc {
+  margin: 0;
+  color: var(--c-steel);
+  font-size: 0.98rem;
+}
+
+.row__meta {
+  font-family: var(--f-util);
+  font-size: 0.78rem;
+  color: var(--c-brand);
+  white-space: nowrap;
+}
+
+@media (max-width: 40rem) {
+  .row {
+    grid-template-columns: 2.5rem 1fr;
+  }
+  .row__meta {
+    grid-column: 2;
+  }
+}
+
+/* --- prózás tartalom (szolgáltatás- és blogoldalak) --- */
+
+.prose {
+  max-width: 62ch;
+}
+
+.prose h2 {
+  margin-top: 2.2rem;
+}
+
+.prose ul {
+  padding-left: 1.2rem;
+}
+
+.prose li {
+  margin-bottom: 0.4rem;
+}
+
+/* --- űrlap --- */
+
+.field {
+  display: block;
+  margin-bottom: 1.1rem;
+}
+
+.field > span {
+  display: block;
+  font-family: var(--f-util);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--c-steel);
+  margin-bottom: 0.35rem;
+}
+
+.field input,
+.field textarea {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--c-line);
+  border-radius: var(--r);
+  background: var(--c-paper);
+  font: inherit;
+  color: inherit;
+}
+
+.field input:focus,
+.field textarea:focus {
+  border-color: var(--c-brand);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--c-brand-wash);
+}
+
+.hp {
+  position: absolute;
+  left: -9999px;
+}
+
+.formnote {
+  font-size: 0.92rem;
+  margin-top: 0.9rem;
+  min-height: 1.4em;
+}
+
+.formnote[data-state='ok'] {
+  color: var(--c-up);
+}
+
+.formnote[data-state='err'] {
+  color: #b3261e;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,38 @@
+---
+import Base from '../layouts/Base.astro';
+import Kapcsolatform from '../components/Kapcsolatform.astro';
+---
+
+<Base cim="Kapcsolat" leiras="Írjon nekünk: felmérés, ajánlatkérés vagy támogatási igény — munkanapon belül válaszolunk.">
+  <section class="band">
+    <div class="wrap kap">
+      <div>
+        <p class="eyebrow">Kapcsolat</p>
+        <h1>Mondja el, mi akadt el</h1>
+        <p class="lead">
+          Írja le pár mondatban a helyzetet. Munkanapon belül válaszolunk, és ha kell,
+          egy rövid felméréssel kezdünk.
+        </p>
+        <p>
+          E-mail: <a href="mailto:info@triox.hu">info@triox.hu</a><br />
+          Távsegítség: <a href="https://custom.teamviewer.com/63tk3jx">TeamViewer modul</a>
+        </p>
+      </div>
+      <Kapcsolatform />
+    </div>
+  </section>
+</Base>
+
+<style>
+  .kap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(2rem, 5vw, 4rem);
+    align-items: start;
+  }
+  @media (max-width: 52rem) {
+    .kap {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

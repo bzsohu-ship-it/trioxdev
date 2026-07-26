@@ -1,0 +1,132 @@
+---
+/**
+ * Aláírás-elem: a felügyeleti konzol vizuális nyelve.
+ * A sorok azt mutatják, MIT figyelünk — nem élő adat.
+ * Ha valaha élő adatot kötsz rá (Zabbix/PRTG/Veeam API),
+ * cseréld a tömböt fetch-re, és írd át a "jelmagyarázat" szöveget.
+ */
+const sorok = [
+  { retegek: 'Szerverek', mit: 'Hyper-V hosztok, tárolók', ciklus: '60 mp' },
+  { retegek: 'Mentések', mit: 'Veeam jobok, visszaállítási prtesztek', ciklus: 'naponta' },
+  { retegek: 'Hálózat', mit: 'MikroTik, UniFi, VPN alagutak', ciklus: '60 mp' },
+  { retegek: 'Végpontok', mit: 'Frissítések, védelem, lemezállapot', ciklus: 'óránként' },
+  { retegek: 'Microsoft 365', mit: 'Postafiókok, licencek, bejelentkezések', ciklus: 'óránként' },
+];
+---
+
+<div class="tabla">
+  <div class="tabla__fej">
+    <span class="pip" aria-hidden="true"></span>
+    <span>felügyelet alatt</span>
+  </div>
+  <ul>
+    {sorok.map((s) => (
+      <li>
+        <span class="sor__nev">
+          <span class="led" aria-hidden="true"></span>
+          <strong>{s.retegek}</strong>
+        </span>
+        <span class="mit">{s.mit}</span>
+        <span class="ciklus">{s.ciklus}</span>
+      </li>
+    ))}
+  </ul>
+  <p class="tabla__lab">Amit mérünk, azt tudjuk megjavítani időben.</p>
+</div>
+
+<style>
+  .tabla {
+    border: 1px solid var(--c-line);
+    border-radius: var(--r);
+    background: var(--c-paper);
+    box-shadow: 0 1px 2px rgba(22, 24, 29, 0.04), 0 12px 32px -18px rgba(34, 60, 115, 0.35);
+    overflow: hidden;
+  }
+  .tabla__fej {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.7rem 1rem;
+    background: var(--c-ink);
+    color: #e9ecf2;
+    font-family: var(--f-util);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .pip {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--c-up);
+    box-shadow: 0 0 0 0 rgba(46, 158, 107, 0.7);
+    animation: lelegzik 2.6s ease-out infinite;
+  }
+  @keyframes lelegzik {
+    0% { box-shadow: 0 0 0 0 rgba(46, 158, 107, 0.55); }
+    70% { box-shadow: 0 0 0 0.5rem rgba(46, 158, 107, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(46, 158, 107, 0); }
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  li {
+    display: grid;
+    grid-template-columns: 9rem 1fr auto;
+    gap: 0.75rem;
+    align-items: baseline;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--c-line);
+    font-size: 0.92rem;
+  }
+  .sor__nev {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+  li strong {
+    font-family: var(--f-display);
+    font-weight: 600;
+  }
+  .led {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: var(--c-up);
+    flex-shrink: 0;
+    animation: villog 1.4s step-start infinite;
+  }
+  li:nth-child(2) .led { animation-delay: 0.28s; }
+  li:nth-child(3) .led { animation-delay: 0.56s; }
+  li:nth-child(4) .led { animation-delay: 0.84s; }
+  li:nth-child(5) .led { animation-delay: 1.12s; }
+  @keyframes villog {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+  }
+  .mit {
+    color: var(--c-steel);
+  }
+  .ciklus {
+    font-family: var(--f-util);
+    font-size: 0.74rem;
+    color: var(--c-brand);
+  }
+  .tabla__lab {
+    margin: 0;
+    padding: 0.85rem 1rem;
+    background: var(--c-mist);
+    color: var(--c-steel);
+    font-size: 0.86rem;
+  }
+  @media (max-width: 34rem) {
+    li {
+      grid-template-columns: 1fr auto;
+    }
+    .mit {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

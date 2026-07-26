@@ -1,0 +1,227 @@
+---
+const menu = [
+  {
+    cim: 'Szolgáltatások',
+    al: [
+      { href: '/szolgaltatasok/it-rendszerfelugyelet/', cim: 'IT rendszerfelügyelet' },
+      { href: '/szolgaltatasok/felho-szolgaltatasok/', cim: 'Felhő szolgáltatások' },
+      { href: '/szolgaltatasok/adatmentes/', cim: 'Adatmentés' },
+      { href: '/szolgaltatasok/auditalas-it-dokumentacio/', cim: 'Auditálás és IT dokumentáció' },
+      { href: '/szolgaltatasok/drp/', cim: 'Katasztrófa-helyreállítás (DRP)' },
+      { href: '/szolgaltatasok/hoszting-szolgaltatasok/', cim: 'Hoszting szolgáltatások' },
+    ],
+  },
+  {
+    cim: 'Blog',
+    al: [
+      { href: '/blog/', cim: 'Összes bejegyzés' },
+      { href: '/blog/uj-honlap/', cim: 'Megújult a triox.hu' },
+    ],
+  },
+  {
+    cim: 'Támogatás',
+    al: [
+      { href: '/tamogatas/', cim: 'Hibabejelentés' },
+      { href: 'https://custom.teamviewer.com/63tk3jx', cim: 'Távsegítség (TeamViewer)', kulso: true },
+      { href: 'mailto:info@triox.hu', cim: 'E-mail küldés' },
+    ],
+  },
+  {
+    cim: 'Kapcsolat',
+    al: [
+      { href: '/kapcsolat/', cim: 'Kapcsolati űrlap' },
+      { href: 'mailto:info@triox.hu', cim: 'E-mail küldés' },
+    ],
+  },
+];
+const most = Astro.url.pathname;
+---
+
+<header class="fej">
+  <div class="wrap fej__in">
+    <a class="fej__brand" href="/">
+      <img class="fej__logo" src="/logo.svg" alt="Triox logó" width="32" height="32" />
+      <span class="fej__nev">triox <em>informatika</em></span>
+    </a>
+
+    <nav class="nav-fej" aria-label="Fő menü">
+      {menu.map((m, i) => (
+        <div class="nav-elem">
+          <button
+            class="nav-gomb"
+            aria-expanded="false"
+            aria-controls={`panel-${i}`}
+            data-idx={i}
+          >
+            {m.cim}
+            <svg class="nav-nyil" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
+              <polyline points="1,3.5 6,8.5 11,3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+
+          <div id={`panel-${i}`} class="nav-panel" hidden>
+            {m.al.map((a) => (
+              <a
+                href={a.href}
+                aria-current={most.startsWith(a.href) && !a.href.includes(':') ? 'page' : undefined}
+                target={a.kulso ? '_blank' : undefined}
+                rel={a.kulso ? 'noopener noreferrer' : undefined}
+              >{a.cim}</a>
+            ))}
+          </div>
+        </div>
+      ))}
+    </nav>
+  </div>
+</header>
+
+<script>
+  const elemek = Array.from(document.querySelectorAll<HTMLElement>('.nav-elem'));
+
+  function zarOsszes(kiveve: HTMLElement | null = null) {
+    elemek.forEach((el) => {
+      if (el === kiveve) return;
+      el.querySelector<HTMLButtonElement>('.nav-gomb')!.setAttribute('aria-expanded', 'false');
+      el.querySelector<HTMLElement>('.nav-panel')!.hidden = true;
+    });
+  }
+
+  elemek.forEach((el) => {
+    const g = el.querySelector<HTMLButtonElement>('.nav-gomb')!;
+    const p = el.querySelector<HTMLElement>('.nav-panel')!;
+
+    g.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const nyitva = g.getAttribute('aria-expanded') === 'true';
+      zarOsszes(nyitva ? null : el);
+      g.setAttribute('aria-expanded', String(!nyitva));
+      p.hidden = nyitva;
+    });
+
+    p.addEventListener('click', (e) => e.stopPropagation());
+  });
+
+  document.addEventListener('click', () => zarOsszes());
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') zarOsszes();
+  });
+</script>
+
+<style>
+  .fej {
+    border-bottom: 1px solid var(--c-line);
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(8px);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .fej__in {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    min-height: 4.25rem;
+  }
+  .fej__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+    color: var(--c-ink);
+  }
+  .fej__logo {
+    width: 2rem;
+    height: 2rem;
+    object-fit: contain;
+    display: block;
+  }
+  .fej__nev {
+    font-family: var(--f-display);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .fej__nev em {
+    font-style: normal;
+    font-weight: 400;
+    color: var(--c-steel);
+  }
+
+  /* Nav sor */
+  .nav-fej {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  /* Egy menüpont tartója */
+  .nav-elem {
+    position: relative;
+  }
+
+  /* Trigger gomb */
+  .nav-gomb {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-family: var(--f-display);
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--c-ink);
+    background: none;
+    border: none;
+    border-radius: var(--r);
+    padding: 0.45rem 0.7rem;
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s;
+  }
+  .nav-gomb:hover,
+  .nav-gomb[aria-expanded='true'] {
+    color: var(--c-brand);
+    background: var(--c-brand-wash);
+  }
+  .nav-nyil {
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+  .nav-gomb[aria-expanded='true'] .nav-nyil {
+    transform: rotate(180deg);
+  }
+
+  /* Legördülő panel */
+  .nav-panel[hidden] { display: none; }
+  .nav-panel {
+    position: absolute;
+    top: calc(100% + 0.4rem);
+    left: 0;
+    min-width: 16rem;
+    background: var(--c-paper);
+    border: 1px solid var(--c-line);
+    border-radius: var(--r);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.10);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 20;
+  }
+  .nav-panel a {
+    font-family: var(--f-body);
+    font-size: 0.92rem;
+    color: var(--c-ink);
+    text-decoration: none;
+    padding: 0.65rem 1rem;
+    border-left: 3px solid transparent;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+    white-space: nowrap;
+  }
+  .nav-panel a + a {
+    border-top: 1px solid var(--c-line);
+  }
+  .nav-panel a:hover,
+  .nav-panel a[aria-current='page'] {
+    background: var(--c-brand-wash);
+    color: var(--c-brand);
+    border-left-color: var(--c-brand);
+  }
+</style>

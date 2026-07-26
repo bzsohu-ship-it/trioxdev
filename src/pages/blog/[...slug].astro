@@ -1,0 +1,28 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const lista = await getCollection('blog', ({ data }) => !data.piszkozat);
+  return lista.map((b) => ({ params: { slug: b.id }, props: { b } }));
+}
+
+const { b } = Astro.props;
+const { Content } = await render(b);
+const datum = b.data.datum.toLocaleDateString('hu-HU', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+
+<Base cim={b.data.cim} leiras={b.data.leiras}>
+  <article class="band">
+    <div class="wrap">
+      <p class="eyebrow">{datum} · {b.data.szerzo}</p>
+      <h1>{b.data.cim}</h1>
+      <div class="prose"><Content /></div>
+      <p style="margin-top:2.5rem"><a href="/blog/">← Vissza a bloghoz</a></p>
+    </div>
+  </article>
+</Base>

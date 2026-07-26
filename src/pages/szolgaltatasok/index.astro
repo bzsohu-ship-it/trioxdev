@@ -1,0 +1,30 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const lista = (await getCollection('szolgaltatasok')).sort(
+  (a, b) => a.data.sorrend - b.data.sorrend
+);
+---
+
+<Base cim="Szolgáltatások" leiras="IT rendszerfelügyelet, felhő, adatmentés, audit, DRP és hoszting — a Triox Informatika szolgáltatásai.">
+  <section class="band">
+    <div class="wrap">
+      <p class="eyebrow">Szolgáltatások</p>
+      <h1>Amit átveszünk Öntől</h1>
+      <p class="lead">Külön-külön is kérhető, de a legtöbb ügyfelünknél ezek együtt adnak ki egy működő üzemeltetést.</p>
+      <div class="rows">
+        {lista.map((sz, i) => (
+          <a class="row" href={`/szolgaltatasok/${sz.id}/`}>
+            <span class="row__idx">{String(i + 1).padStart(2, '0')}</span>
+            <span>
+              <span class="row__title">{sz.data.cim}</span>
+              <span class="row__desc">{sz.data.osszefoglalo}</span>
+            </span>
+            <span class="row__meta">{sz.data.cimke ?? 'részletek →'}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>

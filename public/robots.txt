@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://triox.hu/sitemap-index.xml

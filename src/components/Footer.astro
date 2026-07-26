@@ -1,0 +1,75 @@
+---
+const ev = new Date().getFullYear();
+---
+
+<footer class="lab">
+  <div class="wrap lab__in">
+    <div>
+      <p class="lab__szlogen">Tudjuk hogyan segíthetünk önnek</p>
+      <p class="lab__kicsi">
+        Triox Informatika Kft. · <a href="mailto:info@triox.hu">info@triox.hu</a>
+      </p>
+    </div>
+    <nav aria-label="Lábléc">
+      <a href="/szolgaltatasok/">Szolgáltatások</a>
+      <a href="/blog/">Blog</a>
+      <a href="/tamogatas/">Támogatás</a>
+      <a href="/partnerek/">Partnerek</a>
+      <a href="/adatvedelmi-nyilatkozat/">Adatvédelem</a>
+      <a href="https://custom.teamviewer.com/63tk3jx">Távsegítség</a>
+    </nav>
+  </div>
+  <div class="wrap lab__jog">
+    <p>© {ev} Triox Informatika Kft. Minden jog fenntartva.</p>
+  </div>
+</footer>
+
+<style>
+  .lab {
+    border-top: 1px solid var(--c-line);
+    background: var(--c-mist);
+    padding-block: 3rem 1.5rem;
+    margin-top: 4rem;
+  }
+  .lab__in {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .lab__szlogen {
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 1.05rem;
+    margin: 0 0 0.3rem;
+  }
+  .lab__kicsi {
+    color: var(--c-steel);
+    font-size: 0.92rem;
+    margin: 0;
+  }
+  .lab nav {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    gap: 0.4rem 2rem;
+  }
+  .lab nav a {
+    font-size: 0.92rem;
+    text-decoration: none;
+    color: var(--c-ink);
+  }
+  .lab nav a:hover {
+    color: var(--c-brand);
+    text-decoration: underline;
+  }
+  .lab__jog {
+    margin-top: 2.5rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--c-line);
+    color: var(--c-steel);
+    font-size: 0.82rem;
+  }
+  .lab__jog p {
+    margin: 0;
+  }
+</style>

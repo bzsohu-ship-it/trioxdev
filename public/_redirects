@@ -1,0 +1,20 @@
+# Régi GoDaddy URL-ek -> új struktúra.
+# Mindkét alakot felvesszük: nyers ékezetes és százalékkódolt.
+
+/it-rendszerfelügyelet-1        /szolgaltatasok/it-rendszerfelugyelet/       301
+/it-rendszerfel%C3%BCgyelet-1   /szolgaltatasok/it-rendszerfelugyelet/       301
+/felhő-szolgáltatások           /szolgaltatasok/felho-szolgaltatasok/        301
+/felh%C5%91-szolg%C3%A1ltat%C3%A1sok /szolgaltatasok/felho-szolgaltatasok/   301
+/adatmentés                     /szolgaltatasok/adatmentes/                  301
+/adatment%C3%A9s                /szolgaltatasok/adatmentes/                  301
+/auditálás-it-dokumentáció      /szolgaltatasok/auditalas-it-dokumentacio/   301
+/audit%C3%A1l%C3%A1s-it-dokument%C3%A1ci%C3%B3 /szolgaltatasok/auditalas-it-dokumentacio/ 301
+/drp                            /szolgaltatasok/drp/                         301
+/drp-vázlat                     /szolgaltatasok/drp/                         301
+/drp-v%C3%A1zlat                /szolgaltatasok/drp/                         301
+/hoszting-szolgáltatások        /szolgaltatasok/hoszting-szolgaltatasok/     301
+/hoszting-szolg%C3%A1ltat%C3%A1sok /szolgaltatasok/hoszting-szolgaltatasok/  301
+/támogatás                      /tamogatas/                                  301
+/t%C3%A1mogat%C3%A1s            /tamogatas/                                  301
+/adatvédelmi-nyilatkozat        /adatvedelmi-nyilatkozat/                    301
+/adatv%C3%A9delmi-nyilatkozat   /adatvedelmi-nyilatkozat/                    301

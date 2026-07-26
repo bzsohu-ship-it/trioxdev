@@ -1,0 +1,31 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const bejegyzesek = (await getCollection('blog', ({ data }) => !data.piszkozat)).sort(
+  (a, b) => b.data.datum.valueOf() - a.data.datum.valueOf()
+);
+const datum = (d: Date) =>
+  d.toLocaleDateString('hu-HU', { year: 'numeric', month: 'long', day: 'numeric' });
+---
+
+<Base cim="Blog" leiras="Üzemeltetési tapasztalatok, Microsoft 365 és biztonsági témák a Triox Informatikától.">
+  <section class="band">
+    <div class="wrap">
+      <p class="eyebrow">Blog</p>
+      <h1>Amit a gyakorlatban tanultunk</h1>
+      <div class="rows">
+        {bejegyzesek.map((b) => (
+          <a class="row" href={`/blog/${b.id}/`}>
+            <span class="row__idx">{datum(b.data.datum).slice(0, 4)}</span>
+            <span>
+              <span class="row__title">{b.data.cim}</span>
+              <span class="row__desc">{b.data.leiras}</span>
+            </span>
+            <span class="row__meta">{datum(b.data.datum)}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>

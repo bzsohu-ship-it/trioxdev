@@ -1,0 +1,114 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Allapottabla from '../components/Allapottabla.astro';
+
+const szolgaltatasok = (await getCollection('szolgaltatasok')).sort(
+  (a, b) => a.data.sorrend - b.data.sorrend
+);
+---
+
+<Base
+  cim="Professzionális IT üzemeltetés"
+  leiras="Triox Informatika Kft. — teljes körű IT üzemeltetés, felhő, adatmentés és rendszerfelügyelet kis- és középvállalkozásoknak."
+>
+  <section class="hero band">
+    <div class="wrap hero__in">
+      <div>
+        <p class="eyebrow">Professzionális IT üzemeltetés</p>
+        <h1>Ai Emberi intelligencia átültetése a digitális világba</h1>
+        <p class="lead">
+          Gyorsabb hibaelhárítás, kevesebb állásidő, kiszámíthatóbb költségek. Ezt hozza az AI az IT üzemeltetésbe.
+        </p>
+        <p>
+          <a class="btn" href="/kapcsolat/">Kérjen felmérést</a>
+          <a class="btn btn--ghost" href="/szolgaltatasok/">Szolgáltatások</a>
+        </p>
+      </div>
+      <Allapottabla />
+    </div>
+  </section>
+
+  <section class="band band--mist">
+    <div class="wrap">
+      <p class="eyebrow">Szolgáltatások</p>
+      <h2>Amit átveszünk Öntől</h2>
+      <div class="rows">
+        {szolgaltatasok.map((sz, i) => (
+          <a class="row" href={`/szolgaltatasok/${sz.id}/`}>
+            <span class="row__idx">{String(i + 1).padStart(2, '0')}</span>
+            <span>
+              <span class="row__title">{sz.data.cim}</span>
+              <span class="row__desc">{sz.data.osszefoglalo}</span>
+            </span>
+            <span class="row__meta">{sz.data.cimke ?? 'részletek →'}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap harom">
+      <div>
+        <h3>Technikai tapasztalat</h3>
+        <p>
+          Operációs rendszerek, hálózatok és adatbázisok — napi szinten azokkal a
+          technológiákkal dolgozunk, amelyekkel egy cég működése során találkozik.
+        </p>
+      </div>
+      <div>
+        <h3>Kiszámítható költség</h3>
+        <p>
+          A saját üzemeltetés drága és nehezen tervezhető. Kiszervezéssel a költség
+          átalánydíjjá válik, Ön pedig arra koncentrálhat, amiben a legjobb.
+        </p>
+      </div>
+      <div>
+        <h3>Elégedettségi garancia</h3>
+        <p>
+          Személyre szabott szolgáltatást adunk, nem sablont. Ha nem elégedett a
+          munkánkkal, azt orvosoljuk — ezért tudjuk vállalni a garanciát.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band band--mist">
+    <div class="wrap cta">
+      <h2>Nézzük meg, hol áll most a rendszere</h2>
+      <p class="lead">
+        Egy órás felmérésből kiderül, mi a legnagyobb kockázat, és mennyibe kerül megszüntetni.
+      </p>
+      <a class="btn" href="/kapcsolat/">Időpontot kérek</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero__in {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: clamp(2rem, 5vw, 4rem);
+    align-items: center;
+  }
+  .hero .btn {
+    margin-right: 0.6rem;
+  }
+  .harom {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 2rem;
+  }
+  .cta {
+    text-align: center;
+  }
+  .cta .lead {
+    margin-inline: auto;
+  }
+  @media (max-width: 52rem) {
+    .hero__in {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
