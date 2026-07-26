@@ -8,6 +8,7 @@ const szolgaltatasok = defineCollection({
     osszefoglalo: z.string(),
     sorrend: z.number().default(99),
     cimke: z.string().optional(),
+    szelesLayout: z.boolean().default(false),
   }),
 });
 

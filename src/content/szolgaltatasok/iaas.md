@@ -3,6 +3,7 @@ cim: IaaS – Bérelt virtuális infrastruktúra
 osszefoglalo: Virtuális gépek, tárhely és hálózat a saját szerverparkunkon — a hardverrel és az üzemeltetéssel nem kell foglalkoznia.
 sorrend: 1
 cimke: egyedi konfiguráció
+szelesLayout: true
 ---
 
 ## Hardver és szoftver szolgáltatásként (SPLA / CSP)

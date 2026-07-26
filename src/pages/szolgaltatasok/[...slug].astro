@@ -9,16 +9,93 @@ export async function getStaticPaths() {
 
 const { sz } = Astro.props;
 const { Content } = await render(sz);
+const szeles = sz.data.szelesLayout;
 ---
 
 <Base cim={sz.data.cim} leiras={sz.data.osszefoglalo}>
   <article class="band">
-    <div class="wrap">
+    <div class={szeles ? 'wrap-szeles' : 'wrap'}>
       <p class="eyebrow"><a href="/szolgaltatasok/">Szolgáltatások</a></p>
       <h1>{sz.data.cim}</h1>
       <p class="lead">{sz.data.osszefoglalo}</p>
-      <div class="prose"><Content /></div>
+      <div class={szeles ? 'tartalom-szeles' : 'prose'}><Content /></div>
       <p style="margin-top:2.5rem"><a class="btn" href="/kapcsolat/">Ajánlatot kérek</a></p>
     </div>
   </article>
 </Base>
+
+<style>
+  .wrap-szeles {
+    width: 100%;
+    max-width: 90rem;
+    margin-inline: auto;
+    padding-inline: var(--pad);
+  }
+
+  .tartalom-szeles {
+    margin-top: 1.5rem;
+  }
+
+  .tartalom-szeles h2 {
+    margin-top: 2.5rem;
+  }
+
+  .tartalom-szeles h3 {
+    margin-top: 1.5rem;
+  }
+
+  .tartalom-szeles ul {
+    padding-left: 1.2rem;
+  }
+
+  .tartalom-szeles li {
+    margin-bottom: 0.4rem;
+  }
+
+  /* Táblázatok görgethetők mobilon */
+  .tartalom-szeles :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.93rem;
+    margin-block: 1.25rem;
+  }
+
+  .tartalom-szeles :global(th),
+  .tartalom-szeles :global(td) {
+    text-align: left;
+    padding: 0.6rem 0.9rem;
+    border: 1px solid var(--c-line);
+    vertical-align: top;
+  }
+
+  .tartalom-szeles :global(th) {
+    background: var(--c-ink);
+    color: #e9ecf2;
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+  }
+
+  .tartalom-szeles :global(tr:nth-child(even) td) {
+    background: var(--c-mist);
+  }
+
+  .tartalom-szeles :global(blockquote) {
+    border-left: 4px solid var(--c-brand);
+    margin: 1.5rem 0;
+    padding: 0.75rem 1.25rem;
+    background: var(--c-brand-wash);
+    border-radius: 0 var(--r) var(--r) 0;
+    color: var(--c-ink);
+    font-size: 0.95rem;
+  }
+
+  /* Táblázat konténer mobilon vízszintes görgetéssel */
+  @media (max-width: 52rem) {
+    .tartalom-szeles :global(table) {
+      display: block;
+      overflow-x: auto;
+    }
+  }
+</style>
