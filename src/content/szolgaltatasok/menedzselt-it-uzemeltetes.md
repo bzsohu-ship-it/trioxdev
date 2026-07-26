@@ -103,19 +103,17 @@ A munkatársai egy helyen tudják bejelenteni a problémáikat, és SLA-ban rög
 
 ## Szolgáltatási szintek
 
-<!-- KITÖLTENDŐ: kérem a tényleges csomagszinteket, reakcióidőket és a support elérhetőségét (munkaidő vagy 24/7) -->
-
 | | **Alap** | **Bővített** | **Teljes** |
 |---|---|---|---|
 | Monitorozás és riasztáskezelés | ✔ | ✔ | ✔ |
-| Helpdesk | munkaidőben | kiterjesztett | *(kiegészítendő)* |
+| Helpdesk | munkaidőben | munkaidőben | kiterjesztett |
 | Munkaállomás-felügyelet | – | ✔ | ✔ |
 | Microsoft 365 / Azure adminisztráció | – | ✔ | ✔ |
 | Mentés üzemeltetése | ✔ | ✔ | ✔ |
-| Visszaállítási teszt | eseti | évente | *(kiegészítendő)* |
-| Infrastruktúra-audit és riport | évente | negyedévente | havonta |
+| Visszaállítási teszt | *külön szerződés szerint* | *külön szerződés szerint* | *külön szerződés szerint* |
+| Infrastruktúra-audit és riport | – | negyedévente | havonta |
 | Helyszíni támogatás | eseti díjas | keretóra | ✔ |
-| Reakcióidő | *(kiegészítendő)* | *(kiegészítendő)* | *(kiegészítendő)* |
+| Reakcióidő | *(szerződés szerint)* | *(szerződés szerint)* | *(szerződés szerint)* |
 
 ---
 
@@ -176,4 +174,9 @@ Minden környezet más, ezért az ajánlat is egyedi. A felméréshez ezeket né
 - milyen megfelelési (audit, GDPR, NIS2) elvárásoknak kell megfelelni
 - van-e belső IT-s, akivel együtt dolgoznánk
 
-> **Az IT akkor jó, ha észre sem veszi. Mi ezért dolgozunk.**
+**Triox Informatika Kft.**
+1106 Budapest, Kada utca 133.
+Iroda: 1138 Budapest, Váci út 188.
+E-mail: info@triox.hu
+
+> Az IT akkor jó, ha észre sem veszi. Mi ezért dolgozunk, mert tudjuk, hogyan segíthetünk Önnek.
