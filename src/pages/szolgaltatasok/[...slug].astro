@@ -1,7 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import StarBorder from '../../components/StarBorder.astro';
 
 export async function getStaticPaths() {
   const lista = await getCollection('szolgaltatasok');
@@ -20,7 +19,7 @@ const szeles = sz.data.szelesLayout;
       <h1>{sz.data.cim}</h1>
       <p class="lead">{sz.data.osszefoglalo}</p>
       <div class={szeles ? 'tartalom-szeles' : 'prose'}><Content /></div>
-      <p style="margin-top:2.5rem"><StarBorder href="/kapcsolat/" color="#5B82E0" speed="5s" thickness={3}>Ajánlatot kérek</StarBorder></p>
+      <p style="margin-top:2.5rem"><a class="btn" href="/kapcsolat/">Ajánlatot kérek</a></p>
     </div>
   </article>
 </Base>
