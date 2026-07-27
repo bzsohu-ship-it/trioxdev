@@ -21,7 +21,7 @@
   --f-util: 'JetBrains Mono Variable', ui-monospace, monospace;
 
   /* Ritmus */
-  --w-max: 68rem;
+  --w-max: 78rem;
   --pad: clamp(1.25rem, 4vw, 3rem);
   --gap: clamp(2.5rem, 7vw, 5.5rem);
   --r: 4px;
