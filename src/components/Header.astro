@@ -105,14 +105,18 @@ const most = Astro.url.pathname;
   function zarOsszes(kiveve: HTMLElement | null = null) {
     elemek.forEach((el) => {
       if (el === kiveve) return;
-      el.querySelector<HTMLButtonElement>('.nav-gomb')!.setAttribute('aria-expanded', 'false');
-      el.querySelector<HTMLElement>('.nav-panel')!.hidden = true;
+      const g = el.querySelector<HTMLButtonElement>('.nav-gomb');
+      const p = el.querySelector<HTMLElement>('.nav-panel');
+      if (!p) return;
+      g?.setAttribute('aria-expanded', 'false');
+      p.hidden = true;
     });
   }
 
   elemek.forEach((el) => {
     const g = el.querySelector<HTMLButtonElement>('.nav-gomb')!;
-    const p = el.querySelector<HTMLElement>('.nav-panel')!;
+    const p = el.querySelector<HTMLElement>('.nav-panel');
+    if (!p) return;
 
     g.addEventListener('click', (e) => {
       e.stopPropagation();
