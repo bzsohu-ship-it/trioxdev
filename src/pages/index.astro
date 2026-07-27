@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Allapottabla from '../components/Allapottabla.astro';
+import StarBorder from '../components/StarBorder.astro';
 
 const szolgaltatasok = (await getCollection('szolgaltatasok')).sort(
   (a, b) => a.data.sorrend - b.data.sorrend
@@ -38,8 +39,8 @@ const allitasok = [
         <p class="alcim">
           Menedzselt IT infrastruktúra és hosting magyar szakértőktől. Saját szervereken, ügyfelenként dedikált, izolált környezetben.
         </p>
-        <p>
-          <a class="btn" href="/kapcsolat/">Kérjen ajánlatot</a>
+        <p class="hero-cta">
+          <StarBorder href="/kapcsolat/" color="#5B82E0" speed="5s" thickness={3}>Kérjen ajánlatot</StarBorder>
           <a class="btn btn--ghost" href="/kapcsolat/">Beszéljünk az infrastruktúrájáról</a>
         </p>
       </div>
@@ -83,7 +84,7 @@ const allitasok = [
       <p class="lead">
         Egy rövid felmérésből kiderül, mi a legnagyobb kockázat, és mennyibe kerül megszüntetni.
       </p>
-      <a class="btn" href="/kapcsolat/">Kérjen ajánlatot</a>
+      <StarBorder href="/kapcsolat/" color="#5B82E0" speed="5s" thickness={3}>Kérjen ajánlatot</StarBorder>
     </div>
   </section>
 </Base>
