@@ -1,0 +1,37 @@
+# Ez a workflow NEM publikál.
+#
+# Az éles oldalt a Cloudflare Pages saját Git-integrációja építi közvetlenül
+# a GitHub repóból: a main ágra érkező merge után ~1-2 perccel megjelenik a
+# trioxdev.pages.dev címen. A nem-main ágakról branch preview készül.
+#
+# Korábban itt egy wrangler-es Publish lépés is állt, de az soha nem futott le
+# sikeresen (nem voltak beállítva a CLOUDFLARE_* secretek), így minden commitra
+# piros X került, holott a deploy valójában megtörtént. A lépés ezért kikerült.
+#
+# Ha valamikor mégis innen kellene publikálni, előbb a Cloudflare oldali
+# Git-integrációt kell lekapcsolni, különben dupla deploy lenne.
+
+name: Build ellenőrzés
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build (Astro)
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+        env:
+          PUBLIC_N8N_WEBHOOK: ${{ secrets.PUBLIC_N8N_WEBHOOK }}
