@@ -1,7 +1,7 @@
 ---
 cim: Audit Restore Validation és Visszaállítási Tesztek
 osszefoglalo: Dokumentált visszaállítási tesztek, amelyekkel igazolható, hogy mentései kritikus helyzetben valóban használhatók.
-sorrend: 5
+sorrend: 6
 cimke: audit compliance
 szelesLayout: true
 ---

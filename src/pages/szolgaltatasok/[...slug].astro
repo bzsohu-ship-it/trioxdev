@@ -91,6 +91,56 @@ const szeles = sz.data.szelesLayout;
     font-size: 0.95rem;
   }
 
+  /* Lenyitható technikai részletek — a /technologia/ oldal accordionjával egyező megjelenés */
+  .tartalom-szeles :global(details) {
+    border: 1px solid var(--c-line);
+    border-radius: var(--r);
+    padding: 1rem 1.25rem;
+    margin-block: 1.5rem;
+    background: var(--c-mist);
+  }
+
+  .tartalom-szeles :global(summary) {
+    font-family: var(--f-util);
+    font-size: 0.74rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-brand);
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .tartalom-szeles :global(summary::-webkit-details-marker) {
+    display: none;
+  }
+
+  .tartalom-szeles :global(summary::before) {
+    content: '+';
+    font-size: 1rem;
+    line-height: 1;
+    width: 1rem;
+    text-align: center;
+  }
+
+  .tartalom-szeles :global(details[open] summary::before) {
+    content: '–';
+  }
+
+  .tartalom-szeles :global(summary:hover) {
+    color: var(--c-brand-deep);
+  }
+
+  .tartalom-szeles :global(details ul) {
+    margin-bottom: 0;
+  }
+
+  .tartalom-szeles :global(details li) {
+    font-size: 0.94rem;
+  }
+
   /* Táblázat konténer mobilon vízszintes görgetéssel */
   @media (max-width: 52rem) {
     .tartalom-szeles :global(table) {
