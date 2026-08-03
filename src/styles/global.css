@@ -240,7 +240,10 @@ img {
   color: var(--c-steel);
 }
 
+/* A cím és a leírás <span>, ezért kell a display: block — enélkül soron
+   belüli elemek maradnak, egybefolynak, és a margin sem érvényesül rajtuk. */
 .row__title {
+  display: block;
   font-family: var(--f-display);
   font-weight: 600;
   font-size: 1.15rem;
@@ -248,6 +251,7 @@ img {
 }
 
 .row__desc {
+  display: block;
   margin: 0;
   color: var(--c-steel);
   font-size: 0.98rem;
