@@ -38,7 +38,7 @@ const allitasok = [
         <p class="alcim">
           Menedzselt IT infrastruktúra és hosting magyar szakértőktől. Saját szervereken, ügyfelenként dedikált, izolált környezetben.
         </p>
-        <p>
+        <p class="hero__gombok">
           <a class="btn" href="/kapcsolat/">Kérjen ajánlatot</a>
           <a class="btn btn--ghost" href="/kapcsolat/">Beszéljünk az infrastruktúrájáról</a>
         </p>
@@ -95,8 +95,10 @@ const allitasok = [
     gap: clamp(2rem, 5vw, 4rem);
     align-items: center;
   }
-  .hero .btn {
-    margin-right: 0.6rem;
+  .hero__gombok {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
   }
   .alcim {
     color: var(--c-steel);
@@ -117,6 +119,15 @@ const allitasok = [
   @media (max-width: 52rem) {
     .hero__in {
       grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 34rem) {
+    .hero__gombok .btn {
+      width: 100%;
+      justify-content: center;
+    }
+    .harom {
+      gap: 1.5rem;
     }
   }
 </style>

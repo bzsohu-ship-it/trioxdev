@@ -35,6 +35,7 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -45,6 +46,8 @@ body {
   font-size: 1.0625rem;
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
+  /* hosszú URL-ek, domainnevek ne feszítsék szét a mobil nézetet */
+  overflow-wrap: break-word;
 }
 
 h1,
@@ -288,6 +291,26 @@ img {
 
 .formnote[data-state='err'] {
   color: #b3261e;
+}
+
+/* --- mobil finomhangolás --- */
+
+@media (max-width: 34rem) {
+  body {
+    font-size: 1rem;
+  }
+  .lead {
+    font-size: 1.05rem;
+  }
+  .row {
+    padding: 1.25rem 0;
+  }
+  .btn {
+    padding: 0.75rem 1.15rem;
+  }
+  .prose ul {
+    padding-left: 1rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
