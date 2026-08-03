@@ -162,7 +162,7 @@ A telephelyi üzemeltetés akkor működik, ha a távoli beavatkozás mögött v
 
 ---
 
-## Mit üzemeltetünk — platform-katalógus
+<h2 id="platform-katalogus">Mit üzemeltetünk — platform-katalógus</h2>
 
 Az alábbi lista nem termékkatalógus, hanem annak a bizonyítéka, hogy a rendszerét **nem kell hozzáigazítani** az üzemeltetőhöz. Ha valami nincs a listán, az nem jelenti, hogy nem üzemeltetjük — jelentse, mi fut Önnél, és megmondjuk.
 
