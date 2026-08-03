@@ -156,7 +156,7 @@ Az átláthatóság kedvéért — az alábbiak külön megállapodás alapján,
 ## Miért a Triox Informatika?
 
 - **Több mint 20 év** vállalati IT üzemeltetési tapasztalat
-- **Saját infrastruktúra** – nemcsak üzemeltetünk, saját szerverparkot és két budapesti datacentert működtetünk
+- **Saját infrastruktúra** – nemcsak üzemeltetünk, saját szerverparkot és két budapesti adatközpontot működtetünk
 - **Írásban rögzített SLA** – rendelkezésre állás és reakcióidő a választott szolgáltatáshoz igazítva
 - **Személyes üzemeltetői kapcsolat** – konkrét szakemberek, nem ticketszámok
 - **Magyar nyelvű támogatás**

@@ -1,5 +1,5 @@
 ---
-cim: DCaaS – Datacenter as a Service
+cim: DCaaS – Bérelt adatközpont
 osszefoglalo: A teljes IT infrastruktúráját kiszervezheti hozzánk — szerverek, tárolók, hálózat és üzemeltetés egy kézben, saját szerverszoba nélkül.
 sorrend: 2
 cimke: teljes kiszervezés
