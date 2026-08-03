@@ -21,6 +21,7 @@
   --f-util: 'JetBrains Mono Variable', ui-monospace, monospace;
 
   /* Ritmus */
+  --h-fej: 4.25rem; /* a ragadós fejléc magassága — a horgonyugrás is ehhez igazodik */
   --w-max: 78rem;
   --pad: clamp(1.25rem, 4vw, 3rem);
   --gap: clamp(2.5rem, 7vw, 5.5rem);
@@ -35,6 +36,8 @@
 
 html {
   scroll-behavior: smooth;
+  /* horgonyra ugráskor a célcímsor ne kerüljön a ragadós fejléc alá */
+  scroll-padding-top: calc(var(--h-fej) + 1.25rem);
   -webkit-text-size-adjust: 100%;
 }
 

@@ -30,6 +30,7 @@ const menu: Fomenu[] = [
   {
     cim: 'Technológia',
     al: [
+      { href: '/szolgaltatasok/helyi-uzemeltetes/#platform-katalogus', cim: 'Mit üzemeltetünk — platform-katalógus' },
       { href: '/technologia/', cim: 'Technológia áttekintés' },
     ],
   },
@@ -229,7 +230,7 @@ const most = Astro.url.pathname;
     align-items: center;
     justify-content: space-between;
     gap: 1.5rem;
-    min-height: 4.25rem;
+    min-height: var(--h-fej);
   }
   .fej__brand {
     display: inline-flex;
