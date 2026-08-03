@@ -5,10 +5,13 @@ const ev = new Date().getFullYear();
 <footer class="lab">
   <div class="wrap lab__in">
     <div>
-      <p class="lab__marka">
-        <img class="lab__jel" src="/logo.svg" alt="Triox Informatika" width="44" height="44" />
-        <span class="lab__szlogen">Tudjuk hogyan segíthetünk önnek</span>
-      </p>
+      <div class="lab__marka">
+        <img class="lab__jel" src="/logo.svg" alt="" aria-hidden="true" width="44" height="44" />
+        <p class="lab__szoveg">
+          <span class="lab__nev">triox <em>informatika</em></span>
+          <span class="lab__szlogen">Tudjuk hogyan segíthetünk önnek</span>
+        </p>
+      </div>
     </div>
     <nav aria-label="Lábléc">
       <a href="/szolgaltatasok/">Szolgáltatások</a>
@@ -48,10 +51,31 @@ const ev = new Date().getFullYear();
     width: 2.75rem;
     height: 2.75rem;
   }
-  .lab__szlogen {
+  /* Cégnév felül, alatta a kisebb szlogen — balra zárva. */
+  .lab__szoveg {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    margin: 0;
+  }
+  /* Ugyanaz a szedés, mint a fejlécben: félkövér „triox", normál „informatika". */
+  .lab__nev {
     font-family: var(--f-display);
     font-weight: 600;
-    font-size: 1.05rem;
+    letter-spacing: 0.02em;
+    line-height: 1.25;
+    white-space: nowrap;
+  }
+  .lab__nev em {
+    font-style: normal;
+    font-weight: 400;
+    color: var(--c-steel);
+  }
+  .lab__szlogen {
+    font-size: 0.88rem;
+    color: var(--c-steel);
+    line-height: 1.35;
   }
   .lab nav {
     display: grid;
