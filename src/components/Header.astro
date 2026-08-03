@@ -50,14 +50,14 @@ const menu = [
 const most = Astro.url.pathname;
 ---
 
-<header class="fej">
+<header class="fej" data-menu="zarva">
   <div class="wrap fej__in">
     <a class="fej__brand" href="/">
       <img class="fej__logo" src="/logo.svg" alt="Triox logó" width="32" height="32" />
       <span class="fej__nev">triox <em>informatika</em></span>
     </a>
 
-    <nav class="nav-fej" aria-label="Fő menü">
+    <nav class="nav-fej" id="fomenu" aria-label="Fő menü">
       {menu.map((m, i) => (
         <div class="nav-elem">
           {m.href ? (
@@ -96,11 +96,27 @@ const most = Astro.url.pathname;
         </div>
       ))}
     </nav>
+
+    <button
+      class="burger"
+      id="burger"
+      type="button"
+      aria-controls="fomenu"
+      aria-expanded="false"
+      aria-label="Menü megnyitása"
+    >
+      <span class="burger__vonal" aria-hidden="true"></span>
+      <span class="burger__vonal" aria-hidden="true"></span>
+      <span class="burger__vonal" aria-hidden="true"></span>
+    </button>
   </div>
 </header>
 
 <script>
+  const fej = document.querySelector<HTMLElement>('.fej')!;
+  const burger = document.querySelector<HTMLButtonElement>('#burger')!;
   const elemek = Array.from(document.querySelectorAll<HTMLElement>('.nav-elem'));
+  const mobil = window.matchMedia('(max-width: 62rem)');
 
   function zarOsszes(kiveve: HTMLElement | null = null) {
     elemek.forEach((el) => {
@@ -113,27 +129,73 @@ const most = Astro.url.pathname;
     });
   }
 
+  function menutZar() {
+    fej.dataset.menu = 'zarva';
+    burger.setAttribute('aria-expanded', 'false');
+    burger.setAttribute('aria-label', 'Menü megnyitása');
+    zarOsszes();
+  }
+
+  function menutNyit() {
+    fej.dataset.menu = 'nyitva';
+    burger.setAttribute('aria-expanded', 'true');
+    burger.setAttribute('aria-label', 'Menü bezárása');
+  }
+
+  burger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (fej.dataset.menu === 'nyitva') menutZar();
+    else menutNyit();
+  });
+
   elemek.forEach((el) => {
     const g = el.querySelector<HTMLButtonElement>('.nav-gomb')!;
     const p = el.querySelector<HTMLElement>('.nav-panel');
-    if (!p) return;
+
+    // Direkt link (nincs panel): mobilon a menü záruljon be kattintásra.
+    if (!p) {
+      g.addEventListener('click', () => menutZar());
+      return;
+    }
 
     g.addEventListener('click', (e) => {
       e.stopPropagation();
       const nyitva = g.getAttribute('aria-expanded') === 'true';
-      zarOsszes(nyitva ? null : el);
+      // Mobilon harmonika: több panel is nyitva lehet egyszerre.
+      if (!mobil.matches) zarOsszes(nyitva ? null : el);
       g.setAttribute('aria-expanded', String(!nyitva));
       p.hidden = nyitva;
     });
 
-    p.addEventListener('click', (e) => e.stopPropagation());
+    p.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).closest('a')) {
+        menutZar();
+        return;
+      }
+      e.stopPropagation();
+    });
   });
 
-  document.addEventListener('click', () => zarOsszes());
+  // A menü üres felületére kattintás ne zárja be a panelt.
+  document.querySelector<HTMLElement>('.nav-fej')!.addEventListener('click', (e) => {
+    if (!(e.target as HTMLElement).closest('a')) e.stopPropagation();
+  });
+
+  document.addEventListener('click', () => {
+    zarOsszes();
+    menutZar();
+  });
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') zarOsszes();
+    if (e.key !== 'Escape') return;
+    const voltNyitva = fej.dataset.menu === 'nyitva';
+    zarOsszes();
+    menutZar();
+    if (voltNyitva) burger.focus();
   });
+
+  // Ha asztali méretre nő az ablak, a mobil állapot ne ragadjon be.
+  mobil.addEventListener('change', () => menutZar());
 </script>
 
 <style>
@@ -230,6 +292,11 @@ const most = Astro.url.pathname;
     overflow: hidden;
     z-index: 20;
   }
+  /* A jobb szélen álló menüpontok panele jobbra zár, hogy ne lógjon ki. */
+  .nav-elem:nth-last-child(-n + 3) .nav-panel {
+    left: auto;
+    right: 0;
+  }
   .nav-panel a {
     font-family: var(--f-body);
     font-size: 0.92rem;
@@ -248,5 +315,137 @@ const most = Astro.url.pathname;
     background: var(--c-brand-wash);
     color: var(--c-brand);
     border-left-color: var(--c-brand);
+  }
+
+  /* --- hamburger gomb --- */
+
+  .burger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.3rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    margin-right: -0.5rem;
+    background: none;
+    border: none;
+    border-radius: var(--r);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .burger__vonal {
+    display: block;
+    width: 1.35rem;
+    height: 2px;
+    margin-inline: auto;
+    border-radius: 2px;
+    background: var(--c-ink);
+    transition: transform 0.2s ease, opacity 0.15s ease;
+  }
+  .fej[data-menu='nyitva'] .burger__vonal:nth-child(1) {
+    transform: translateY(0.5rem) rotate(45deg);
+  }
+  .fej[data-menu='nyitva'] .burger__vonal:nth-child(2) {
+    opacity: 0;
+  }
+  .fej[data-menu='nyitva'] .burger__vonal:nth-child(3) {
+    transform: translateY(-0.5rem) rotate(-45deg);
+  }
+
+  /* --- köztes sáv: a menü még kifér, csak szűkebben --- */
+
+  @media (min-width: 62.01rem) and (max-width: 78rem) {
+    .nav-fej {
+      gap: 0;
+    }
+    .nav-gomb {
+      font-size: 0.86rem;
+      padding: 0.45rem 0.5rem;
+    }
+  }
+
+  /* --- mobil és tablet: hamburger, jobbra zárt lenyíló menü --- */
+
+  @media (max-width: 62rem) {
+    .fej__in {
+      gap: 1rem;
+      min-height: 3.75rem;
+    }
+    .fej__logo {
+      width: 1.75rem;
+      height: 1.75rem;
+    }
+    .fej__nev {
+      font-size: 0.98rem;
+    }
+
+    .burger {
+      display: flex;
+    }
+
+    .nav-fej {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: var(--pad);
+      left: auto;
+      width: min(22rem, calc(100vw - 2 * var(--pad)));
+      max-height: calc(100vh - 3.75rem);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      padding: 0.4rem;
+      background: var(--c-paper);
+      border: 1px solid var(--c-line);
+      border-radius: var(--r);
+      box-shadow: 0 14px 32px rgba(22, 24, 29, 0.14);
+    }
+    .fej[data-menu='nyitva'] .nav-fej {
+      display: flex;
+    }
+
+    .nav-elem {
+      position: static;
+    }
+    .nav-elem + .nav-elem {
+      border-top: 1px solid var(--c-line);
+    }
+
+    .nav-gomb {
+      display: flex;
+      width: 100%;
+      justify-content: flex-end;
+      text-align: right;
+      font-size: 1rem;
+      padding: 0.85rem 0.75rem;
+    }
+
+    .nav-panel {
+      position: static;
+      min-width: 0;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+      background: var(--c-mist);
+      padding: 0.2rem 0;
+    }
+    .nav-panel a {
+      text-align: right;
+      white-space: normal;
+      padding: 0.7rem 0.75rem;
+      border-left: none;
+      border-right: 3px solid transparent;
+    }
+    .nav-panel a + a {
+      border-top: 1px solid var(--c-line);
+    }
+    .nav-panel a:hover,
+    .nav-panel a[aria-current='page'] {
+      border-left-color: transparent;
+      border-right-color: var(--c-brand);
+    }
   }
 </style>
