@@ -36,6 +36,9 @@ const ev = new Date().getFullYear();
   }
   .lab__in {
     display: flex;
+    /* A márkablokk alacsonyabb, mint a menü — középre igazítva kiegyensúlyozott
+       marad a lábléc. Alapértelmezett stretch mellett felülre tapadna. */
+    align-items: center;
     justify-content: space-between;
     gap: 2rem;
     flex-wrap: wrap;
