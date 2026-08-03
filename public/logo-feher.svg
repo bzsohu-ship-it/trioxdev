@@ -3,59 +3,59 @@
   <defs>
     <style>
       .cls-1 {
-        fill: url(#linear-gradient-13);
+        fill: #ffffff;
       }
 
       .cls-2 {
-        fill: url(#linear-gradient-2);
+        fill: #ffffff;
       }
 
       .cls-3 {
-        fill: url(#linear-gradient-10);
+        fill: #ffffff;
       }
 
       .cls-4 {
-        fill: url(#linear-gradient-12);
+        fill: #ffffff;
       }
 
       .cls-5 {
-        fill: url(#linear-gradient-4);
+        fill: #ffffff;
       }
 
       .cls-6 {
-        fill: url(#linear-gradient-3);
+        fill: #ffffff;
       }
 
       .cls-7 {
-        fill: url(#linear-gradient-5);
+        fill: #ffffff;
       }
 
       .cls-8 {
-        fill: url(#linear-gradient-8);
+        fill: #ffffff;
       }
 
       .cls-9 {
-        fill: url(#linear-gradient-14);
+        fill: #ffffff;
       }
 
       .cls-10 {
-        fill: url(#linear-gradient-7);
+        fill: #ffffff;
       }
 
       .cls-11 {
-        fill: url(#linear-gradient-9);
+        fill: #ffffff;
       }
 
       .cls-12 {
-        fill: url(#linear-gradient-11);
+        fill: #ffffff;
       }
 
       .cls-13 {
-        fill: url(#linear-gradient-6);
+        fill: #ffffff;
       }
 
       .cls-14 {
-        fill: url(#linear-gradient);
+        fill: #ffffff;
       }
     </style>
     <linearGradient id="linear-gradient" x1="33.72" y1="93.63" x2="76.95" y2="62.29" gradientUnits="userSpaceOnUse">
