@@ -9,9 +9,6 @@ const ev = new Date().getFullYear();
         <img class="lab__jel" src="/logo.svg" alt="Triox Informatika" width="44" height="44" />
         <span class="lab__szlogen">Tudjuk hogyan segíthetünk önnek</span>
       </p>
-      <p class="lab__kicsi">
-        Triox Informatika Kft. · <a href="mailto:info@triox.hu">info@triox.hu</a>
-      </p>
     </div>
     <nav aria-label="Lábléc">
       <a href="/szolgaltatasok/">Szolgáltatások</a>
@@ -23,7 +20,7 @@ const ev = new Date().getFullYear();
     </nav>
   </div>
   <div class="wrap lab__jog">
-    <p>© {ev} Triox Informatika Kft. Minden jog fenntartva.</p>
+    <p>© {ev} Triox Informatika Kft. Minden jog fenntartva. · <a href="mailto:info@triox.hu">info@triox.hu</a></p>
   </div>
 </footer>
 
@@ -44,7 +41,7 @@ const ev = new Date().getFullYear();
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    margin: 0 0 0.4rem;
+    margin: 0;
   }
   .lab__jel {
     flex: none;
@@ -55,11 +52,6 @@ const ev = new Date().getFullYear();
     font-family: var(--f-display);
     font-weight: 600;
     font-size: 1.05rem;
-  }
-  .lab__kicsi {
-    color: var(--c-steel);
-    font-size: 0.92rem;
-    margin: 0;
   }
   .lab nav {
     display: grid;
