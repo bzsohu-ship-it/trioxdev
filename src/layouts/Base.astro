@@ -13,6 +13,9 @@ interface Props {
 
 const { cim, leiras } = Astro.props;
 const kanonikus = new URL(Astro.url.pathname, Astro.site);
+// A megosztóképek abszolút URL-t igényelnek, különben a Facebook/LinkedIn nem tölti be.
+const ogKep = new URL('/og-image-1200x630-vilagos.png', Astro.site);
+const twitterKep = new URL('/twitter-card-1200x675-vilagos.png', Astro.site);
 ---
 
 <!doctype html>
@@ -23,14 +26,29 @@ const kanonikus = new URL(Astro.url.pathname, Astro.site);
     <title>{cim} — Triox Informatika Kft.</title>
     <meta name="description" content={leiras} />
     <link rel="canonical" href={kanonikus} />
-    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
+    <link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+    <meta name="theme-color" content="#0007ff" />
+
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="hu_HU" />
     <meta property="og:site_name" content="Triox Informatika Kft." />
     <meta property="og:title" content={cim} />
     <meta property="og:description" content={leiras} />
     <meta property="og:url" content={kanonikus} />
-    <meta name="theme-color" content="#3358A7" />
+    <meta property="og:image" content={ogKep} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Triox Informatika — Tudjuk hogyan segíthetünk önnek" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={twitterKep} />
     <script type="application/ld+json" set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'ProfessionalService',

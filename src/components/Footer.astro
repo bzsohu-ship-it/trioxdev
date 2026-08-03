@@ -5,10 +5,13 @@ const ev = new Date().getFullYear();
 <footer class="lab">
   <div class="wrap lab__in">
     <div>
-      <p class="lab__szlogen">Tudjuk hogyan segíthetünk önnek</p>
-      <p class="lab__kicsi">
-        Triox Informatika Kft. · <a href="mailto:info@triox.hu">info@triox.hu</a>
-      </p>
+      <div class="lab__marka">
+        <img class="lab__jel" src="/logo.svg" alt="" aria-hidden="true" width="44" height="44" />
+        <p class="lab__szoveg">
+          <span class="lab__nev">triox <em>informatika</em></span>
+          <span class="lab__szlogen">Tudjuk hogyan segíthetünk önnek</span>
+        </p>
+      </div>
     </div>
     <nav aria-label="Lábléc">
       <a href="/szolgaltatasok/">Szolgáltatások</a>
@@ -20,7 +23,7 @@ const ev = new Date().getFullYear();
     </nav>
   </div>
   <div class="wrap lab__jog">
-    <p>© {ev} Triox Informatika Kft. Minden jog fenntartva.</p>
+    <p>© {ev} Triox Informatika Kft. Minden jog fenntartva. · <a href="mailto:info@triox.hu">info@triox.hu</a></p>
   </div>
 </footer>
 
@@ -37,16 +40,43 @@ const ev = new Date().getFullYear();
     gap: 2rem;
     flex-wrap: wrap;
   }
-  .lab__szlogen {
+  .lab__marka {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0;
+  }
+  .lab__jel {
+    flex: none;
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+  /* Cégnév felül, alatta a kisebb szlogen — balra zárva. */
+  .lab__szoveg {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    margin: 0;
+  }
+  /* Ugyanaz a szedés, mint a fejlécben: félkövér „triox", normál „informatika". */
+  .lab__nev {
     font-family: var(--f-display);
     font-weight: 600;
-    font-size: 1.05rem;
-    margin: 0 0 0.3rem;
+    letter-spacing: 0.02em;
+    line-height: 1.25;
+    white-space: nowrap;
   }
-  .lab__kicsi {
+  .lab__nev em {
+    font-style: normal;
+    font-weight: 400;
     color: var(--c-steel);
-    font-size: 0.92rem;
-    margin: 0;
+  }
+  .lab__szlogen {
+    font-family: var(--f-display);
+    font-size: 0.88rem;
+    color: var(--c-steel);
+    line-height: 1.35;
   }
   .lab nav {
     display: grid;

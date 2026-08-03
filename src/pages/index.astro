@@ -28,6 +28,7 @@ const allitasok = [
   leiras="Triox Informatika Kft. — menedzselt IT infrastruktúra és hosting magyar szakértőktől. Saját szervereken, ügyfelenként dedikált, izolált környezetben."
 >
   <section class="hero band">
+    <img class="vizjel vizjel--hero" src="/logo.svg" alt="" aria-hidden="true" />
     <div class="wrap hero__in">
       <div>
         <p class="eyebrow">Menedzselt IT infrastruktúra</p>
@@ -77,7 +78,8 @@ const allitasok = [
     </div>
   </section>
 
-  <section class="band band--mist">
+  <section class="band band--sotet">
+    <img class="vizjel vizjel--cta" src="/logo-feher.svg" alt="" aria-hidden="true" />
     <div class="wrap cta">
       <h2>Nézzük meg, hol áll most a rendszere</h2>
       <p class="lead">
@@ -89,7 +91,26 @@ const allitasok = [
 </Base>
 
 <style>
+  .hero {
+    position: relative;
+    overflow: hidden;
+  }
+  /* Halvány, nagy jel a hero mögött — periférián érzékelhető textúra. */
+  .vizjel--hero {
+    right: -6rem;
+    bottom: -8rem;
+    width: 34rem;
+    opacity: 0.04;
+  }
+  .vizjel--cta {
+    right: -4rem;
+    bottom: -6rem;
+    width: 22rem;
+    opacity: 0.07;
+  }
   .hero__in {
+    position: relative;
+    z-index: 1;
     display: grid;
     grid-template-columns: 1.05fr 0.95fr;
     gap: clamp(2rem, 5vw, 4rem);

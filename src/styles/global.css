@@ -1,13 +1,14 @@
 /* =========================================================
    Triox Informatika — design tokenek
-   Márkakék #3358A7 a logóból, Montserrat a logó betűtípusa.
+   Márkakék #0007FF a 2026-os logókészletből (a jel gradiense
+   #0007FF → #0005BF), Montserrat a logó betűtípusa.
    ========================================================= */
 
 :root {
   /* Szín */
-  --c-brand: #3358a7;
-  --c-brand-deep: #223c73;
-  --c-brand-wash: #eef2fa;
+  --c-brand: #0007ff;
+  --c-brand-deep: #0005bf; /* a jel gradiensének sötét vége — hover-állapot */
+  --c-brand-wash: #ebedff;
   --c-ink: #16181d;
   --c-steel: #6c6d6d;
   --c-line: #dfe3ea;
@@ -113,6 +114,50 @@ img {
 .band--mist {
   background: var(--c-mist);
   border-block: 1px solid var(--c-line);
+}
+
+/* --- sötét záró sáv: kontraszt a lap végén, a fehér jellel --- */
+
+.band--sotet {
+  position: relative;
+  overflow: hidden;
+  background: var(--c-ink);
+  color: #e9ecf2;
+}
+
+.band--sotet h2 {
+  color: #fff;
+}
+
+.band--sotet .lead {
+  color: #b9bec9;
+}
+
+/* A márkakék gomb sötét alapon alig válik el (2:1), ezért itt világos gomb. */
+.band--sotet .btn {
+  background: #fff;
+  border-color: #fff;
+  color: var(--c-brand);
+}
+
+.band--sotet .btn:hover {
+  background: var(--c-brand-wash);
+  border-color: var(--c-brand-wash);
+  color: var(--c-brand-deep);
+}
+
+/* --- jel háttérgrafikaként: csak textúra, nem dísz --- */
+
+.vizjel {
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+
+.band--sotet > .wrap {
+  position: relative;
+  z-index: 1;
 }
 
 /* --- eyebrow: mono, mert a rendszerek nyelve --- */

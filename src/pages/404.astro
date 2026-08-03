@@ -3,8 +3,9 @@ import Base from '../layouts/Base.astro';
 ---
 
 <Base cim="Nincs ilyen oldal" leiras="A keresett oldal nem található.">
-  <section class="band">
-    <div class="wrap prose">
+  <section class="band hibaoldal">
+    <img class="vizjel vizjel--404" src="/logo.svg" alt="" aria-hidden="true" />
+    <div class="wrap prose hibaoldal__in">
       <p class="eyebrow">404</p>
       <h1>Ez az oldal nincs meg</h1>
       <p>Vagy elköltözött, vagy sosem létezett. Innen tud továbbmenni:</p>
@@ -16,3 +17,27 @@ import Base from '../layouts/Base.astro';
     </div>
   </section>
 </Base>
+
+<style>
+  .hibaoldal {
+    position: relative;
+    overflow: hidden;
+  }
+  .hibaoldal__in {
+    position: relative;
+    z-index: 1;
+  }
+  .vizjel--404 {
+    right: -5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 26rem;
+    opacity: 0.06;
+  }
+  @media (max-width: 52rem) {
+    .vizjel--404 {
+      right: -8rem;
+      width: 20rem;
+    }
+  }
+</style>
