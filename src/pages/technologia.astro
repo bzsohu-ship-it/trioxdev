@@ -1,107 +1,291 @@
 ---
 import Base from '../layouts/Base.astro';
+
+const kartyak = [
+  {
+    cimke: 'Adatvesztés és visszaállítás',
+    cim: 'A visszaállítás nálunk nem terv, hanem külön infrastruktúra',
+    allitas: [
+      'A legtöbb súlyos adatvesztés nem attól lesz súlyos, hogy megtörtént, hanem attól, hogy a mentés ugyanabban a rackben, ugyanazon a tárolón vagy ugyanabban az épületben volt, mint az éles rendszer.',
+      'Nálunk a mentés több, egymástól fizikailag független célponton, több helyszínen áll — a kritikus terhelésekhez pedig off-site VM-replika is tartozik, amiről nem visszaállítani kell, hanem elindítani.',
+    ],
+    kulcs: 'A kérdés nem az, van-e mentés. Az, hogy hol van, és mennyi idő alatt van fent.',
+    reszletek: [
+      { cimke: 'Backup', szoveg: 'enterprise szintű adatmentési megoldások' },
+      { cimke: 'Backup célpontok', szoveg: 'több, egymástól független fizikai backup target, több helyszínen' },
+      { cimke: 'Replikáció', szoveg: 'off-site VM replika-célpont a kritikus terhelésekhez' },
+      { cimke: 'Datacenter', szoveg: 'két, egymástól független budapesti helyszín' },
+    ],
+  },
+  {
+    cimke: 'Ügyfél-izoláció',
+    cim: 'Az Ön környezete nem osztozik senkivel',
+    allitas: [
+      'Osztott környezetben egy másik ügyfél kompromittálódása, hibás konfigurációja vagy hirtelen terhelése az Ön kockázata is — akkor is, ha Ön mindent jól csinált.',
+      'Nálunk minden ügyfél saját hálózati szegmenst kap, VLAN-alapú vagy fizikai szegmentálással, dedikált gateway mögött. Igény szerint a környezet az internetről egyáltalán nem elérhető — érzékeny adatot kezelő ügyfeleknél ez már működő gyakorlat.',
+    ],
+    kulcs: 'Auditnál a „logikailag elválasztva” gyakran kevés. Ezért adunk fizikai szegmentálást is.',
+    reszletek: [
+      { cimke: 'Ügyfél-izoláció', szoveg: 'VLAN-alapú vagy fizikai szegmentálás, ügyfelenként dedikált szegmens' },
+      { cimke: 'Gateway', szoveg: 'ügyfelenként dedikált tűzfal, NAT és VPN endpoint — saját szabályrendszerrel' },
+      { cimke: 'Publikus IP', szoveg: 'dedikált publikus IPv4 cím ügyfelenként, saját címtartományunkból' },
+      { cimke: 'Kétszintű szegmentálás', szoveg: 'külön belső (adatbázis, alkalmazás) és publikus (web, mail) hálózati réteg' },
+    ],
+    megjegyzes:
+      'A saját címtartományból kapott dedikált IP azt is jelenti, hogy az Ön levelezésének és szolgáltatásainak IP-reputációja nem függ attól, mit csinál egy másik ügyfél.',
+  },
+  {
+    cimke: 'Management-hozzáférés',
+    cim: 'A támadási felület ott kezdődik, ahol a kezelőfelület',
+    allitas: [
+      'Egy infrastruktúra biztonsága gyakran nem az alkalmazásnál dől el, hanem ott, hogy honnan lehet hozzáférni a szerverek és a hálózati eszközök kezelőfelületéhez.',
+      'A Triox management-hálózata dedikált és az internetről nem elérhető — nincs kitett menedzsment-interfész, amit valakinek jelszóval kellene védenie.',
+    ],
+    kulcs: 'Amit nem lehet elérni az internetről, azt nem lehet az internetről feltörni.',
+    reszletek: [
+      { cimke: 'Out-of-band management', szoveg: 'dedikált, az internetről nem elérhető management hálózat' },
+      { szoveg: 'Ügyfél-hozzáférés VPN-en keresztül, ügyfelenként dedikált endpointon' },
+    ],
+  },
+  {
+    cimke: 'Teljesítmény és rendelkezésre állás',
+    cim: 'A szűk keresztmetszet ritkán a szerver',
+    allitas: [
+      'Ha egy virtualizált környezet lassú, az legtöbbször nem CPU-kérdés, hanem hálózati vagy tárolási. A gerinchálózat nálunk 2×10 Gbps, redundáns kialakításban — egy uplink vagy egy switch kiesése nem jelent szolgáltatáskiesést.',
+      'Az erőforrás-kiosztás az Ön terheléséhez igazodik, nem egy előre gyártott csomaghoz: nagy erőforrás- és nagy tárigényű, nagyvállalati méretű terheléseket is kiszolgálunk.',
+    ],
+    kulcs: 'Redundancia nélkül a „nagy sebesség” csak addig tart, amíg minden működik.',
+    reszletek: [
+      { cimke: 'Hálózat', szoveg: 'nagysebességű, redundáns 2×10 Gbps gerinchálózat' },
+      { cimke: 'Hardver', szoveg: 'enterprise szerverpark' },
+      { cimke: 'Skálázható erőforrás-kiosztás', szoveg: 'igényhez igazított CPU-, memória- és tárkiosztás' },
+      { cimke: 'Nincs merev csomagkényszer', szoveg: 'egyedi konfiguráció, nem előre gyártott sablonok' },
+    ],
+    hivatkozas: {
+      szoveg: 'Ilyen terhelésre példa az országos lefedettségű médiaszolgáltató környezete',
+      url: '/esettanulmanyok/',
+    },
+  },
+  {
+    cimke: 'Virtualizációs platform',
+    cim: 'Nem kell platformot váltania ahhoz, hogy hozzánk költözzön',
+    allitas: [
+      'A platformváltás önmagában is projekt: migrációs kockázat, új licencek, újratanulás, átírt üzemeltetési folyamatok.',
+      'Nálunk mindhárom elterjedt platform üzemel — Microsoft Hyper-V, VMware és Proxmox —, így a meglévő környezete abban maradhat, amiben most fut. Ha viszont épp a licencköltségek miatt gondolkodik váltáson, azt is meg tudjuk lépni, egy irányított migrációval.',
+    ],
+    kulcs: 'A platform legyen döntés, ne kényszer.',
+    reszletek: [
+      { cimke: 'Virtualizáció', szoveg: 'Microsoft Hyper-V (Windows Server platform), VMware, Proxmox' },
+      { szoveg: 'Migráció-támogatás meglévő környezetből' },
+      { cimke: 'Szolgáltatási modellek', szoveg: 'IaaS (VM, tárhely, hálózat), DCaaS (teljes ügyfél-datacenter), SaaS (alkalmazás-hosting)' },
+    ],
+  },
+];
 ---
 
-<Base cim="Technológia" leiras="Enterprise virtualizáció, redundáns hálózat, ügyfél-izoláció és backup-megoldások — a Triox infrastruktúrájának technológiai alapjai.">
+<Base
+  cim="Technológia"
+  leiras="Enterprise virtualizáció, redundáns hálózat, ügyfél-izoláció és backup — öt pont arról, milyen konkrét kockázatokra ad választ a Triox infrastruktúrája."
+>
   <section class="band">
     <div class="wrap prose">
       <p class="eyebrow">Technológia</p>
-      <h1>Amire az infrastruktúra épül</h1>
-      <p class="lead">Enterprise szintű komponensek, ügyfelenként dedikált konfigurációban.</p>
+      <h1>Nem attól lesz stabil egy rendszer, hogy mi van benne — hanem attól, mi történik, amikor baj van</h1>
+      <p class="lead">
+        Az alábbi öt pont azt írja le, hogy a Triox infrastruktúrája milyen konkrét kockázatokra ad
+        választ. Minden komponens ügyfelenként dedikált konfigurációban működik — nincs előre gyártott
+        csomag, és nincs osztott környezet.
+      </p>
+    </div>
+  </section>
 
-      <div class="tech-tabla">
-        <div class="tech-sor tech-sor--fej">
-          <span>Terület</span>
-          <span>Amit adunk</span>
-        </div>
-        <div class="tech-sor">
-          <strong>Virtualizáció</strong>
-          <span>Microsoft Hyper-V, VMware, Proxmox</span>
-        </div>
-        <div class="tech-sor">
-          <strong>Hardver</strong>
-          <span>Enterprise szerverpark</span>
-        </div>
-        <div class="tech-sor">
-          <strong>Hálózat</strong>
-          <span>Nagysebességű, redundáns 2×10 Gbps gerinchálózat</span>
-        </div>
-        <div class="tech-sor">
-          <strong>Ügyfél-izoláció</strong>
-          <span>VLAN-alapú vagy fizikai szegmentálás, ügyfelenként dedikált szegmens</span>
-        </div>
-        <div class="tech-sor">
-          <strong>Gateway</strong>
-          <span>Ügyfelenként dedikált tűzfal, NAT és VPN endpoint</span>
-        </div>
-        <div class="tech-sor">
-          <strong>Backup</strong>
-          <span>Enterprise szintű adatmentési megoldások</span>
-        </div>
-        <div class="tech-sor">
-          <strong>Backup célpontok</strong>
-          <span>Több, egymástól független fizikai backup target, több helyszínen</span>
-        </div>
-        <div class="tech-sor">
-          <strong>Replikáció</strong>
-          <span>Off-site VM replika-célpont a kritikus terhelésekhez</span>
-        </div>
-        <div class="tech-sor">
-          <strong>Out-of-band management</strong>
-          <span>Dedikált, az internetről nem elérhető management hálózat</span>
-        </div>
-        <div class="tech-sor">
-          <strong>Publikus IP</strong>
-          <span>Dedikált publikus IPv4 cím ügyfelenként, saját címtartományból</span>
-        </div>
-        <div class="tech-sor">
-          <strong>Datacenter</strong>
-          <span>Két budapesti helyszín</span>
-        </div>
+  <section class="band band--mist">
+    <div class="wrap">
+      <div class="tkartyak">
+        {kartyak.map((k, i) => (
+          <article class="tkartya">
+            <div class="tkartya__fej">
+              <span class="tkartya__idx">{String(i + 1).padStart(2, '0')}</span>
+              <span class="tkartya__cimke">{k.cimke}</span>
+            </div>
+
+            <h2>{k.cim}</h2>
+
+            {k.allitas.map((bek) => <p>{bek}</p>)}
+
+            <p class="tkartya__kulcs">{k.kulcs}</p>
+
+            {k.hivatkozas && (
+              <p class="tkartya__hiv">
+                <a href={k.hivatkozas.url}>{k.hivatkozas.szoveg} →</a>
+              </p>
+            )}
+
+            <details class="reszletek">
+              <summary>Technikai részletek</summary>
+              <ul>
+                {k.reszletek.map((r) => (
+                  <li>
+                    {r.cimke && <strong>{r.cimke}:</strong>}
+                    {' '}{r.szoveg}
+                  </li>
+                ))}
+              </ul>
+              {k.megjegyzes && <p class="reszletek__jegyzet">{k.megjegyzes}</p>}
+            </details>
+          </article>
+        ))}
       </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap cta">
+      <h2>Nézzük meg, mit jelent ez az Ön környezetében</h2>
+      <p class="lead">
+        Ezek nem opciók egy árlistán, hanem az alapkonfiguráció része. Hogy az Ön környezetében
+        pontosan mit jelent, az a jelenlegi rendszerétől függ — nézzük meg együtt.
+      </p>
+      <a class="btn" href="/kapcsolat/">Kérek egy infrastruktúra-átvilágítást</a>
     </div>
   </section>
 </Base>
 
 <style>
-  .tech-tabla {
-    margin-top: 2rem;
-    border: 1px solid var(--c-line);
-    border-radius: var(--r);
-    overflow: hidden;
-  }
-  .tech-sor {
+  .tkartyak {
     display: grid;
-    grid-template-columns: 14rem 1fr;
-    gap: 1rem;
-    padding: 0.85rem 1.25rem;
-    border-bottom: 1px solid var(--c-line);
-    font-size: 0.95rem;
+    gap: 1.5rem;
+  }
+  .tkartya {
+    background: var(--c-paper);
+    border: 1px solid var(--c-line);
+    border-left: 4px solid var(--c-brand);
+    border-radius: var(--r);
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+  }
+  .tkartya__fej {
+    display: flex;
     align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.9rem;
   }
-  .tech-sor:last-child {
-    border-bottom: none;
-  }
-  .tech-sor--fej {
-    background: var(--c-ink);
-    color: #e9ecf2;
-    font-family: var(--f-display);
-    font-weight: 600;
-    font-size: 0.82rem;
-    letter-spacing: 0.06em;
+  .tkartya__idx,
+  .tkartya__cimke {
+    font-family: var(--f-util);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
   }
-  .tech-sor:not(.tech-sor--fej):nth-child(even) {
-    background: var(--c-mist);
+  .tkartya__idx {
+    color: var(--c-brand);
   }
-  .tech-sor strong {
+  .tkartya__cimke {
+    color: var(--c-steel);
+  }
+  .tkartya h2 {
+    font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+    margin-bottom: 0.7rem;
+    max-width: 34ch;
+  }
+  .tkartya p {
+    color: var(--c-steel);
+    font-size: 0.98rem;
+    max-width: 68ch;
+  }
+  .tkartya__kulcs {
+    border-left: 2px solid var(--c-brand);
+    padding-left: 1rem;
+    margin: 1.4rem 0;
+    color: var(--c-ink);
     font-family: var(--f-display);
     font-weight: 600;
+    font-size: 1.02rem;
+    line-height: 1.45;
   }
-  @media (max-width: 40rem) {
-    .tech-sor {
-      grid-template-columns: 1fr;
-      gap: 0.25rem;
+  .tkartya__hiv {
+    font-size: 0.9rem;
+  }
+  .tkartya__hiv a {
+    text-decoration: none;
+  }
+  .tkartya__hiv a:hover {
+    text-decoration: underline;
+  }
+
+  /* --- lenyitható technikai részletek --- */
+
+  .reszletek {
+    border-top: 1px solid var(--c-line);
+    padding-top: 1rem;
+    margin-top: 1.4rem;
+  }
+  .reszletek summary {
+    font-family: var(--f-util);
+    font-size: 0.74rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-brand);
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .reszletek summary::-webkit-details-marker {
+    display: none;
+  }
+  .reszletek summary::before {
+    content: '+';
+    font-size: 1rem;
+    line-height: 1;
+    width: 1rem;
+    text-align: center;
+  }
+  .reszletek[open] summary::before {
+    content: '–';
+  }
+  .reszletek summary:hover {
+    color: var(--c-brand-deep);
+  }
+  .reszletek ul {
+    margin: 1rem 0 0;
+    padding-left: 1.1rem;
+  }
+  .reszletek li {
+    color: var(--c-steel);
+    font-size: 0.94rem;
+    margin-bottom: 0.45rem;
+  }
+  .reszletek li strong {
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-weight: 600;
+    margin-right: 0.3rem;
+  }
+  .reszletek__jegyzet {
+    margin: 1rem 0 0;
+    padding: 0.85rem 1rem;
+    background: var(--c-brand-wash);
+    border-radius: var(--r);
+    font-size: 0.9rem;
+  }
+
+  .cta {
+    text-align: center;
+  }
+  .cta .lead {
+    margin-inline: auto;
+    max-width: 54ch;
+  }
+
+  @media (max-width: 34rem) {
+    .tkartya__kulcs {
+      font-size: 0.98rem;
+      padding-left: 0.8rem;
+    }
+    .cta .btn {
+      width: 100%;
+      justify-content: center;
     }
   }
 </style>
