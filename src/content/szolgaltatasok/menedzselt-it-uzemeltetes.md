@@ -157,7 +157,7 @@ Az átláthatóság kedvéért — az alábbiak külön megállapodás alapján,
 
 - **Több mint 20 év** vállalati IT üzemeltetési tapasztalat
 - **Saját infrastruktúra** – nemcsak üzemeltetünk, saját szerverparkot és két budapesti datacentert működtetünk
-- **99,99% rendelkezésre állási vállalás**
+- **Írásban rögzített SLA** – rendelkezésre állás és reakcióidő a választott szolgáltatáshoz igazítva
 - **Személyes üzemeltetői kapcsolat** – konkrét szakemberek, nem ticketszámok
 - **Magyar nyelvű támogatás**
 - **Egy kézben az egész** – infrastruktúra, üzemeltetés, mentés és audit egyetlen partnertől
