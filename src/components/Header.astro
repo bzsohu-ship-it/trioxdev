@@ -1,5 +1,21 @@
 ---
-const menu = [
+/** Menüpont a lenyíló panelben. */
+interface Almenu {
+  href: string;
+  cim: string;
+  /** Külső link: új lapon nyílik, rel="noopener noreferrer"-rel. */
+  kulso?: boolean;
+}
+
+/**
+ * Főmenüpont. Vagy `href`-fel közvetlen link (pl. GYIK),
+ * vagy `al`-lal lenyíló panel — a kettő kizárja egymást.
+ */
+type Fomenu =
+  | { cim: string; href: string; kulso?: boolean; al?: undefined }
+  | { cim: string; href?: undefined; al: Almenu[] };
+
+const menu: Fomenu[] = [
   {
     cim: 'Szolgáltatások',
     al: [
@@ -60,7 +76,7 @@ const most = Astro.url.pathname;
     <nav class="nav-fej" id="fomenu" aria-label="Fő menü">
       {menu.map((m, i) => (
         <div class="nav-elem">
-          {m.href ? (
+          {m.href !== undefined ? (
             <a
               href={m.href}
               class="nav-gomb nav-gomb--link"
