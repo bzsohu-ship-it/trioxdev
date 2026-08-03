@@ -52,7 +52,7 @@ Egy meglévő szerverpark leváltása nem mindig indokolt, és nem is mindig leh
 
 ## 2. A telephely és az adatközpont ne két külön világ legyen
 
-A hibrid rendszerek nem attól lesznek rosszak, hogy hibridek, hanem attól, hogy két külön csapat, két külön eljárásrend és két külön mentési logika mentén épülnek. Ilyenkor a hiba pontosan a két világ határán szokott keletkezni — és pontosan ott nincs is gazdája. **Nálunk a telephelyi és az adatközponti rész egy rendszer**, egy felügyelet alatt, közös mentési renddel, site-to-site VPN-nel összekötve.
+A hibrid rendszerek nem attól lesznek rosszak, hogy hibridek, hanem attól, hogy két külön csapat, két külön eljárásrend és két külön mentési logika mentén épülnek. Ilyenkor a hiba pontosan a két világ határán szokott keletkezni — és pontosan ott nincs is gazdája. **Nálunk a telephelyi és az adatközponti rész egy rendszer**, egy felügyelet alatt, közös címtárral, közös mentési renddel, site-to-site VPN-nel összekötve.
 
 > **Két rendszer két felelőssel: az a hiba, ami senkié. Egy rendszer két helyszínen: az egy megoldás.**
 
@@ -60,9 +60,11 @@ A hibrid rendszerek nem attól lesznek rosszak, hogy hibridek, hanem attól, hog
 <summary>Technikai részletek</summary>
 
 - **Site-to-site VPN** a telephely és a Triox adatközpont között, ügyfelenként dedikált gateway-en
+- **Egységes címtár és névfeloldás:** kiterjesztett Active Directory (további tartományvezérlő az adatközpontban), közös DNS/DHCP-logika
 - **Kapacitás-kiegészítés:** ha a telephelyi vas elfogy, a bővítés lehet virtuális gép az adatközpontban — hardverbeszerzés és szállítási idő nélkül
 - **Off-site mentési és replika-célpont** a telephelyi rendszerekhez
 - **Fokozatos migráció támogatása:** ha később mégis a költöztetés a cél, az hibriden keresztül, leállás nélkül, lépésenként történik
+- **Felhő-integráció:** Microsoft 365 / Entra ID és Azure irányú kapcsolódás, hibrid identitás
 
 </details>
 
@@ -104,6 +106,7 @@ A saját szerverszobában futó rendszerek leggyakoribb rejtett kockázata, hogy
 - **Off-site másolat** a Triox adatközpontjába, több, egymástól független fizikai backup targetre, több helyszínre
 - **3-2-1 elv gyakorlatban:** 3 példány, 2 különböző médián, 1 telephelyen kívül
 - **Enterprise mentési platform:** Veeam Backup & Replication és Veeam Agent (fizikai gépekhez is), alternatívaként Synology / Iperius / BackupChain megoldások
+- **Alkalmazás-tudatos mentés:** adatbázis- és levelezőrendszer-konzisztens mentés (VSS vagy natív adatbázis-mentés), nem csak fájlszintű másolat
 - **Megőrzési politika:** ügyfelenként egyeztetett retenció, több generációval
 
 </details>
@@ -126,6 +129,8 @@ Ha a telephelyen áll az éles rendszer, akkor a telephely kiesése — tűz, el
 <summary>Technikai részletek</summary>
 
 - **Off-site VM-replika** a Triox adatközpontjában, a kritikus terhelésekhez
+- **Failover a Triox oldalára:** a felébresztett környezetet a site-to-site VPN-en vagy dedikált publikus IP-n éri el
+- **Visszaállás (failback)** a telephelyre, amint a rendes állapot helyreállt
 - **Csökkentett üzem is opció:** nem minden rendszernek kell teljes kapacitáson futnia egy DR-eseményben — az olcsóbb, reális szint is tervezhető
 - **Két budapesti adatközponti helyszín**, egymástól függetlenül
 - **Teljes Disaster Recovery teszt:** a DR-terv éles próbája — a szerződésben egyeztetett igényeknek megfelelően, külön szolgáltatásként, dokumentált jegyzőkönyvvel
@@ -191,13 +196,24 @@ Az alábbi lista nem termékkatalógus, hanem annak a bizonyítéka, hogy a rend
 
 - **Active Directory Domain Services** — tartományi címtár, GPO, OU-struktúra, jogosultságkezelés
 - **DNS és DHCP** — belső névfeloldás, címkiosztás
+- **Active Directory Certificate Services (belső PKI)** — vállalati tanúsítványkiadás
+- **Microsoft Entra ID (Azure AD)** — hibrid identitás, Entra Connect szinkron
 - **Microsoft 365** — Exchange Online, SharePoint Online, Teams, OneDrive; migráció és üzemeltetés
-- **Fájlszolgáltatás** — Windows fájlszerver, DFS, kvóták, ACL-struktúra
+- **Microsoft Exchange Server** — helyszíni és hibrid levelezés
+- **Linux-alapú levelezés** — Postfix, Dovecot
+- **Fájlszolgáltatás** — Windows fájlszerver, DFS, kvóták, ACL-struktúra; Linux Samba / NFS
+- **Nyomtatószerver**, hálózati nyomtatás
 - **WSUS** — belső frissítéselosztás
 
 ### Adatbázis szerverek
 
 - **Microsoft SQL Server** — 2016-tól 2022/2025-ig, Expresstől Enterprise-ig; Always On rendelkezésre állási csoport, karbantartási tervek, mentési stratégia
+- **Firebird / InterBase** — sok magyar ügyviteli és számlázó rendszer alatt ez fut
+- **PostgreSQL**
+- **MySQL / MariaDB** — webes és ügyviteli alkalmazások alatt
+- **Oracle Database**
+- **MongoDB**
+- **Redis** — cache és session-tár
 - **SQLite-alapú alkalmazások** — fájlszintű mentéssel
 
 **Amit az adatbázis-üzemeltetés nálunk jelent:**
@@ -221,20 +237,31 @@ Az alábbi lista nem termékkatalógus, hanem annak a bizonyítéka, hogy a rend
 
 Nem a szoftver gyártói supportját adjuk, hanem azt a platformot, amin fut — és a mentést, ami megvédi.
 
+- **ERP és ügyviteli rendszerek** — SQL- vagy Firebird-alapú magyar és nemzetközi rendszerek kiszolgálása
+- **Microsoft Dynamics NAV / Business Central**
+- **Bér- és HR-rendszerek, számlázó- és készletprogramok**
+- **Dokumentumkezelő és iktató rendszerek**
+- **Ágazati és gyártásvezérlő rendszerek (MES, SCADA) kiszolgáló oldala**
+- **Kamerarendszer- és beléptető szerverek (VMS)**
 - **Egyedi fejlesztésű, belső alkalmazások** — ahol a fejlesztő már nem elérhető, de a rendszernek mennie kell
 
 ### Hálózat és biztonság
 
 - **MikroTik RouterOS** — routing, tűzfal, VPN, VLAN
+- **Cisco** hálózati eszközök
+- **Fortinet / pfSense / OPNsense** tűzfalak
 - **VLAN-alapú vagy fizikai szegmentálás** — kétszintű felosztás: belső (adatbázis, alkalmazás) és publikus (web, mail) réteg
 - **VPN** — site-to-site és távoli hozzáférés (IPsec, WireGuard, OpenVPN, SSTP)
+- **Wi-Fi infrastruktúra**, vendéghálózat leválasztással
 - **Tanúsítványkezelés** — nyilvános és belső TLS-tanúsítványok, lejárat-figyeléssel
+- **Végpontvédelem** felügyelete, központi konzollal
 
 ### Tároló, mentés, hardver
 
 - **Szerverplatformok:** Dell PowerEdge, HPE ProLiant, Lenovo / IBM — iDRAC, iLO out-of-band menedzsmenttel
 - **Tárolók:** RAID-tömbök, SAN / iSCSI, NAS (Synology és társai)
 - **Mentés:** Veeam Backup & Replication, Veeam Agent, Synology mentési megoldások, Iperius, BackupChain, Windows Server Backup
+- **Szünetmentes tápellátás (UPS)** felügyelete, szabályos leállítás áramszünetnél
 - **Hardver-életciklus:** garancia- és supportkövetés, bővítés- és cseretervezés
 
 ### Felügyelet, menedzsment, automatizálás
@@ -251,4 +278,6 @@ Nem a szoftver gyártói supportját adjuk, hanem azt a platformot, amin fut —
 ## Nézzük meg együtt, mi fut most Önnél
 
 A legtöbb cégnél nem az a kérdés, hogy felhő vagy saját szerver — hanem az, hogy **melyik rendszernek hol a helye**. Erre nem lehet árlistáról válaszolni. Nézzük meg együtt, mi fut most Önnél, mi mennyibe kerül üzemeltetésben és kockázatban, és mi az a minimális változtatás, ami a legtöbbet javít.
+
+> A felmérés nem kötelezettségvállalás. A végén kap egy dokumentált állapotképet és egy kockázati listát — akkor is, ha nem velünk dolgozik tovább.
 

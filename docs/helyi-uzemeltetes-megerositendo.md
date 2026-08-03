@@ -2,50 +2,30 @@
 
 **Belső jegyzet. Nem publikus** — ez a mappa nincs a buildben, csak a `src/pages` és a `public` kerül ki.
 
-A [helyi-uzemeltetes.md](../src/content/szolgaltatasok/helyi-uzemeltetes.md) oldal jelenleg **kizárólag a megerősített (✅) tételeket** tartalmazza. Az alábbiakat a forrásdokumentum `⚠️`-vel jelölte („piaci sztenderd, valószínűleg vállalható, de kiadás előtt erősítsd meg"), ezért kimaradtak.
+A [helyi-uzemeltetes.md](../src/content/szolgaltatasok/helyi-uzemeltetes.md) oldalra 2026-08-03-án bekerült a forrásdokumentum `⚠️` tételeinek nagy része. Az alábbiak **szándékosan maradtak kint** — ezek addig ne kerüljenek be, amíg nincs mögöttük valós kompetencia és vállalás.
 
-Jelölje be, amit ténylegesen vállalnak, és beszúrhatók az oldalra a megadott helyre.
+## Kimaradt: szolgáltatási vállalás
 
-## Kártyák
-
-| # | Kártya | Kimaradt tétel |
+| Tétel | Hova kerülne | Miért maradt ki |
 |---|---|---|
-| 2 | Hibrid | Egységes címtár: kiterjesztett Active Directory (további DC az adatközpontban), közös DNS/DHCP-logika |
-| 2 | Hibrid | Felhő-integráció: Microsoft 365 / Entra ID és Azure irányú kapcsolódás, hibrid identitás |
-| 4 | Mentés | Alkalmazás-tudatos mentés: adatbázis- és levelezőrendszer-konzisztens mentés (VSS / natív adatbázis-mentés) |
-| 5 | DR | Failover a Triox oldalára (site-to-site VPN-en vagy dedikált publikus IP-n) |
-| 5 | DR | Visszaállás (failback) a telephelyre |
-| 5 | DR | Definiált RTO / RPO rendszerenként — **csak mérhető, szerződésben tartható értékkel** |
+| Definiált RTO / RPO rendszerenként | 5. kártya (DR) | Csak mérhető, szerződésben tartható értékkel írható ki — ugyanaz a logika, ami miatt a 99,99% is kikerült az oldalról |
 
-## Platform-katalógus
+## Kimaradt: platformok
 
 **Virtualizáció**
 - Kubernetes
 
-**Linux disztribúciók**
+**Linux disztribúciók** — *jelenleg csak Ubuntu Server LTS és Debian szerepel*
 - Red Hat Enterprise Linux (RHEL)
 - Rocky Linux / AlmaLinux / CentOS (és CentOS-migráció)
 - SUSE Linux Enterprise / openSUSE
 - Oracle Linux
 - FreeBSD
 
-**Címtár és munkahelyi szolgáltatások**
-- Active Directory Certificate Services (belső PKI)
-- Microsoft Entra ID (Azure AD), Entra Connect szinkron
-- Microsoft Exchange Server (helyszíni és hibrid) — *sok magyar cégnél még él*
-- Linux-alapú levelezés (Postfix, Dovecot)
-- Nyomtatószerver, hálózati nyomtatás
-
 **Adatbázisok**
-- **Firebird / InterBase** — *a forrásdokumentum külön kiemeli: sok magyar ügyviteli és számlázó rendszer alatt ez fut*
-- PostgreSQL
-- MySQL / MariaDB
-- Oracle Database — *a magyar nagyvállalati körben erős érv*
-- MongoDB
-- Redis
 - IBM Db2
 
-**Alkalmazás- és webszerverek**
+**Alkalmazás- és webszerverek** — *jelenleg csak IIS, FTP/SFTP és RDS szerepel*
 - Apache HTTP Server
 - nginx (reverse proxy, terheléselosztás, TLS-terminálás)
 - Apache Tomcat
@@ -54,25 +34,13 @@ Jelölje be, amit ténylegesen vállalnak, és beszúrhatók az oldalra a megado
 - PHP-FPM
 - Java futtatókörnyezet (JRE/JDK)
 
-**Üzleti alkalmazások** — *csak referenciával vállalhatók*
-- ERP és ügyviteli rendszerek (SQL- vagy Firebird-alapú)
-- Microsoft Dynamics NAV / Business Central
+**Üzleti alkalmazások**
 - SAP
-- Bér- és HR-rendszerek, számlázó- és készletprogramok
-- Dokumentumkezelő és iktató rendszerek
-- MES / SCADA gyártásvezérlés kiszolgáló oldala — *a legerősebb érv a helyi üzemeltetés mellett, ha vállalható*
-- Kamerarendszer- és beléptető szerverek (VMS)
 
-**Hálózat és biztonság**
-- Cisco hálózati eszközök
-- Fortinet / pfSense / OPNsense tűzfalak
-- Wi-Fi infrastruktúra, vendéghálózat leválasztással
-- Végpontvédelem felügyelete központi konzollal
+## Nyitott szerkesztői kérdés
 
-**Hardver**
-- Szünetmentes tápellátás (UPS) felügyelete, szabályos leállítás áramszünetnél
+- **A visszaállítási teszt benne van-e az üzemeltetési alapdíjban?** Az oldal jelenleg három helyen azt írja, hogy a szerződésben egyeztetett igényeknek megfelelően, **külön szolgáltatásként** történik. Ha az alapdíj tartalmaz évi egy tesztet, a megfogalmazást pontosítani kell („a szerződésben egyeztetett gyakorisággal, azon felül külön megrendelésre").
 
-## Egyéb nyitott kérdés
+## Megjegyzés a következő körhöz
 
-- **Átvételi felmérés díjmentessége.** A forrásdokumentum egy bizalomépítő mondatot javasol a záró CTA fölé („A felmérés nem kötelezettségvállalás. A végén kap egy dokumentált állapotképet és egy kockázati listát — akkor is, ha nem velünk dolgozik tovább."). Ez kimaradt, mert azt sugallja, hogy a felmérés ingyenes. Ha az, beszúrható a záró blokk végére.
-- **Visszaállítási tesztek elhatárolása.** Az oldal három helyen kiírja, hogy ez a szerződésben egyeztetett igényeknek megfelelően, külön szolgáltatás. Ha az üzemeltetési alapdíj tartalmaz évi egy tesztet, a megfogalmazást pontosítani kell.
+Az adatbázis-blokkban szerepel a MySQL / MariaDB, a MongoDB és a Redis, az alkalmazásszerver-blokkban viszont nincs sem nginx, sem Apache, sem PHP-FPM, sem Node.js. Ez a párosítás szokatlan: ezek a rendszerek jellemzően együtt fordulnak elő. Ha az alkalmazásszerver-oldali kompetencia valójában megvan, érdemes kiírni — enélkül a katalógus azt sugallja, hogy az adatbázist üzemeltetjük, az előtte álló webréteget viszont nem.
