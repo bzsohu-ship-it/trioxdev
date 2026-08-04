@@ -195,8 +195,12 @@ const kartyak = [
 </Base>
 
 <style>
+  /* A kártyablokk a főmenü szélességéhez igazodik (az a fejlécben ~787 px),
+     és középre kerül — így a sorhossz is olvashatóbb marad. */
   .tkartyak {
     display: grid;
+    max-width: 50rem;
+    margin-inline: auto;
     gap: 1.5rem;
   }
   .tkartya {
