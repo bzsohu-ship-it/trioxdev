@@ -280,7 +280,7 @@ img {
    hanem görgethetővé tesszük — ugyanúgy, mint a széles táblázatokat. */
 .abra {
   max-width: 55rem;
-  margin: 1.75rem 0;
+  margin: 1.75rem auto;
   overflow-x: auto;
 }
 
