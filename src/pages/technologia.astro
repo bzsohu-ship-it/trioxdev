@@ -25,6 +25,7 @@ const kartyak = [
       'Nálunk minden ügyfél saját hálózati szegmenst kap, VLAN-alapú vagy fizikai szegmentálással, dedikált gateway mögött. Igény szerint a környezet az internetről egyáltalán nem elérhető — érzékeny adatot kezelő ügyfeleknél ez már működő gyakorlat.',
     ],
     kulcs: 'Auditnál a „logikailag elválasztva” gyakran kevés. Ezért adunk fizikai szegmentálást is.',
+    abra: 'izolacio',
     reszletek: [
       { cimke: 'Ügyfél-izoláció', szoveg: 'VLAN-alapú vagy fizikai szegmentálás, ügyfelenként dedikált szegmens' },
       { cimke: 'Gateway', szoveg: 'ügyfelenként dedikált tűzfal, NAT és VPN endpoint — saját szabályrendszerrel' },
@@ -115,6 +116,47 @@ const kartyak = [
 
             <p class="tkartya__kulcs">{k.kulcs}</p>
 
+            {k.abra === 'izolacio' && (
+              <figure class="abra">
+                <svg viewBox="0 0 880 306" role="img" aria-labelledby="abra-izolacio">
+                  <title id="abra-izolacio">Az internet felől érkező forgalom ügyfelenként külön, dedikált gateway-en halad át. Minden ügyfél saját hálózati szegmenst kap, azon belül külön publikus réteggel (web, mail) és belső réteggel (adatbázis, alkalmazás). A két ügyfél szegmense között nincs átjárás.</title>
+                  <rect class="abra__doboz" x="0" y="125" width="96" height="50" rx="4" />
+                  <text class="abra__cimke" x="48" y="155" text-anchor="middle">Internet</text>
+                  <path class="abra__vonal" d="M96 150 H116 V87 H134" />
+                  <path class="abra__nyil" d="M140 87 L132 82 L132 92 Z" />
+                  <path class="abra__vonal" d="M116 150 V222 H134" />
+                  <path class="abra__nyil" d="M140 222 L132 217 L132 227 Z" />
+                  <rect class="abra__doboz" x="140" y="60" width="180" height="54" rx="4" />
+                  <text class="abra__cimke" x="230" y="84" text-anchor="middle">Dedikált átjáró</text>
+                  <text class="abra__mono" x="230" y="102" text-anchor="middle">TŰZFAL · NAT · VPN</text>
+                  <rect class="abra__doboz" x="140" y="195" width="180" height="54" rx="4" />
+                  <text class="abra__cimke" x="230" y="219" text-anchor="middle">Dedikált átjáró</text>
+                  <text class="abra__mono" x="230" y="237" text-anchor="middle">TŰZFAL · NAT · VPN</text>
+                  <path class="abra__vonal" d="M320 87 H354" />
+                  <path class="abra__nyil" d="M360 87 L352 82 L352 92 Z" />
+                  <path class="abra__vonal" d="M320 222 H354" />
+                  <path class="abra__nyil" d="M360 222 L352 217 L352 227 Z" />
+                  <rect class="abra__kiemelt" x="360" y="30" width="510" height="115" rx="4" />
+                  <text class="abra__mono" x="376" y="50">ÜGYFÉL A — DEDIKÁLT SZEGMENS</text>
+                  <rect class="abra__sav" x="376" y="60" width="478" height="36" rx="2" />
+                  <text class="abra__cimke" x="392" y="83">Publikus réteg</text>
+                  <text class="abra__kicsi" x="838" y="83" text-anchor="end">web, mail</text>
+                  <rect class="abra__sav" x="376" y="102" width="478" height="36" rx="2" />
+                  <text class="abra__cimke" x="392" y="125">Belső réteg</text>
+                  <text class="abra__kicsi" x="838" y="125" text-anchor="end">adatbázis, alkalmazás</text>
+                  <rect class="abra__doboz" x="360" y="165" width="510" height="115" rx="4" />
+                  <text class="abra__mono" x="376" y="185">ÜGYFÉL B — DEDIKÁLT SZEGMENS</text>
+                  <rect class="abra__sav" x="376" y="195" width="478" height="36" rx="2" />
+                  <text class="abra__cimke" x="392" y="218">Publikus réteg</text>
+                  <text class="abra__kicsi" x="838" y="218" text-anchor="end">web, mail</text>
+                  <rect class="abra__sav" x="376" y="237" width="478" height="36" rx="2" />
+                  <text class="abra__cimke" x="392" y="260">Belső réteg</text>
+                  <text class="abra__kicsi" x="838" y="260" text-anchor="end">adatbázis, alkalmazás</text>
+                  <text class="abra__mono" x="615" y="300" text-anchor="middle">A KÉT SZEGMENS KÖZÖTT NINCS ÁTJÁRÁS</text>
+                </svg>
+              </figure>
+            )}
+
             {k.hivatkozas && (
               <p class="tkartya__hiv">
                 <a href={k.hivatkozas.url}>{k.hivatkozas.szoveg} →</a>
@@ -153,11 +195,16 @@ const kartyak = [
 </Base>
 
 <style>
+  /* A kártyablokk a fejléc tartalomsávjával azonos szélességű: mindkettő a
+     .wrap-ből örökli, tehát a logó bal élétől a GYIK jobb éléig tart. */
   .tkartyak {
     display: grid;
     gap: 1.5rem;
   }
   .tkartya {
+    /* Grid-elem alapból min-width: auto, ezért az ábra min-width-je szétfeszítené
+       a rácsot. Nullázva az ábra a saját konténerében görgethető. */
+    min-width: 0;
     background: var(--c-paper);
     border: 1px solid var(--c-line);
     border-left: 4px solid var(--c-brand);
@@ -186,12 +233,18 @@ const kartyak = [
   .tkartya h2 {
     font-size: clamp(1.25rem, 2.4vw, 1.6rem);
     margin-bottom: 0.7rem;
-    max-width: 34ch;
   }
+  /* Nincs max-width: a korábbi 68ch a széles kártyában 407 px-t hagyott
+     üresen jobbra, amitől az egész blokk balra dőlt. */
   .tkartya p {
     color: var(--c-steel);
     font-size: 0.98rem;
-    max-width: 68ch;
+  }
+  /* Sorkizárt törzsszöveg. Elválasztás nélkül a hosszú magyar szavak
+     folyókat nyitnának a hasábban, ezért a hyphens is kell hozzá. */
+  .tkartya p:not(.tkartya__kulcs):not(.tkartya__hiv) {
+    text-align: justify;
+    hyphens: auto;
   }
   .tkartya__kulcs {
     border-left: 2px solid var(--c-brand);
@@ -285,6 +338,13 @@ const kartyak = [
     max-width: 54ch;
   }
 
+  /* Keskeny nézetben a sor ~36 karakter. Ilyen rövid soron a sorkizárás
+     tátongó szóközöket nyit, ezért ott balra zárt marad. */
+  @media (max-width: 40rem) {
+    .tkartya p:not(.tkartya__kulcs):not(.tkartya__hiv) {
+      text-align: left;
+    }
+  }
   @media (max-width: 34rem) {
     .tkartya__kulcs {
       font-size: 0.98rem;

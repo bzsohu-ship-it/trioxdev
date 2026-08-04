@@ -10,6 +10,36 @@ szelesLayout: true
 
 Egyre több audit, szabályozói vizsgálat és ügyfél-elvárás írja elő a mentések rendszeres visszaállítási tesztjének igazolását. Mi elvégezzük — és jegyzőkönyvet adunk róla.
 
+<figure class="abra">
+<svg viewBox="0 0 880 130" role="img" aria-labelledby="abra-arv">
+<title id="abra-arv">A visszaállítási teszt öt lépése: a mentési pont kiválasztása, elkülönített tesztkörnyezet felépítése, a visszaállítás elvégzése, az adatok ellenőrzése, végül az audit-kompatibilis jegyzőkönyv.</title>
+<text class="abra__mono" x="78" y="24" text-anchor="middle">01</text>
+<rect class="abra__doboz" x="0" y="34" width="156" height="62" rx="4" />
+<text class="abra__cimke" x="78" y="70" text-anchor="middle">Mentési pont</text>
+<text class="abra__kicsi" x="78" y="116" text-anchor="middle">egyeztetett időpontról</text>
+<path class="abra__nyil" d="M164 59 L176 65 L164 71 Z" />
+<text class="abra__mono" x="259" y="24" text-anchor="middle">02</text>
+<rect class="abra__doboz" x="181" y="34" width="156" height="62" rx="4" />
+<text class="abra__cimke" x="259" y="70" text-anchor="middle">Tesztkörnyezet</text>
+<text class="abra__kicsi" x="259" y="116" text-anchor="middle">az élestől elkülönítve</text>
+<path class="abra__nyil" d="M345 59 L357 65 L345 71 Z" />
+<text class="abra__mono" x="440" y="24" text-anchor="middle">03</text>
+<rect class="abra__doboz" x="362" y="34" width="156" height="62" rx="4" />
+<text class="abra__cimke" x="440" y="70" text-anchor="middle">Visszaállítás</text>
+<text class="abra__kicsi" x="440" y="116" text-anchor="middle">teljes vagy részleges</text>
+<path class="abra__nyil" d="M526 59 L538 65 L526 71 Z" />
+<text class="abra__mono" x="621" y="24" text-anchor="middle">04</text>
+<rect class="abra__doboz" x="543" y="34" width="156" height="62" rx="4" />
+<text class="abra__cimke" x="621" y="70" text-anchor="middle">Ellenőrzés</text>
+<text class="abra__kicsi" x="621" y="116" text-anchor="middle">olvashatóság, integritás</text>
+<path class="abra__nyil" d="M707 59 L719 65 L707 71 Z" />
+<text class="abra__mono" x="802" y="24" text-anchor="middle">05</text>
+<rect class="abra__kiemelt" x="724" y="34" width="156" height="62" rx="4" />
+<text class="abra__cimke" x="802" y="70" text-anchor="middle">Jegyzőkönyv</text>
+<text class="abra__kicsi" x="802" y="116" text-anchor="middle">audit-kompatibilis</text>
+</svg>
+</figure>
+
 ---
 
 ## Miért fontos a visszaállítási teszt?

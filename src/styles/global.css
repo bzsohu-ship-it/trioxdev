@@ -273,6 +273,73 @@ img {
   }
 }
 
+/* --- ábrák: beágyazott SVG, hogy örökölje a betűket és a színtokeneket --- */
+
+/* A viewBox 880 egység széles: 55rem-nél a feliratok pontosan a megadott
+   pixelméretben látszanak. Keskeny nézetben nem zsugorítjuk olvashatatlanra,
+   hanem görgethetővé tesszük — ugyanúgy, mint a széles táblázatokat. */
+.abra {
+  max-width: 55rem;
+  margin: 1.75rem auto;
+  overflow-x: auto;
+}
+
+.abra svg {
+  display: block;
+  width: 100%;
+  min-width: 44rem;
+  height: auto;
+}
+
+.abra__doboz {
+  fill: var(--c-paper);
+  stroke: var(--c-line);
+  stroke-width: 1;
+}
+
+.abra__kiemelt {
+  fill: var(--c-brand-wash);
+  stroke: var(--c-brand);
+  stroke-width: 1;
+}
+
+.abra__sav {
+  fill: var(--c-mist);
+  stroke: var(--c-line);
+  stroke-width: 1;
+}
+
+.abra__cimke {
+  font-family: var(--f-display);
+  font-weight: 600;
+  font-size: 15px;
+  fill: var(--c-ink);
+}
+
+.abra__mono {
+  font-family: var(--f-util);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  fill: var(--c-steel);
+  text-transform: uppercase;
+}
+
+.abra__kicsi {
+  font-family: var(--f-body);
+  font-size: 12.5px;
+  fill: var(--c-steel);
+}
+
+.abra__vonal {
+  stroke: var(--c-brand);
+  stroke-width: 1.5;
+  fill: none;
+}
+
+.abra__nyil {
+  fill: var(--c-brand);
+}
+
 /* --- prózás tartalom (szolgáltatás- és blogoldalak) --- */
 
 .prose {

@@ -18,6 +18,42 @@ Ha pedig a kettő kombinációja a jó válasz, azt is felépítjük — a telep
 
 ## A három modell
 
+<figure class="abra">
+<svg viewBox="0 0 880 232" role="img" aria-labelledby="abra-modellek">
+<title id="abra-modellek">A három üzemeltetési modell: on-premise a telephelyen, hibrid a telephely és a Triox adatközpont között site-to-site VPN-nel, illetve teljesen adatközponti. A modellek között bármelyik irányba van átjárás.</title>
+<text class="abra__mono" x="135" y="14" text-anchor="middle">ON-PREMISE</text>
+<rect class="abra__doboz" x="55" y="30" width="160" height="104" rx="4" />
+<rect class="abra__sav" x="75" y="50" width="120" height="16" rx="2" />
+<rect class="abra__sav" x="75" y="74" width="120" height="16" rx="2" />
+<rect class="abra__sav" x="75" y="98" width="120" height="16" rx="2" />
+<text class="abra__cimke" x="135" y="154" text-anchor="middle">Az Ön telephelye</text>
+<text class="abra__kicsi" x="135" y="172" text-anchor="middle">minden helyben fut</text>
+<text class="abra__mono" x="440" y="14" text-anchor="middle">HIBRID</text>
+<rect class="abra__doboz" x="305" y="42" width="110" height="80" rx="4" />
+<rect class="abra__sav" x="320" y="58" width="80" height="14" rx="2" />
+<rect class="abra__sav" x="320" y="78" width="80" height="14" rx="2" />
+<rect class="abra__kiemelt" x="465" y="42" width="110" height="80" rx="4" />
+<rect class="abra__sav" x="480" y="58" width="80" height="14" rx="2" />
+<rect class="abra__sav" x="480" y="78" width="80" height="14" rx="2" />
+<path class="abra__vonal" stroke-dasharray="4 4" d="M415 82 H465" />
+<text class="abra__mono" x="440" y="74" text-anchor="middle">VPN</text>
+<text class="abra__cimke" x="440" y="154" text-anchor="middle">Telephely + adatközpont</text>
+<text class="abra__kicsi" x="440" y="172" text-anchor="middle">egy rendszer, egy felügyelet alatt</text>
+<text class="abra__mono" x="745" y="14" text-anchor="middle">ADATKÖZPONTI</text>
+<rect class="abra__kiemelt" x="665" y="30" width="160" height="104" rx="4" />
+<rect class="abra__sav" x="685" y="50" width="120" height="16" rx="2" />
+<rect class="abra__sav" x="685" y="74" width="120" height="16" rx="2" />
+<rect class="abra__sav" x="685" y="98" width="120" height="16" rx="2" />
+<text class="abra__cimke" x="745" y="154" text-anchor="middle">Triox adatközpont</text>
+<text class="abra__kicsi" x="745" y="172" text-anchor="middle">nincs saját szerverszoba</text>
+<path class="abra__vonal" d="M150 206 H730" />
+<path class="abra__nyil" d="M135 206 L152 200 L152 212 Z" />
+<path class="abra__nyil" d="M745 206 L728 200 L728 212 Z" />
+<rect x="330" y="196" width="220" height="20" fill="var(--c-paper)" />
+<text class="abra__mono" x="440" y="210" text-anchor="middle">ÁTJÁRÁS BÁRMELYIK IRÁNYBA</text>
+</svg>
+</figure>
+
 | Modell | Hol van a rendszer | Kinek való |
 |---|---|---|
 | **On-premise üzemeltetés** | Teljes egészében az Ön telephelyén | Ahol a hardvernek fizikailag ott kell lennie, vagy már megtörtént a beruházás |
@@ -98,6 +134,34 @@ A mentés-ellenőrzés a mentési feladat lefutásának felügyelete. Annak igaz
 A saját szerverszobában futó rendszerek leggyakoribb rejtett kockázata, hogy a mentés ugyanabban a helyiségben van, mint az éles rendszer — ugyanazon a hálózaton, ugyanazon a tápon, ugyanazon zár mögött. Tűz, beázás, lopás vagy egy titkosító zsarolóvírus esetén ez a mentés is elveszik. **Ezért a telephelyi mentés mellé mindig adunk egy tőle független, off-site másolatot** a Triox adatközpontjában — így a helyi visszaállítás gyors marad, de a katasztrófa-eset is fedve van.
 
 > **A kérdés nem az, van-e mentés. Az, hogy hol van, és mennyi idő alatt van fent.**
+
+<figure class="abra">
+<svg viewBox="0 0 880 252" role="img" aria-labelledby="abra-321">
+<title id="abra-321">Az éles rendszer a telephelyen fut. Mellette helyi mentés áll a gyors visszaállításhoz, ezen felül a Triox adatközpontjába megy másolat két, egymástól független backup targetre, két helyszínre, valamint egy off-site VM-replika, amit nem visszaállítani kell, hanem elindítani.</title>
+<rect class="abra__doboz" x="0" y="72" width="150" height="70" rx="4" />
+<text class="abra__cimke" x="75" y="102" text-anchor="middle">Éles rendszer</text>
+<text class="abra__kicsi" x="75" y="122" text-anchor="middle">az Ön telephelyén</text>
+<path class="abra__vonal" d="M150 107 H194" />
+<path class="abra__nyil" d="M200 107 L192 102 L192 112 Z" />
+<rect class="abra__doboz" x="200" y="72" width="150" height="70" rx="4" />
+<text class="abra__cimke" x="275" y="102" text-anchor="middle">Helyi mentés</text>
+<text class="abra__kicsi" x="275" y="122" text-anchor="middle">gyors visszaállításhoz</text>
+<path class="abra__vonal" d="M350 107 H404" />
+<path class="abra__nyil" d="M410 107 L402 102 L402 112 Z" />
+<rect class="abra__kiemelt" x="410" y="18" width="470" height="196" rx="4" />
+<text class="abra__mono" x="426" y="38">TRIOX ADATKÖZPONT — KÉT HELYSZÍN</text>
+<rect class="abra__sav" x="426" y="50" width="212" height="56" rx="2" />
+<text class="abra__cimke" x="532" y="74" text-anchor="middle">Backup target 1</text>
+<text class="abra__kicsi" x="532" y="93" text-anchor="middle">helyszín A</text>
+<rect class="abra__sav" x="652" y="50" width="212" height="56" rx="2" />
+<text class="abra__cimke" x="758" y="74" text-anchor="middle">Backup target 2</text>
+<text class="abra__kicsi" x="758" y="93" text-anchor="middle">helyszín B</text>
+<rect class="abra__sav" x="426" y="126" width="438" height="68" rx="2" />
+<text class="abra__cimke" x="645" y="152" text-anchor="middle">Off-site VM-replika</text>
+<text class="abra__kicsi" x="645" y="174" text-anchor="middle">nem visszaállítani kell, hanem elindítani</text>
+<text class="abra__mono" x="440" y="242" text-anchor="middle">3 PÉLDÁNY · 2 MÉDIA · 1 TELEPHELYEN KÍVÜL</text>
+</svg>
+</figure>
 
 <details>
 <summary>Technikai részletek</summary>
