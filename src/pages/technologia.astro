@@ -25,6 +25,7 @@ const kartyak = [
       'Nálunk minden ügyfél saját hálózati szegmenst kap, VLAN-alapú vagy fizikai szegmentálással, dedikált gateway mögött. Igény szerint a környezet az internetről egyáltalán nem elérhető — érzékeny adatot kezelő ügyfeleknél ez már működő gyakorlat.',
     ],
     kulcs: 'Auditnál a „logikailag elválasztva” gyakran kevés. Ezért adunk fizikai szegmentálást is.',
+    abra: 'izolacio',
     reszletek: [
       { cimke: 'Ügyfél-izoláció', szoveg: 'VLAN-alapú vagy fizikai szegmentálás, ügyfelenként dedikált szegmens' },
       { cimke: 'Gateway', szoveg: 'ügyfelenként dedikált tűzfal, NAT és VPN endpoint — saját szabályrendszerrel' },
@@ -115,6 +116,47 @@ const kartyak = [
 
             <p class="tkartya__kulcs">{k.kulcs}</p>
 
+            {k.abra === 'izolacio' && (
+              <figure class="abra">
+                <svg viewBox="0 0 880 306" role="img" aria-labelledby="abra-izolacio">
+                  <title id="abra-izolacio">Az internet felől érkező forgalom ügyfelenként külön, dedikált gateway-en halad át. Minden ügyfél saját hálózati szegmenst kap, azon belül külön publikus réteggel (web, mail) és belső réteggel (adatbázis, alkalmazás). A két ügyfél szegmense között nincs átjárás.</title>
+                  <rect class="abra__doboz" x="0" y="125" width="100" height="50" rx="4" />
+                  <text class="abra__cimke" x="50" y="155" text-anchor="middle">Internet</text>
+                  <path class="abra__vonal" d="M100 150 H125 V87 H144" />
+                  <path class="abra__nyil" d="M150 87 L142 82 L142 92 Z" />
+                  <path class="abra__vonal" d="M125 150 V222 H144" />
+                  <path class="abra__nyil" d="M150 222 L142 217 L142 227 Z" />
+                  <rect class="abra__doboz" x="150" y="60" width="130" height="54" rx="4" />
+                  <text class="abra__cimke" x="215" y="84" text-anchor="middle">Dedikált gateway</text>
+                  <text class="abra__mono" x="215" y="102" text-anchor="middle">TŰZFAL · NAT · VPN</text>
+                  <rect class="abra__doboz" x="150" y="195" width="130" height="54" rx="4" />
+                  <text class="abra__cimke" x="215" y="219" text-anchor="middle">Dedikált gateway</text>
+                  <text class="abra__mono" x="215" y="237" text-anchor="middle">TŰZFAL · NAT · VPN</text>
+                  <path class="abra__vonal" d="M280 87 H314" />
+                  <path class="abra__nyil" d="M320 87 L312 82 L312 92 Z" />
+                  <path class="abra__vonal" d="M280 222 H314" />
+                  <path class="abra__nyil" d="M320 222 L312 217 L312 227 Z" />
+                  <rect class="abra__kiemelt" x="320" y="30" width="540" height="115" rx="4" />
+                  <text class="abra__mono" x="336" y="50">ÜGYFÉL A — DEDIKÁLT SZEGMENS</text>
+                  <rect class="abra__sav" x="336" y="60" width="508" height="36" rx="2" />
+                  <text class="abra__cimke" x="352" y="83">Publikus réteg</text>
+                  <text class="abra__kicsi" x="828" y="83" text-anchor="end">web, mail</text>
+                  <rect class="abra__sav" x="336" y="102" width="508" height="36" rx="2" />
+                  <text class="abra__cimke" x="352" y="125">Belső réteg</text>
+                  <text class="abra__kicsi" x="828" y="125" text-anchor="end">adatbázis, alkalmazás</text>
+                  <rect class="abra__doboz" x="320" y="165" width="540" height="115" rx="4" />
+                  <text class="abra__mono" x="336" y="185">ÜGYFÉL B — DEDIKÁLT SZEGMENS</text>
+                  <rect class="abra__sav" x="336" y="195" width="508" height="36" rx="2" />
+                  <text class="abra__cimke" x="352" y="218">Publikus réteg</text>
+                  <text class="abra__kicsi" x="828" y="218" text-anchor="end">web, mail</text>
+                  <rect class="abra__sav" x="336" y="237" width="508" height="36" rx="2" />
+                  <text class="abra__cimke" x="352" y="260">Belső réteg</text>
+                  <text class="abra__kicsi" x="828" y="260" text-anchor="end">adatbázis, alkalmazás</text>
+                  <text class="abra__mono" x="590" y="300" text-anchor="middle">A KÉT SZEGMENS KÖZÖTT NINCS ÁTJÁRÁS</text>
+                </svg>
+              </figure>
+            )}
+
             {k.hivatkozas && (
               <p class="tkartya__hiv">
                 <a href={k.hivatkozas.url}>{k.hivatkozas.szoveg} →</a>
@@ -158,6 +200,9 @@ const kartyak = [
     gap: 1.5rem;
   }
   .tkartya {
+    /* Grid-elem alapból min-width: auto, ezért az ábra min-width-je szétfeszítené
+       a rácsot. Nullázva az ábra a saját konténerében görgethető. */
+    min-width: 0;
     background: var(--c-paper);
     border: 1px solid var(--c-line);
     border-left: 4px solid var(--c-brand);
