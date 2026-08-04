@@ -195,12 +195,10 @@ const kartyak = [
 </Base>
 
 <style>
-  /* A kártyablokk a főmenü szélességéhez igazodik (az a fejlécben ~787 px),
-     és középre kerül — így a sorhossz is olvashatóbb marad. */
+  /* A kártyablokk a fejléc tartalomsávjával azonos szélességű: mindkettő a
+     .wrap-ből örökli, tehát a logó bal élétől a GYIK jobb éléig tart. */
   .tkartyak {
     display: grid;
-    max-width: 50rem;
-    margin-inline: auto;
     gap: 1.5rem;
   }
   .tkartya {
