@@ -231,12 +231,12 @@ const kartyak = [
   .tkartya h2 {
     font-size: clamp(1.25rem, 2.4vw, 1.6rem);
     margin-bottom: 0.7rem;
-    max-width: 34ch;
   }
+  /* Nincs max-width: a korábbi 68ch a széles kártyában 407 px-t hagyott
+     üresen jobbra, amitől az egész blokk balra dőlt. */
   .tkartya p {
     color: var(--c-steel);
     font-size: 0.98rem;
-    max-width: 68ch;
   }
   /* Sorkizárt törzsszöveg. Elválasztás nélkül a hosszú magyar szavak
      folyókat nyitnának a hasábban, ezért a hyphens is kell hozzá. */
@@ -336,6 +336,13 @@ const kartyak = [
     max-width: 54ch;
   }
 
+  /* Keskeny nézetben a sor ~36 karakter. Ilyen rövid soron a sorkizárás
+     tátongó szóközöket nyit, ezért ott balra zárt marad. */
+  @media (max-width: 40rem) {
+    .tkartya p:not(.tkartya__kulcs):not(.tkartya__hiv) {
+      text-align: left;
+    }
+  }
   @media (max-width: 34rem) {
     .tkartya__kulcs {
       font-size: 0.98rem;
