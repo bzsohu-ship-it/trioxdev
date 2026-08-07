@@ -1,5 +1,30 @@
 ---
 import Base from '../layouts/Base.astro';
+
+/**
+ * Partnerek. Új partner hozzáadása:
+ *   1. a logót tedd a `public/partnerek/` mappába (SVG a legjobb, mert éles marad)
+ *   2. vedd fel ide egy sorral, a `logo` a fájlnév a mappán belül
+ *
+ * A `logo` elhagyható: amíg nincs jóváhagyott logófájl, a csempe a nevet
+ * mutatja. Így az oldal félkész logó nélkül sem néz befejezetlennek.
+ *
+ * Csak olyan partner kerüljön ide, akinek a megjelenítésére van engedélyünk —
+ * a gyártói logók használatát márkahasználati szabályzat köti.
+ */
+interface Partner {
+  nev: string;
+  szerep: string;
+  /** Fájlnév a `public/partnerek/` mappán belül. Ha hiányzik, a név látszik. */
+  logo?: string;
+}
+
+const partnerek: Partner[] = [
+  {
+    nev: 'Microsoft',
+    szerep: 'CSP viszonteladó · SPLA szerződéses partner',
+  },
+];
 ---
 
 <Base cim="Partnerek" leiras="Technológiai partnereink és minősítéseink.">
@@ -7,8 +32,91 @@ import Base from '../layouts/Base.astro';
     <div class="wrap prose">
       <p class="eyebrow">Partnerek</p>
       <h1>Akikkel dolgozunk</h1>
-      <p>Microsoft CSP viszonteladó és SPLA szerződéses partner.</p>
-      <p><em>Ide jönnek a partnerlogók és a referenciák.</em></p>
+      <p class="lead">
+        A licencelést és a gyártói hátteret is mi intézzük — Önnek egy szerződéses
+        partnere van az egészre.
+      </p>
+
+      <ul class="partnerracs">
+        {partnerek.map((p) => (
+          <li class="partner">
+            <div class="partner__jel">
+              {p.logo ? (
+                <img src={`/partnerek/${p.logo}`} alt={p.nev} loading="lazy" />
+              ) : (
+                <span class="partner__nev">{p.nev}</span>
+              )}
+            </div>
+            <p class="partner__szerep">{p.szerep}</p>
+          </li>
+        ))}
+      </ul>
+
+      <p class="megjegyzes">
+        A megvalósított projektekről az <a href="/esettanulmanyok/">Esettanulmányok</a>
+        oldalon olvashat. Ügyfeleink nevét nem tesszük közzé.
+      </p>
     </div>
   </section>
 </Base>
+
+<style>
+  .partnerracs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 14rem));
+    gap: 1.25rem;
+    justify-content: start;
+    margin: 2rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .partner {
+    margin: 0;
+  }
+
+  /* Egységes magasság, hogy az eltérő arányú logók egy vonalban álljanak. */
+  .partner__jel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 6rem;
+    padding: 1rem;
+    border: 1px solid var(--c-line);
+    border-radius: var(--r);
+    background: var(--c-paper);
+  }
+
+  .partner__jel img {
+    max-width: 100%;
+    max-height: 3rem;
+    object-fit: contain;
+  }
+
+  .partner__nev {
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 1.15rem;
+    color: var(--c-ink);
+  }
+
+  .partner__szerep {
+    margin: 0.6rem 0 0;
+    color: var(--c-steel);
+    font-size: 0.88rem;
+    line-height: 1.4;
+  }
+
+  .megjegyzes {
+    margin-top: 2.5rem;
+    color: var(--c-steel);
+    font-size: 0.95rem;
+  }
+
+  @media (max-width: 34rem) {
+    .partnerracs {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+  }
+</style>
