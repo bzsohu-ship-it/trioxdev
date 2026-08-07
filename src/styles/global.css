@@ -342,9 +342,10 @@ img {
 
 /* --- prózás tartalom (szolgáltatás- és blogoldalak) --- */
 
-.prose {
-  max-width: 62ch;
-}
+/* Szándékosan nincs itt max-width. A .prose gyakran a .wrap-pel egy elemen
+   ül (class="wrap prose"), és egy itteni max-width — még a none is —
+   felülírná a .wrap korlátját, mert később áll és azonos a specifikussága.
+   Így a tartalom a .wrap szélességét kapja, azaz a kezdőlapét. */
 
 .prose h2 {
   margin-top: 2.2rem;
