@@ -194,6 +194,7 @@ Ha a telephelyen áll az éles rendszer, akkor a telephely kiesése — tűz, el
 
 - **Off-site VM-replika** a Triox adatközpontjában, a kritikus terhelésekhez
 - **Failover a Triox oldalára:** a felébresztett környezetet a site-to-site VPN-en vagy dedikált publikus IP-n éri el
+- **Definiált RTO / RPO:** rendszerenként egyeztetve — nem egy szám az egész cégre
 - **Visszaállás (failback)** a telephelyre, amint a rendes állapot helyreállt
 - **Csökkentett üzem is opció:** nem minden rendszernek kell teljes kapacitáson futnia egy DR-eseményben — az olcsóbb, reális szint is tervezhető
 - **Két budapesti adatközponti helyszín**, egymástól függetlenül
@@ -238,6 +239,7 @@ Az alábbi lista nem termékkatalógus, hanem annak a bizonyítéka, hogy a rend
 | **VMware vSphere / ESXi** | Meglévő környezet átvétele és üzemeltetése |
 | **Proxmox VE** | KVM és LXC |
 | **Docker / Docker Compose** | Konténerizált alkalmazások üzemeltetése |
+| **Kubernetes** | Konténer-orkesztráció |
 | Fizikai (bare metal) szerverek | Ahol a virtualizáció nem opció (licenckötöttség, hardverkulcs, teljesítmény) |
 
 ### Operációs rendszer platformok
@@ -249,10 +251,15 @@ Az alábbi lista nem termékkatalógus, hanem annak a bizonyítéka, hogy a rend
 - Windows kliens: Windows 11, Windows 10, csoportházirenddel (GPO) menedzselve
 - Terminálszolgáltatás / Remote Desktop Services (RDS), session host farm
 
-**Linux**
+**Linux / UNIX**
 
 - Ubuntu Server LTS
 - Debian
+- Red Hat Enterprise Linux (RHEL)
+- Rocky Linux / AlmaLinux / CentOS — CentOS-migrációval együtt
+- SUSE Linux Enterprise / openSUSE
+- Oracle Linux
+- FreeBSD
 
 > Az örökölt (már nem támogatott) rendszereket sem tagadjuk le: sok magyar cégnél fut olyan alkalmazás, ami régi platformot igényel. Ezeket **izolált, szigorúan szegmentált környezetben** tudjuk biztonságosan tovább üzemeltetni, amíg a kiváltás megtörténik.
 
@@ -294,6 +301,12 @@ Az alábbi lista nem termékkatalógus, hanem annak a bizonyítéka, hogy a rend
 | Platform | Megjegyzés |
 |---|---|
 | **Microsoft IIS** | ASP.NET / .NET Framework és .NET (Core) alkalmazások, alkalmazáskészletek, tanúsítványkezelés |
+| **Apache HTTP Server** | Klasszikus webkiszolgálás, virtuális hosztok |
+| **nginx** | Reverse proxy, terheléselosztás, TLS-terminálás |
+| **Apache Tomcat** | Java webalkalmazások |
+| **Node.js** | PM2 vagy systemd alatt futtatva |
+| **PHP-FPM** | PHP-alapú alkalmazások kiszolgálása |
+| **Java futtatókörnyezet (JRE/JDK)** | Ügyviteli és banki kliensek alatt |
 | **FTP / SFTP szolgáltatás** | Adatcsere partnerekkel |
 | **Terminálszerver-alapú alkalmazás-kiszolgálás (RDS)** | Ahol az ügyviteli rendszer vastag kliense központosítva fut |
 
