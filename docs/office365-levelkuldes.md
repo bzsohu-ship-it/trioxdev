@@ -36,20 +36,50 @@ Microsoft Entra admin center → **Alkalmazásregisztrációk** → **Új regisz
 
 A `Mail.Send` alkalmazásengedély alapból **a bérlő összes postafiókjából**
 engedi a küldést. Ezt Exchange Online alkalmazás-hozzáférési szabállyal
-szűkítjük a feladó fiókra. Exchange Online PowerShellben:
+szűkítjük a feladó fiókra.
+
+### 3.1 Az Exchange Online modul telepítése
+
+Az Exchange cmdletek **nem beépítettek**, külön modulból jönnek. E nélkül a
+`Connect-ExchangeOnline` „is not recognized as the name of a cmdlet" hibát ad.
+Windows PowerShell 5.1 helyett **PowerShell 7-et** (`pwsh`) használj.
 
 ```powershell
-Connect-ExchangeOnline
-New-DistributionGroup -Name "SzkriptKuldok" -Type Security -Members "noreply@triox.hu"
-New-ApplicationAccessPolicy -AppId <ALKALMAZAS_ID> `
-  -PolicyScopeGroupId "SzkriptKuldok@triox.hu" `
-  -AccessRight RestrictAccess `
-  -Description "A triox.hu urlap csak a noreply fiokbol kuldhet"
-Test-ApplicationAccessPolicy -Identity "info@triox.hu" -AppId <ALKALMAZAS_ID>
+Install-Module -Name ExchangeOnlineManagement -Scope CurrentUser -Force
+Import-Module ExchangeOnlineManagement
+Connect-ExchangeOnline -UserPrincipalName <a bérlő rendszergazdájának UPN-je>
 ```
 
-Az utolsó parancsnak `Denied`-et kell adnia egy másik fiókra, és `Granted`-et a
-`noreply@triox.hu` címre. A szabály életbe lépése akár egy órát is vehet.
+A `Connect-ExchangeOnline` böngészőablakot nyit a bejelentkezéshez. Rendszergazdai
+jogosultság kell hozzá; a `-Scope CurrentUser` miatt a telepítéshez viszont nem
+kell emelt jogú ablak.
+
+### 3.2 A szabály
+
+```powershell
+# A csoport a szabály hatókörét adja. A -Members fióknak már léteznie kell.
+New-DistributionGroup -Name "SzkriptKuldok" -Type Security `
+  -PrimarySmtpAddress "szkriptkuldok@triox.hu" `
+  -Members "noreply@triox.hu"
+
+New-ApplicationAccessPolicy -AppId <ALKALMAZAS_ID> `
+  -PolicyScopeGroupId "szkriptkuldok@triox.hu" `
+  -AccessRight RestrictAccess `
+  -Description "A triox.hu urlap csak a noreply fiokbol kuldhet"
+
+# Ellenőrzés: az elsőnek Granted, a másodiknak Denied a helyes válasz.
+Test-ApplicationAccessPolicy -Identity "noreply@triox.hu" -AppId <ALKALMAZAS_ID>
+Test-ApplicationAccessPolicy -Identity "info@triox.hu"    -AppId <ALKALMAZAS_ID>
+```
+
+A frissen létrehozott csoport nem azonnal használható a szabályhoz, és maga a
+szabály életbe lépése is akár egy órát vehet. Ha a `New-ApplicationAccessPolicy`
+azt mondja, nem találja a csoportot, várj pár percet és futtasd újra.
+
+A Microsoft újabb, finomabb mechanizmusa ugyanerre az **RBAC for Applications**
+(`New-ManagementRoleAssignment -App <appId> -Role "Application Mail.Send"
+-CustomResourceScope <hatókör>`). Az `ApplicationAccessPolicy` egyszerűbb és
+működik; ha egyszer megszűnne, arra kell átállni.
 
 ## 4. Cloudflare Pages változók
 
@@ -112,6 +142,7 @@ A Function `console.error` sorai a Cloudflare dashboard → Pages projekt →
 
 | Tünet | Valószínű ok |
 |---|---|
+| `Connect-ExchangeOnline ... is not recognized` | nincs telepítve az `ExchangeOnlineManagement` modul — lásd 3.1 |
 | 403 a token után, `Access is denied` | nincs rendszergazdai jóváhagyás a `Mail.Send`-re |
 | 403 `ApplicationAccessPolicy` említéssel | a 3. pont szabálya kizárja a feladó fiókot |
 | 401 a tokenkérésnél | lejárt vagy elgépelt `O365_CLIENT_SECRET` |
