@@ -159,14 +159,44 @@ levelek a levélszemét mappában landolnak.
 ## 6. Visszaélés elleni védelem
 
 A kódban: mézesbödön mező, mezőhossz-korlátok, azonos eredet (Origin) kényszer,
-és a visszaigazoló levél nem tartalmazza a beküldő szövegét — így nem lehet vele
-idegen címekre kéretlen tartalmat küldetni.
+IP-nkénti sebességkorlát, és a visszaigazoló levél nem tartalmazza a beküldő
+szövegét — így nem lehet vele idegen címekre kéretlen tartalmat küldetni.
 
-Ami **nincs** a kódban: sebességkorlát. Ez Cloudflare oldalon a helye, kód
-nélkül: Security → WAF → **Rate limiting rules**, útvonal `/api/kapcsolat`,
-javaslat 5 kérés / 10 perc / IP, akció Block.
+### 6.1 Sebességkorlát — a KV névtér bekötése
 
-<!-- KITÖLTENDŐ: a rate limiting szabály felvétele a Cloudflare-en -->
+**IP-nként 5 elküldött megkeresés / 10 perc.** A számlálók Cloudflare KV-ben
+vannak. Csak az érvényes beküldés fogyasztja a keretet: az elgépelt e-mail miatt
+visszadobott kísérlet nem.
+
+A névteret a dashboardon kell létrehozni és bekötni:
+
+1. Workers & Pages → **KV** → *Create a namespace* → név pl. `triox-sebessegkorlat`
+2. Workers & Pages → `trioxdev` → Settings → **Functions** → *KV namespace bindings*
+3. A kötés **neve pontosan `SEBESSEGKORLAT`** legyen, a névtér a fenti
+4. Production **és** Preview alá is, majd **új deploy**
+
+**Ha a kötés hiányzik, a végpont nem áll le, csak korlát nélkül fut** — egy
+elfelejtett kötés ne okozzon kiesést az űrlapon. A hiányt a Function
+`console.warn`-nal naplózza (`Nincs bekötve a SEBESSEGKORLAT KV`), és a korlát
+csendben nem érvényesül. Ezt érdemes deploy után ellenőrizni.
+
+A KV végső konzisztenciájú, tehát a korlát **közelítő**: egyszerre érkező kérések
+ugyanazt a számlálót olvashatják. Spam ellen elég, precíz kvótának nem való.
+
+### 6.2 WAF rate limiting — a DNS átállítása után
+
+A kódbeli korlát a Function *belsejében* fut, tehát a kérés akkor is eljut a
+Workerig, ha eldobjuk. Peremhálózati szűréshez WAF-szabály kell:
+Security → WAF → **Rate limiting rules**, útvonal `/api/kapcsolat`,
+5 kérés / 10 perc / IP, akció Block.
+
+Ez **ma nem vehető fel hasznosan**: a WAF-szabályok zóna szintűek, a
+`*.pages.dev` forgalomra nem vonatkoznak. A `triox.hu` már Cloudflare-zóna, de a
+rekordja DNS-only módban a GoDaddyra mutat, tehát a forgalom nem megy át a
+Cloudflare-en. A szabálynak akkor lesz értelme, amikor a `triox.hu` proxyzottan
+(narancssárga felhő) a Pages projektet szolgálja ki.
+
+<!-- KITÖLTENDŐ: a WAF rate limiting szabály felvétele a DNS átállítása után -->
 
 ## Helyi teszt
 
@@ -178,6 +208,10 @@ cp .dev.vars.example .dev.vars   # töltsd ki
 npm run build
 npm run functions                # http://localhost:8788
 ```
+
+A `functions` script `--kv SEBESSEGKORLAT` kapcsolóval indul, így a
+sebességkorlát helyben is működik, saját helyi névtérrel. A korláthoz
+`CF-Connecting-IP` fejléc kell — helyben kézzel add meg a curl-hívásban.
 
 Gyors próba levélküldés nélkül (a mézesbödön miatt nem megy ki levél):
 
@@ -215,6 +249,7 @@ try { Invoke-RestMethod -Method Post -Uri "https://graph.microsoft.com/v1.0/user
 | 403 `ErrorAccessDenied`, `[RAOP] : Blocked by tenant configured AppOnly AccessPolicy settings` | app-only hozzáférés megtagadva — lásd alább |
 | 401 a tokenkérésnél | lejárt vagy elgépelt `O365_CLIENT_SECRET` |
 | `MailboxNotEnabledForRESTAPI` | a feladó fióknak nincs Exchange Online licence |
+| A végpont 429-et ad | sebességkorlát: 5 elküldött megkeresés / 10 perc / IP — lásd 6.1 |
 | A végpont 500-at ad | a Function nem látja a környezeti változókat: elmaradt az új deploy, vagy csak Preview alá kerültek |
 | A végpont 502-t ad | a változók megvannak, de a token vagy a `sendMail` bukik — a fenti PowerShell megmondja, melyik |
 
