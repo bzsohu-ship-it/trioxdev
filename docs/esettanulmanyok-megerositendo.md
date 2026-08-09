@@ -12,6 +12,7 @@ vissza.
 | Állítás | Forrás |
 |---|---|
 | A négy környezet léte és rövid leírása | `src/pages/rolunk.astro` — „Akikkel dolgozunk" |
+| A 03. eset pénzügyi szolgáltatója **országos fiókhálózattal** működik | Zsolt megerősítése, 2026-08-09. A `rolunk.astro` „Akikkel dolgozunk" listája is ezt írja — a két oldal szinkronban van, együtt kell módosítani |
 | Redundáns 2×10 Gbps gerinc, két budapesti helyszín, 20+ év | `rolunk.astro` — „Számokban”; `technologia.astro` |
 | Ügyfelenként dedikált átjáró, saját publikus IPv4, kétszintű szegmentálás | `technologia.astro` — „Ügyfél-izoláció”; `biztonsag.astro` — 2–3. réteg |
 | Teljesen izolált, az internetről nem elérhető környezet érzékeny adatnál | `technologia.astro` — „Ügyfél-izoláció”; `dcaas.md` 9. pont |
