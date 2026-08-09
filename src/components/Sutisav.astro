@@ -1,0 +1,127 @@
+---
+// Hozzájárulás-kérő sáv a Google Analyticshez. Csak akkor van rá szükség, ha a
+// GA4 azonosító be van állítva: a süti nélküli Cloudflare-méréshez nem kell
+// hozzájárulás, azért nem kérünk semmit, ha csak az fut.
+const ga4Id = import.meta.env.PUBLIC_GA4_ID ?? '';
+---
+
+{
+  ga4Id && (
+    <div class="sutisav" id="sutisav" role="region" aria-label="Süti-beállítások" hidden>
+      <div class="sutisav__in">
+        <p class="sutisav__szoveg">
+          A látogatottságot süti nélkül mérjük. A részletesebb elemzéshez használt Google Analytics
+          viszont sütit tesz ki, ezért azt csak az Ön hozzájárulásával indítjuk el.{' '}
+          <a href="/sutik/">Mit mérünk pontosan?</a>
+        </p>
+        <div class="sutisav__gombok">
+          <button class="btn" type="button" data-valasz="elfogadva">
+            Elfogadom
+          </button>
+          <button class="btn btn--ghost" type="button" data-valasz="elutasitva">
+            Elutasítom
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+<script is:inline>
+  (function () {
+    var KULCS = 'triox-meres';
+    var sav = document.getElementById('sutisav');
+    if (!sav) return; // nincs GA4 beállítva: nincs mit kérdezni
+
+    function olvas() {
+      try {
+        return localStorage.getItem(KULCS);
+      } catch (e) {
+        return null;
+      }
+    }
+    function ir(ertek) {
+      try {
+        localStorage.setItem(KULCS, ertek);
+      } catch (e) {
+        // privát mód: a döntés csak eddig az oldalbetöltésig él
+      }
+    }
+
+    // A sáv a döntésig látszik. Utána a /sutik/ oldalról bármikor előhívható.
+    if (!olvas()) sav.hidden = false;
+
+    sav.addEventListener('click', function (e) {
+      var gomb = e.target.closest('[data-valasz]');
+      if (!gomb) return;
+      var valasz = gomb.getAttribute('data-valasz');
+      ir(valasz);
+      sav.hidden = true;
+      if (valasz === 'elfogadva') {
+        if (window.trioxMeresIndit) window.trioxMeresIndit();
+      } else if (window.trioxMeresLeallit) {
+        window.trioxMeresLeallit();
+      }
+    });
+
+    // A /sutik/ oldal „Beállítás módosítása" gombja hívja.
+    window.trioxSutiBeallitas = function () {
+      sav.hidden = false;
+      var elso = sav.querySelector('[data-valasz]');
+      if (elso) elso.focus();
+    };
+  })();
+</script>
+
+<style>
+  .sutisav {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 40;
+    background: var(--c-paper);
+    border-top: 1px solid var(--c-line);
+    box-shadow: 0 -8px 24px rgb(22 24 29 / 8%);
+    padding-block: 1rem;
+  }
+  .sutisav[hidden] {
+    display: none;
+  }
+  .sutisav__in {
+    width: 100%;
+    max-width: var(--w-max);
+    margin-inline: auto;
+    padding-inline: var(--pad);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .sutisav__szoveg {
+    margin: 0;
+    font-size: 0.92rem;
+    max-width: 62ch;
+  }
+  .sutisav__gombok {
+    display: flex;
+    gap: 0.6rem;
+    flex: none;
+  }
+  .sutisav .btn {
+    padding: 0.6rem 1.1rem;
+    font-size: 0.9rem;
+  }
+  @media (max-width: 40rem) {
+    .sutisav__in {
+      gap: 0.9rem;
+    }
+    .sutisav__gombok {
+      width: 100%;
+    }
+    .sutisav .btn {
+      flex: 1;
+      justify-content: center;
+    }
+  }
+</style>

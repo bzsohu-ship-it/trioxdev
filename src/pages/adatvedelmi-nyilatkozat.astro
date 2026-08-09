@@ -1,0 +1,213 @@
+---
+// Adatkezelési tájékoztató a honlaphoz. A tartalma szándékosan csak arról szól,
+// amit a kód ténylegesen csinál: a kapcsolati űrlap (functions/api/kapcsolat.ts)
+// és a mérés (src/components/Meres.astro). Ha ezek változnak, ez a lap is
+// változzon — különösen az adatfeldolgozók táblázata és a mezők listája.
+import Base from '../layouts/Base.astro';
+
+// A tájékoztató verziódátuma. Érdemi módosításkor át kell írni.
+const hatalyos = '2026. augusztus 10.';
+---
+
+<Base
+  cim="Adatkezelési tájékoztató"
+  leiras="Milyen adatot kér a triox.hu, mi történik vele, kihez kerül, és hogyan kérheti a törlését."
+>
+  <section class="band">
+    <div class="wrap prose jogi">
+      <p class="eyebrow">Adatkezelés</p>
+      <h1>Adatkezelési tájékoztató</h1>
+      <p class="lead">
+        Ez a tájékoztató a triox.hu honlap használatához kapcsolódó adatkezelésről szól: mit kérünk
+        Öntől, mi történik vele, kihez kerül, és mit tehet, ha meggondolja magát.
+      </p>
+      <p class="jogi__datum">Hatályos: {hatalyos}</p>
+
+      <h2>Ki kezeli az adatait</h2>
+      <p>
+        <strong>Triox Informatika Kft.</strong><br />
+        Székhely: 1106 Budapest, Kada utca 133.<br />
+        Cégjegyzékszám: 01-09-449388<br />
+        Adószám: 13316460-2-42<br />
+        E-mail: <a href="mailto:info@triox.hu">info@triox.hu</a>
+      </p>
+      <p>
+        Adatvédelmi tisztviselőt nem jelöltünk ki — a jogszabály ezt a tevékenységünkhöz nem írja
+        elő. Adatvédelmi kérdéseit az <a href="mailto:info@triox.hu">info@triox.hu</a> címre várjuk.
+      </p>
+
+      <h2>A kapcsolati űrlap</h2>
+      <p>
+        A honlapon egyetlen helyen kérünk adatot: a <a href="/kapcsolat/">kapcsolati űrlapon</a>.
+        Kötelező a <strong>neve</strong>, az <strong>e-mail címe</strong> és az{' '}
+        <strong>üzenete</strong> — enélkül nem tudunk válaszolni. A <strong>cégnév</strong> és a{' '}
+        <strong>telefonszám</strong> megadása nem kötelező.
+      </p>
+      <p>
+        <strong>Mi történik a beküldés után?</strong> Két levél megy ki. Az egyik hozzánk, a
+        megkeresés tartalmával; a másik Önnek, visszaigazolásként. A visszaigazoló szándékosan nem
+        tartalmazza az üzenet szövegét, csak a nevét — így az űrlap nem használható arra, hogy
+        valaki idegen címekre küldessen szöveget.
+      </p>
+      <p>
+        Az adatait <strong>nem tároljuk adatbázisban</strong>. A megkeresés a levelezésünkben él
+        tovább, ugyanúgy, mintha közvetlenül írt volna nekünk.
+      </p>
+
+      <h3>Cél és jogalap</h3>
+      <p>
+        Az adatait kizárólag a megkeresése megválaszolására és — ha erre irányul — az ajánlatadásra
+        használjuk. Marketingcélra nem használjuk, hírlevelet nem küldünk.
+      </p>
+      <p>
+        Jogalap: az Ön kérésére történő, szerződés megkötését megelőző lépések megtétele
+        [GDPR 6. cikk (1) b)]. Ha a megkeresése nem szerződéskötésre irányul, akkor a jogalap a
+        válaszadáshoz fűződő jogos érdekünk [GDPR 6. cikk (1) f)].
+      </p>
+
+      <h3>Meddig őrizzük</h3>
+      <p>
+        A megkeresését és a hozzá tartozó levelezést <strong>addig őrizzük, amíg Ön a törlését nem
+        kéri</strong>. Egyetlen e-mail elég hozzá az{' '}
+        <a href="mailto:info@triox.hu">info@triox.hu</a> címre, és 30 napon belül töröljük.
+      </p>
+      <p>
+        Egy kivétel van: ha a megkeresésből szerződés lett, a számlázáshoz kapcsolódó adatokra a
+        számvitelről szóló 2000. évi C. törvény 8 éves megőrzési kötelezettséget ír elő. Ezeket a
+        törlési kérése ellenére is meg kell őriznünk a határidő végéig.
+      </p>
+
+      <h2>Sütik és látogatottság-mérés</h2>
+      <p>
+        A látogatottságot süti nélkül mérjük. Ami sütit tenne ki, azt csak az Ön hozzájárulásával
+        indítjuk el, és a hozzájárulás bármikor visszavonható. A részleteket — melyik süti mire való
+        és meddig él — külön lapon írtuk le: <a href="/sutik/">Sütik és látogatottság-mérés</a>.
+      </p>
+
+      <h2>Kihez kerülnek az adatai</h2>
+      <p>
+        Adatot nem adunk el, és nem adjuk át marketingcélra. A honlap működéséhez azonban külső
+        szolgáltatókat veszünk igénybe, akik adatfeldolgozóként járnak el:
+      </p>
+      <table class="jogi__tabla">
+        <thead>
+          <tr>
+            <th scope="col">Szolgáltató</th>
+            <th scope="col">Mit csinál</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Cloudflare, Inc.</td>
+            <td>A honlap kiszolgálása, valamint a süti nélküli látogatottság-mérés</td>
+          </tr>
+          <tr>
+            <td>Microsoft Ireland Operations Limited</td>
+            <td>Az űrlapról érkező levelek küldése és tárolása (Microsoft 365 / Exchange Online)</td>
+          </tr>
+          <tr>
+            <td>Google Ireland Limited</td>
+            <td>Látogatottság-elemzés — kizárólag akkor, ha Ön ehhez hozzájárult</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        Ezek a szolgáltatók az adatokat az Európai Unión kívül, jellemzően az Egyesült Államokban is
+        feldolgozhatják. Az adattovábbítás jogi kereteit az Európai Bizottság megfelelőségi
+        határozata, illetve általános szerződési feltételei adják.
+      </p>
+      <p>
+        Ezen kívül adatot csak akkor adunk ki, ha arra jogszabály kötelez minket — például hatósági
+        vagy bírósági megkeresés esetén.
+      </p>
+
+      <h2>Az Ön jogai</h2>
+      <p>Ön bármikor kérheti tőlünk, hogy</p>
+      <ul>
+        <li>tájékoztassuk arról, milyen adatát kezeljük (hozzáférés);</li>
+        <li>javítsuk a pontatlan adatot (helyesbítés);</li>
+        <li>töröljük az adatait (törlés);</li>
+        <li>korlátozzuk az adatkezelést, amíg egy vitás kérdés tisztázódik;</li>
+        <li>adjuk ki az adatait géppel olvasható formában (adathordozhatóság);</li>
+        <li>
+          illetve tiltakozhat az adatkezelés ellen, ha az jogos érdeken alapul.
+        </li>
+      </ul>
+      <p>
+        Írjon az <a href="mailto:info@triox.hu">info@triox.hu</a> címre, és{' '}
+        <strong>30 napon belül válaszolunk</strong>. A kérés teljesítése díjmentes.
+      </p>
+
+      <h2>Hogyan védjük az adatait</h2>
+      <p>
+        A honlap kizárólag titkosított kapcsolaton (HTTPS) érhető el, az űrlap adatai is így jutnak
+        el hozzánk. A megkereséseket a Microsoft 365 postafiókunkban tároljuk, amelyhez csak a
+        munkatársaink férnek hozzá. A levélküldéshez használt hozzáférési adatok kizárólag
+        szerveroldalon vannak, a böngészőbe soha nem kerülnek ki.
+      </p>
+
+      <h2>Ha panasza van</h2>
+      <p>
+        Elsőként minket keressen az <a href="mailto:info@triox.hu">info@triox.hu</a> címen — a legtöbb
+        kérdés így oldódik meg a leggyorsabban. Ettől függetlenül bármikor fordulhat a felügyeleti
+        hatósághoz:
+      </p>
+      <p>
+        <strong>Nemzeti Adatvédelmi és Információszabadság Hatóság (NAIH)</strong><br />
+        Cím: 1055 Budapest, Falk Miksa utca 9–11.<br />
+        Postacím: 1363 Budapest, Pf. 9.<br />
+        Telefon: +36 1 391 1400<br />
+        E-mail: <a href="mailto:ugyfelszolgalat@naih.hu">ugyfelszolgalat@naih.hu</a><br />
+        Honlap: <a href="https://naih.hu" rel="noopener">naih.hu</a>
+      </p>
+      <p>
+        Jogainak megsértése esetén bírósághoz is fordulhat. A pert a lakóhelye vagy tartózkodási
+        helye szerinti törvényszék előtt is megindíthatja.
+      </p>
+
+      <h2>A tájékoztató módosítása</h2>
+      <p>
+        Ha a honlap működése változik, ezt a tájékoztatót is frissítjük. A lap tetején mindig
+        szerepel, mikortól hatályos a jelenlegi szöveg.
+      </p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .jogi {
+    max-width: 46rem;
+  }
+  .jogi__datum {
+    font-family: var(--f-util);
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    color: var(--c-steel);
+    padding-bottom: 1.4rem;
+    border-bottom: 1px solid var(--c-line);
+  }
+  .jogi h3 {
+    margin-top: 1.8rem;
+  }
+  .jogi__tabla {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.4rem 0 1.6rem;
+    font-size: 0.94rem;
+  }
+  .jogi__tabla th,
+  .jogi__tabla td {
+    text-align: left;
+    padding: 0.6rem 0.9rem 0.6rem 0;
+    border-bottom: 1px solid var(--c-line);
+    vertical-align: top;
+  }
+  .jogi__tabla th {
+    font-family: var(--f-util);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--c-steel);
+    font-weight: 400;
+  }
+</style>

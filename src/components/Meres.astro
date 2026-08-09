@@ -1,0 +1,79 @@
+---
+// Látogatottság-mérés. Két rendszer fut, szándékosan eltérő feltétellel:
+//
+// 1. Cloudflare Web Analytics — süti és ujjlenyomat nélkül mér, ezért
+//    hozzájárulás nélkül is futhat. Ez adja az alap látogatottsági számokat.
+// 2. Google Analytics 4 — sütizik, ezért CSAK elfogadás után töltjük be.
+//    Nem „consent mode denied" állapotban indul, hanem el sem indul, amíg a
+//    látogató nem nyomott Elfogadomra: elfogadás nélkül egyetlen kérés sem megy
+//    a Google felé.
+//
+// A két azonosító nem titok — a böngészőben úgyis látszik —, ezért PUBLIC_
+// előtagú, build időben beolvasott változó. Ez nem mond ellent a CLAUDE.md
+// 7. pontjának: az O365-titkokkal ellentétben ezek publikus adatok.
+// Beállításuk: docs/latogatottsag-meres.md
+//
+// Ha egyik változó sincs beállítva, semmi nem mér — a helyi fejlesztés és az
+// előnézeti buildek így nem szennyezik az éles statisztikát.
+const cfToken = import.meta.env.PUBLIC_CF_BEACON_TOKEN ?? '';
+const ga4Id = import.meta.env.PUBLIC_GA4_ID ?? '';
+---
+
+{
+  cfToken && (
+    <script
+      is:inline
+      defer
+      src="https://static.cloudflareinsights.com/beacon.min.js"
+      data-cf-beacon={JSON.stringify({ token: cfToken })}
+    />
+  )
+}
+
+<script is:inline define:vars={{ ga4Id }}>
+  if (ga4Id) {
+    window.dataLayer = window.dataLayer || [];
+    var gtag = function () {
+      window.dataLayer.push(arguments);
+    };
+
+    // Elfogadáskor a süti-sáv hívja. Amíg nem hívja, a gtag.js be sem töltődik.
+    window.trioxMeresIndit = function () {
+      if (window.__trioxGa4) return;
+      window.__trioxGa4 = true;
+      window['ga-disable-' + ga4Id] = false;
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=' + ga4Id;
+      document.head.appendChild(s);
+      gtag('js', new Date());
+      gtag('config', ga4Id);
+    };
+
+    // Visszavonáskor: a gtag hivatalos kikapcsolója, plusz a már kitett _ga
+    // sütik törlése. Enélkül a sütik a visszavonás után is ott maradnának.
+    window.trioxMeresLeallit = function () {
+      window['ga-disable-' + ga4Id] = true;
+      document.cookie.split(';').forEach(function (darab) {
+        var nev = darab.split('=')[0].trim();
+        if (nev.indexOf('_ga') !== 0) return;
+        var vege = '=; Max-Age=0; path=/';
+        document.cookie = nev + vege;
+        document.cookie = nev + vege + '; domain=' + location.hostname;
+        document.cookie = nev + vege + '; domain=.' + location.hostname;
+      });
+    };
+
+    // Egyedi esemény (pl. ajánlatkérés). Hozzájárulás nélkül is meghívható:
+    // a sorba kerül, de sosem megy ki, mert a gtag.js nincs betöltve.
+    window.trioxEsemeny = function (nev, adat) {
+      gtag('event', nev, adat || {});
+    };
+
+    try {
+      if (localStorage.getItem('triox-meres') === 'elfogadva') window.trioxMeresIndit();
+    } catch (e) {
+      // Privát mód vagy letiltott tárolás: nincs eltárolt döntés, nincs GA4.
+    }
+  }
+</script>

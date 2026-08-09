@@ -21,6 +21,7 @@ A tartalom markdownban van, a design tokenek egy helyen: `src/styles/global.css`
 | Logó, favicon, megosztókép | `public/` — lásd az **Arculat** fejezetet |
 | Kapcsolati űrlap mezői | `src/components/Kapcsolatform.astro` |
 | Az űrlap levélküldése (Office 365 / Graph) | `functions/api/kapcsolat.ts` — beállítás: `docs/office365-levelkuldes.md` |
+| Látogatottság-mérés | `src/components/Meres.astro` + `Sutisav.astro` — beállítás: `docs/latogatottsag-meres.md` |
 | Átirányítás régi URL-ről | `public/_redirects` |
 | HTTP fejlécek | `public/_headers` |
 
@@ -42,6 +43,13 @@ A tartalom markdownban van, a design tokenek egy helyen: `src/styles/global.css`
    szolgáltatást (n8n, Resend, SendGrid) és ne próbáljon SMTP-t — a Workers
    futtatókörnyezet nem tud nyers TCP-t. A titkok szerveroldali környezeti
    változók, `PUBLIC_` előtagú változóba nem kerülhetnek.
+8. **Mérőkód csak a `Meres.astro`-ba kerül.** Süti nélküli mérés (Cloudflare)
+   futhat hozzájárulás nélkül; ami sütizik, az csak elfogadás után indulhat, és
+   a `src/pages/sutik.astro` tájékoztatóban is szerepelnie kell. A GA4 azonosító
+   és a Cloudflare token nem titok, ezért ezek `PUBLIC_` előtaggal jók — a 7. pont
+   tiltása az O365-titkokra vonatkozik.
+9. A `/kapcsolat/koszonjuk/` oldal konverziót számol. Ha új útvonal kerül a
+   sitemapba vagy a menübe, ezt hagyd `noindex`-en és a sitemapból kizárva.
 
 ## Arculat
 

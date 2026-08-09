@@ -88,6 +88,17 @@ A `mailto:` hivatkozások (fejléc, lábléc, kapcsolat, rólunk, támogatás) a
 látogató saját levelezőjét nyitják meg — azok nem a mi kiszolgálónkon mennek ki,
 és nem is vezethetők át az Office 365-ön.
 
+## Látogatottság-mérés
+
+Két mérés fut: a **Cloudflare Web Analytics** süti nélkül, hozzájárulás nélkül is,
+a **Google Analytics 4** pedig csak akkor, ha a látogató elfogadta a süti-sávot.
+Az ajánlatkérés mint konverzió a `/kapcsolat/koszonjuk/` oldalletöltésén és a GA4
+`ajanlatkeres` eseményén mérhető.
+
+Amíg a `PUBLIC_CF_BEACON_TOKEN` és a `PUBLIC_GA4_ID` környezeti változó nincs
+beállítva a Cloudflare Pages projektben, **semmi nem mér** és a süti-sáv sem
+jelenik meg. A lépések: [docs/latogatottsag-meres.md](docs/latogatottsag-meres.md).
+
 ## Amíg nincs kitöltve
 
 Több oldalon szándékosan maradt jelölés (ár, reakcióidő, referenciák). Ezek nélkül
