@@ -43,9 +43,14 @@ const menu: Fomenu[] = [
   },
   {
     cim: 'Blog',
+    // A bejegyzések a lista tetejéről, dátum szerint csökkenő sorrendben.
+    // Új cikknél ide is kerüljön be egy — a cikk címénél rövidebb — menücím.
     al: [
       { href: '/blog/', cim: 'Összes bejegyzés' },
+      { href: '/blog/ai-az-irodaban-jogosultsagok/', cim: 'AI az irodában: mit lát valójában?' },
       { href: '/blog/uj-honlap/', cim: 'Megújult a triox.hu' },
+      { href: '/blog/ai-csalas-hangklonozas/', cim: 'Amikor a csaló a főnök hangján hív' },
+      { href: '/blog/passkey-jelszo-nelkuli-belepes/', cim: 'A jelszó, amit nem lehet ellopni' },
     ],
   },
   {
@@ -66,6 +71,23 @@ const menu: Fomenu[] = [
   { cim: 'GYIK', href: '/gyik/' },
 ];
 const most = Astro.url.pathname;
+
+/**
+ * Egy panelen belül a legpontosabban illeszkedő menüpont kap kiemelést, nem
+ * mindegyik illeszkedő: a bejegyzés saját oldalán a bejegyzés, a menüben nem
+ * szereplő aloldalon pedig a gyűjtő ("Összes bejegyzés"). Enélkül a /blog/
+ * minden cikkoldalon kiemelt lenne a cikk mellett.
+ */
+function aktivHref(al: Almenu[]): string | undefined {
+  let talalat: string | undefined;
+  for (const a of al) {
+    // mailto: és külső hivatkozás — ezekre az útvonal sosem illeszkedik
+    if (a.href.includes(':')) continue;
+    if (!most.startsWith(a.href)) continue;
+    if (talalat === undefined || a.href.length > talalat.length) talalat = a.href;
+  }
+  return talalat;
+}
 ---
 
 <header class="fej" data-menu="zarva">
@@ -76,7 +98,9 @@ const most = Astro.url.pathname;
     </a>
 
     <nav class="nav-fej" id="fomenu" aria-label="Fő menü">
-      {menu.map((m, i) => (
+      {menu.map((m, i) => {
+        const aktiv = m.al !== undefined ? aktivHref(m.al) : undefined;
+        return (
         <div class="nav-elem">
           {m.href !== undefined ? (
             <a
@@ -103,7 +127,7 @@ const most = Astro.url.pathname;
                 {m.al.map((a) => (
                   <a
                     href={a.href}
-                    aria-current={most.startsWith(a.href) && !a.href.includes(':') ? 'page' : undefined}
+                    aria-current={a.href === aktiv ? 'page' : undefined}
                     target={a.kulso ? '_blank' : undefined}
                     rel={a.kulso ? 'noopener noreferrer' : undefined}
                   >{a.cim}</a>
@@ -112,7 +136,8 @@ const most = Astro.url.pathname;
             </>
           )}
         </div>
-      ))}
+        );
+      })}
     </nav>
 
     <button

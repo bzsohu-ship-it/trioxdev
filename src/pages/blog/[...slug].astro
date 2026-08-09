@@ -14,15 +14,222 @@ const datum = b.data.datum.toLocaleDateString('hu-HU', {
   month: 'long',
   day: 'numeric',
 });
+
+// Olvasási idő a nyers markdownból: a HTML-jelölést és a frontmattert nem
+// számoljuk bele. 200 szó/perc — magyar folyó szövegre reális becslés.
+const szavak = (b.body ?? '')
+  .replace(/<[^>]*>/g, ' ')
+  .split(/\s+/)
+  .filter(Boolean).length;
+const perc = Math.max(1, Math.round(szavak / 200));
 ---
 
 <Base cim={b.data.cim} leiras={b.data.leiras}>
   <article class="band">
     <div class="wrap">
-      <p class="eyebrow">{datum} · {b.data.szerzo}</p>
+      <p class="eyebrow">{datum} · {b.data.szerzo} · {perc} perc olvasás</p>
       <h1>{b.data.cim}</h1>
-      <div class="prose"><Content /></div>
+      <p class="lead">{b.data.leiras}</p>
+      <div class="prose cikk"><Content /></div>
       <p style="margin-top:2.5rem"><a href="/blog/">← Vissza a bloghoz</a></p>
     </div>
   </article>
 </Base>
+
+<style>
+  /* A markdownból rendelt elemekre nem kerül rá az Astro scope-attribútuma,
+     ezért a tartalomra vonatkozó szabályok mind :global()-ok. A .cikk viszont
+     a sablonban áll, így a szabályok nem szivárognak ki más oldalakra. */
+
+  .cikk {
+    margin-top: 1.75rem;
+  }
+
+  .cikk :global(h2) {
+    margin-top: 2.6rem;
+  }
+
+  .cikk :global(h3) {
+    margin-top: 1.7rem;
+  }
+
+  .cikk :global(hr) {
+    border: 0;
+    border-top: 1px solid var(--c-line);
+    margin-block: 2.5rem;
+  }
+
+  /* Nyitó összefoglaló — a cikk elején álló „mit fogok megtudni" doboz */
+  .cikk :global(.osszefoglalo) {
+    background: var(--c-mist);
+    border: 1px solid var(--c-line);
+    border-left: 4px solid var(--c-brand);
+    border-radius: 0 var(--r) var(--r) 0;
+    padding: 1.2rem 1.5rem;
+    margin-block: 1.75rem 2.25rem;
+  }
+
+  .cikk :global(.osszefoglalo > p:first-child) {
+    font-family: var(--f-util);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-steel);
+    margin-bottom: 0.7rem;
+  }
+
+  .cikk :global(.osszefoglalo ul) {
+    margin-bottom: 0;
+    padding-left: 1.2rem;
+  }
+
+  .cikk :global(.osszefoglalo li:last-child) {
+    margin-bottom: 0;
+  }
+
+  /* Számozott teendőlista — a cikk gyakorlati része */
+  .cikk :global(ol.lepesek) {
+    list-style: none;
+    counter-reset: lepes;
+    padding-left: 0;
+    margin-block: 1.75rem;
+    border-top: 1px solid var(--c-line);
+  }
+
+  .cikk :global(ol.lepesek li) {
+    counter-increment: lepes;
+    position: relative;
+    margin: 0;
+    padding: 1rem 0 1rem 3.1rem;
+    border-bottom: 1px solid var(--c-line);
+  }
+
+  .cikk :global(ol.lepesek li::before) {
+    content: counter(lepes);
+    position: absolute;
+    left: 0;
+    top: 1rem;
+    display: grid;
+    place-items: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    border: 1px solid var(--c-brand);
+    border-radius: 50%;
+    color: var(--c-brand);
+    font-family: var(--f-util);
+    font-size: 0.78rem;
+  }
+
+  /* Záró kiemelés: a cikk végi továbblépés */
+  .cikk :global(.zaras) {
+    background: var(--c-brand-wash);
+    border: 1px solid var(--c-brand);
+    border-radius: var(--r);
+    padding: 1.4rem 1.6rem;
+    margin-top: 2.5rem;
+  }
+
+  .cikk :global(.zaras > :last-child) {
+    margin-bottom: 0;
+  }
+
+  .cikk :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.93rem;
+    margin-block: 1.5rem;
+  }
+
+  .cikk :global(th),
+  .cikk :global(td) {
+    text-align: left;
+    padding: 0.6rem 0.9rem;
+    border: 1px solid var(--c-line);
+    vertical-align: top;
+  }
+
+  .cikk :global(th) {
+    background: var(--c-ink);
+    color: #e9ecf2;
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+  }
+
+  .cikk :global(tr:nth-child(even) td) {
+    background: var(--c-mist);
+  }
+
+  .cikk :global(blockquote) {
+    border-left: 4px solid var(--c-brand);
+    margin-block: 1.75rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--c-brand-wash);
+    border-radius: 0 var(--r) var(--r) 0;
+    color: var(--c-ink);
+    font-size: 0.95rem;
+  }
+
+  .cikk :global(blockquote > :last-child) {
+    margin-bottom: 0;
+  }
+
+  /* Lenyitható részletek — a szolgáltatásoldalak accordionjával egyező megjelenés */
+  .cikk :global(details) {
+    border: 1px solid var(--c-line);
+    border-radius: var(--r);
+    padding: 1rem 1.25rem;
+    margin-block: 1.75rem;
+    background: var(--c-mist);
+  }
+
+  .cikk :global(summary) {
+    font-family: var(--f-util);
+    font-size: 0.74rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-brand);
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .cikk :global(summary::-webkit-details-marker) {
+    display: none;
+  }
+
+  .cikk :global(summary::before) {
+    content: '+';
+    font-size: 1rem;
+    line-height: 1;
+    width: 1rem;
+    text-align: center;
+  }
+
+  .cikk :global(details[open] summary::before) {
+    content: '–';
+  }
+
+  .cikk :global(summary:hover) {
+    color: var(--c-brand-deep);
+  }
+
+  .cikk :global(details ul) {
+    margin-bottom: 0;
+  }
+
+  .cikk :global(details li) {
+    font-size: 0.94rem;
+  }
+
+  /* Széles táblázat mobilon vízszintesen görgethető, nem töri szét az oldalt */
+  @media (max-width: 52rem) {
+    .cikk :global(table) {
+      display: block;
+      overflow-x: auto;
+    }
+  }
+</style>
