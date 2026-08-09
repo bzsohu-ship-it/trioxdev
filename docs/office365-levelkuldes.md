@@ -17,11 +17,12 @@ A beállított értékek:
 
 | Szerep | Cím | Hol állítjuk |
 |---|---|---|
-| feladó | `noreply@triox.hu` (`UserMailbox`) | `O365_FELADO` — ennek kell a hozzáférési szabály hatókörében lennie |
-| címzett | `support@triox.hu` | `O365_CIMZETT` — ide érkeznek a megkeresések |
+| feladó | `noreply@triox.hu` (`UserMailbox`) | `O365_FELADO` — ennek kell a 3.3 hatókörébe esnie |
+| címzett | `support@triox.hu` | `O365_CIMZETT` — ide érkeznek a megkeresések, és ez a visszaigazoló `Reply-To` címe is |
 
-A címzett szabadon átírható, jogosultsági hatása nincs. A feladó viszont nem:
-ha megváltozik, a 3.2 hatókör-csoportot is módosítani kell.
+A címzett szabadon átírható, jogosultsági hatása nincs. A feladó viszont nem: ha
+megváltozik, a 3.3 `TrioxNoreplyHatokor` szűrőjét is át kell írni, különben a
+küldés azonnal tiltásba fut.
 
 ## 2. Entra ID app-regisztráció
 
@@ -41,8 +42,13 @@ Microsoft Entra admin center → **Alkalmazásregisztrációk** → **Új regisz
 ## 3. Hozzáférés szűkítése egy postafiókra — fontos
 
 A `Mail.Send` alkalmazásengedély alapból **a bérlő összes postafiókjából**
-engedi a küldést. Ezt Exchange Online alkalmazás-hozzáférési szabállyal
-szűkítjük a feladó fiókra.
+engedi a küldést. Ezt Exchange-oldali szabállyal szűkítjük a feladó fiókra.
+
+**A működő út az RBAC for Applications** (3.3). A régebbi
+`New-ApplicationAccessPolicy` ebben a bérlőben **nem működött**: a szabály
+létrejött, a `Test-ApplicationAccessPolicy` `Granted`-et adott rá, a tényleges
+Graph-hívás mégis tiltásba futott, és a szabály törlése után is tiltott. Ne azzal
+kezdd. A részletek a hibakeresésben.
 
 ### 3.1 Az Exchange Online modul telepítése
 
@@ -60,32 +66,62 @@ A `Connect-ExchangeOnline` böngészőablakot nyit a bejelentkezéshez. Rendszer
 jogosultság kell hozzá; a `-Scope CurrentUser` miatt a telepítéshez viszont nem
 kell emelt jogú ablak.
 
-### 3.2 A szabály
+### 3.2 A vállalati alkalmazás objektumazonosítója
+
+A következő lépéshez a **vállalati alkalmazás** (service principal)
+objektumazonosítója kell — **nem** az app-regisztrációé. Ugyanahhoz az apphoz két
+külön objektum tartozik, két külön azonosítóval; a regisztráció Áttekintés lapján
+látható „Objektumazonosító" a rossz. A `New-ServicePrincipal` erre
+`AADServicePrincipalNotFound` hibát ad.
+
+Portálon: Entra admin center → Identitás → Alkalmazások → **Vállalati
+alkalmazások** → az „Alkalmazás típusa" szűrő legyen **Minden alkalmazás** →
+keresd meg az appot → Áttekintés → **Objektumazonosító**.
+
+PowerShellből — **külön, friss ablakban**, ahol nem futott
+`Connect-ExchangeOnline`. A két modul `Microsoft.Identity.Client` verziója
+ütközik, együtt `Method not found: … WithLogging` hibát adnak:
 
 ```powershell
-# A csoport a szabály hatókörét adja. A -Members fióknak már léteznie kell.
-New-DistributionGroup -Name "SzkriptKuldok" -Type Security `
-  -PrimarySmtpAddress "szkriptkuldok@triox.hu" `
-  -Members "noreply@triox.hu"
-
-New-ApplicationAccessPolicy -AppId <ALKALMAZAS_ID> `
-  -PolicyScopeGroupId "szkriptkuldok@triox.hu" `
-  -AccessRight RestrictAccess `
-  -Description "A triox.hu urlap csak a noreply fiokbol kuldhet"
-
-# Ellenőrzés: az elsőnek Granted, a másodiknak Denied a helyes válasz.
-Test-ApplicationAccessPolicy -Identity "noreply@triox.hu" -AppId <ALKALMAZAS_ID>
-Test-ApplicationAccessPolicy -Identity "info@triox.hu"    -AppId <ALKALMAZAS_ID>
+Install-Module Microsoft.Graph.Applications -Scope CurrentUser -Force
+Connect-MgGraph -Scopes "Application.Read.All"
+(Get-MgServicePrincipal -Filter "appId eq '<ALKALMAZAS_ID>'").Id
 ```
 
-A frissen létrehozott csoport nem azonnal használható a szabályhoz, és maga a
-szabály életbe lépése is akár egy órát vehet. Ha a `New-ApplicationAccessPolicy`
-azt mondja, nem találja a csoportot, várj pár percet és futtasd újra.
+### 3.3 RBAC for Applications — ez a működő út
 
-A Microsoft újabb, finomabb mechanizmusa ugyanerre az **RBAC for Applications**
-(`New-ManagementRoleAssignment -App <appId> -Role "Application Mail.Send"
--CustomResourceScope <hatókör>`). Az `ApplicationAccessPolicy` egyszerűbb és
-működik; ha egyszer megszűnne, arra kell átállni.
+Vissza az Exchange-hez csatlakozott ablakba:
+
+```powershell
+# 1. Az app service principalja regisztrálódik az Exchange-ben.
+New-ServicePrincipal -AppId <ALKALMAZAS_ID> `
+  -ObjectId "<a vállalati alkalmazás objektumazonosítója>" `
+  -DisplayName "triox.hu kapcsolati urlap"
+
+# 2. Hatókör: csak a feladó postafiók.
+New-ManagementScope -Name "TrioxNoreplyHatokor" `
+  -RecipientRestrictionFilter "PrimarySmtpAddress -eq 'noreply@triox.hu'"
+
+# 3. Szerepkör-hozzárendelés a hatókörre.
+New-ManagementRoleAssignment -App <ALKALMAZAS_ID> `
+  -Role "Application Mail.Send" `
+  -CustomResourceScope "TrioxNoreplyHatokor"
+```
+
+Ellenőrzés — mindháromnak adnia kell kimenetet:
+
+```powershell
+Get-ServicePrincipal | Format-List DisplayName,AppId,ObjectId
+Get-ManagementRoleAssignment -RoleAssigneeType ServicePrincipal | Format-List Name,Role,RoleAssignee,CustomResourceScope
+# A hatókör tényleg a feladóra illeszkedik-e:
+Get-Recipient -RecipientPreviewFilter "PrimarySmtpAddress -eq 'noreply@triox.hu'" | Format-List Name,PrimarySmtpAddress
+```
+
+**A hozzárendelés nem azonnal él.** Éles beállításnál a küldés a
+szerepkör-hozzárendelés után **45 perccel** kezdett működni. Addig a Graph
+ugyanazt a `[RAOP]` tiltást adja, mintha semmi nem lenne beállítva — ez nem hiba,
+csak várni kell. Ne kezdj közben átállítgatni dolgokat: két párhuzamos változás
+után nem lehet megmondani, melyik hatott.
 
 ## 4. Cloudflare Pages változók
 
@@ -173,36 +209,52 @@ try { Invoke-RestMethod -Method Post -Uri "https://graph.microsoft.com/v1.0/user
 | Tünet | Valószínű ok |
 |---|---|
 | `Connect-ExchangeOnline ... is not recognized` | nincs telepítve az `ExchangeOnlineManagement` modul — lásd 3.1 |
+| `Connect-MgGraph`: `Method not found: … WithLogging` | a Graph és az Exchange modul ütközik egy munkamenetben — friss ablak kell |
+| `New-ServicePrincipal`: `AADServicePrincipalNotFound` | az app-regisztráció objektumazonosítóját adtuk meg a vállalati alkalmazásé helyett — lásd 3.2 |
 | 403 `ErrorAccessDenied`, `Access is denied. Check credentials` | nincs rendszergazdai jóváhagyás a `Mail.Send`-re |
-| 403 `ErrorAccessDenied`, `[RAOP] : Blocked by tenant configured AppOnly AccessPolicy settings` | a 3.2 hozzáférési szabálya tiltja a feladó fiókot — lásd alább |
+| 403 `ErrorAccessDenied`, `[RAOP] : Blocked by tenant configured AppOnly AccessPolicy settings` | app-only hozzáférés megtagadva — lásd alább |
 | 401 a tokenkérésnél | lejárt vagy elgépelt `O365_CLIENT_SECRET` |
 | `MailboxNotEnabledForRESTAPI` | a feladó fióknak nincs Exchange Online licence |
 | A végpont 500-at ad | a Function nem látja a környezeti változókat: elmaradt az új deploy, vagy csak Preview alá kerültek |
 | A végpont 502-t ad | a változók megvannak, de a token vagy a `sendMail` bukik — a fenti PowerShell megmondja, melyik |
 
-### A `[RAOP]` blokk
+### A `[RAOP]` blokk — amit az éles beüzemelés tanított
 
-Ez a hozzáférési szabály tiltása, **nem** a hiányzó jóváhagyásé. Megtévesztő,
-hogy a `Test-ApplicationAccessPolicy` közben `Granted`-et adhat: a `Test-`
-közvetlenül értékel ki, a tényleges levélküldési út viszont gyorsítótárból.
-
-Két dolgot kell megnézni. Először, hogy van-e több szabály ugyanarra az appra —
-ha van tiltó, az nyer:
-
-```powershell
-Get-ApplicationAccessPolicy | Format-List Identity,AppId,AccessRight,ScopeName,ScopeIdentity,Description
-```
-
-A `PolicyScopeGroupId` csak a létrehozó parancs *paramétere*, a visszaadott
-objektumon `ScopeName` és `ScopeIdentity` néven szerepel — a rossz névre a
-`Format-List` némán üres kimenetet ad.
-
-Másodszor, hogy a feladó fiók valóban tagja-e a hatókör-csoportnak:
+Ez az üzenet **nem mondja meg, mi hiányzik**. Ugyanezt kaptuk akkor is, amikor
+egyáltalán nem volt beállítva semmi, akkor is, amikor a klasszikus
+`ApplicationAccessPolicy` állt fenn, és akkor is, amikor az RBAC-hozzárendelés
+már létezett, csak még nem érvényesült. Ezért ne az üzenetből próbáld kitalálni
+az okot, hanem menj végig ezen a listán — mindegyik pont önállóan eldönthető:
 
 ```powershell
-Get-DistributionGroupMember -Identity "<ScopeName>" | Select-Object PrimarySmtpAddress
-Add-DistributionGroupMember -Identity "<ScopeName>" -Member "noreply@triox.hu"   # ha hiányzik
+# 1. Van-e egyáltalán Mail.Send a tokenben? (offline, a tokenből olvasva)
+$p = $token.Split('.')[1].Replace('-','+').Replace('_','/'); while ($p.Length % 4) { $p += '=' }
+([Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($p)) | ConvertFrom-Json).roles
+
+# 2. Regisztrálva van-e az app az Exchange-ben?
+Get-ServicePrincipal | Format-List DisplayName,AppId,ObjectId
+
+# 3. Van-e szerepkör-hozzárendelése?
+Get-ManagementRoleAssignment -RoleAssigneeType ServicePrincipal | Format-List Name,Role,RoleAssignee,CustomResourceScope
+
+# 4. A hatókör tényleg illeszkedik-e a feladóra?
+Get-Recipient -RecipientPreviewFilter "PrimarySmtpAddress -eq 'noreply@triox.hu'" | Format-List PrimarySmtpAddress
+
+# 5. Nincs-e EWS/OData korlátozás? (mindkettőnek üresnek vagy True-nak kell lennie)
+Get-OrganizationConfig | Format-List EwsEnabled,EwsApplicationAccessPolicy,EwsAllowList,EwsBlockList
+Get-CASMailbox "noreply@triox.hu" | Format-List EwsEnabled,EwsApplicationAccessPolicy,EwsAllowList,EwsBlockList
+
+# 6. Nem maradt-e klasszikus szabály? (üres listánál „object … couldn't be found" a normális válasz)
+Get-ApplicationAccessPolicy | Format-List AppId,AccessRight,ScopeName
 ```
 
-Ha mindkettő rendben van, terjedési késés: a szabály és a csoporttagság
-érvényesülése akár egy óra.
+Ha mind a hat rendben van, **akkor csak idő kérdése** — nálunk 45 perc volt.
+
+Két csapda, ami sok időt vitt el:
+
+- A `Test-ApplicationAccessPolicy` `Granted`-je **semmit nem bizonyít**. Az csak a
+  régi mechanizmust nézi, és akkor is `Granted`-et ad, ha egyáltalán nincs
+  szabály — miközben a tényleges hívás tilt.
+- A `Get-ApplicationAccessPolicy` üres listánál nem üres kimenetet ad, hanem egy
+  `object 'OU=…\*' couldn't be found` hibát. Ez **azt jelenti, hogy nincs
+  szabály**, nem azt, hogy elromlott valami.
