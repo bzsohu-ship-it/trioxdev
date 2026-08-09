@@ -402,23 +402,23 @@ const tartozkodas = [
 
                   <text class="abra__mono" x="0" y="129">01 · FELMÉRÉS</text>
                   <text class="abra__kicsi" x="0" y="143">szerverek, alkalmazások, adat, hálózat</text>
-                  <rect class="abra__doboz" x="270" y="118" width="120" height="22" rx="3" />
+                  <rect class="abra__fazis" x="270" y="118" width="120" height="22" rx="3" />
 
                   <text class="abra__mono" x="0" y="165">02 · CÉLARCHITEKTÚRA</text>
                   <text class="abra__kicsi" x="0" y="179">RPO/RTO, ütemezés, visszaállási terv</text>
-                  <rect class="abra__doboz" x="360" y="154" width="120" height="22" rx="3" />
+                  <rect class="abra__fazis" x="360" y="154" width="120" height="22" rx="3" />
 
                   <text class="abra__mono" x="0" y="201">03 · PÁRHUZAMOS ÉPÍTÉS</text>
                   <text class="abra__kicsi" x="0" y="215">az új környezet előbb felépül</text>
-                  <rect class="abra__doboz" x="450" y="190" width="210" height="22" rx="3" />
+                  <rect class="abra__fazis" x="450" y="190" width="210" height="22" rx="3" />
 
                   <text class="abra__mono" x="0" y="237">04 · TESZT-MIGRÁCIÓ</text>
                   <text class="abra__kicsi" x="0" y="251">élesben semmit nem próbálunk először</text>
-                  <rect class="abra__doboz" x="630" y="226" width="140" height="22" rx="3" />
+                  <rect class="abra__fazis" x="630" y="226" width="140" height="22" rx="3" />
 
                   <text class="abra__mono" x="0" y="273">05 · ÉLES ÁTÁLLÁS</text>
                   <text class="abra__kicsi" x="0" y="287">egyeztetett ablakban, majd üzemeltetés</text>
-                  <rect class="abra__kiemelt" x="740" y="262" width="140" height="22" rx="3" />
+                  <rect class="abra__zaro" x="740" y="262" width="140" height="22" rx="3" />
 
                   <text class="abra__mono" x="440" y="316" text-anchor="middle">AZ ÉLES ÁTÁLLÁS EGYEZTETETT IDŐABLAKBAN, VISSZAÁLLÁSI FORGATÓKÖNYVVEL</text>
                 </svg>
@@ -980,6 +980,20 @@ const tartozkodas = [
     stroke: var(--c-steel);
     stroke-width: 2;
     fill: none;
+  }
+  /* Az átállás-ábra fázissávjai. Kitöltés kell nekik: a globális
+     .abra__doboz fehér belsővel készült dobozoknak, amikbe felirat kerül —
+     üresen hagyva félkész keretnek látszottak, nem sávnak. A szürke a régi
+     környezeté, a márkakék a most zajló munkáé. */
+  .abra__fazis {
+    fill: var(--c-brand-wash);
+    stroke: var(--c-brand);
+    stroke-width: 1;
+  }
+  /* Az éles átállás az egyetlen visszafordíthatatlan lépés a sorban —
+     ezért ez az egy sáv tömör. */
+  .abra__zaro {
+    fill: var(--c-brand);
   }
   .abra__hatar {
     stroke: var(--c-brand);
