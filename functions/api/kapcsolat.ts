@@ -99,7 +99,7 @@ export const onRequestPost = async ({ request, env }: Kontextus): Promise<Respon
 
   // A visszaigazoló másodlagos: ha elakad, a megkeresés akkor is nálunk van.
   try {
-    await levelKuld(token, env.O365_FELADO, visszaigazoloLevel(megkereses));
+    await levelKuld(token, env.O365_FELADO, visszaigazoloLevel(megkereses, env.O365_CIMZETT));
   } catch (e) {
     console.error('A visszaigazoló nem ment ki:', e);
   }
@@ -233,8 +233,11 @@ function ertesitoLevel(m: Megkereses, cimzett: string): GraphLevel {
  * A visszaigazoló a beküldő által megadott címre megy, ezért szándékosan nem
  * tartalmazza az üzenet szövegét: különben az űrlap idegen címekre szóló
  * kéretlen levelek továbbítójává válna. Csak a név kerül bele, escape-elve.
+ *
+ * A látható szövegben az `info@triox.hu` marad, mert az oldalon mindenhol az áll
+ * nyilvános címként. A `Reply-To` viszont a valódi kezelő postafiók.
  */
-function visszaigazoloLevel(m: Megkereses): GraphLevel {
+function visszaigazoloLevel(m: Megkereses, valaszCim: string): GraphLevel {
   return {
     message: {
       subject: 'Megkaptuk a megkeresését — Triox Informatika',
@@ -252,7 +255,9 @@ valaki ezzel az e-mail címmel üzenetet küldött a triox.hu oldalról. Ha nem 
 volt, hagyja figyelmen kívül.</p>`,
       },
       toRecipients: [{ emailAddress: { address: m.email } }],
-      replyTo: [{ emailAddress: { address: 'info@triox.hu' } }],
+      // Ugyanoda, ahova az értesítő megy: a beküldő válasza így ugyanabba a
+      // postafiókba fut be, ahol maga a megkeresés van.
+      replyTo: [{ emailAddress: { address: valaszCim } }],
     },
     saveToSentItems: false,
   };
