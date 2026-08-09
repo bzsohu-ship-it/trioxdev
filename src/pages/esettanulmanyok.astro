@@ -378,7 +378,7 @@ const tartozkodas = [
 
             {e.abra === 'migracio' && (
               <figure class="abra">
-                <svg viewBox="0 0 880 326" role="img" aria-labelledby="abra-migracio">
+                <svg viewBox="0 0 880 348" role="img" aria-labelledby="abra-migracio">
                   <title id="abra-migracio">
                     Az átállás fázisai idővonalon. A meglévő környezet a felméréstől az éles
                     átállásig végig élesben marad, az új környezet pedig párhuzamosan épül fel
@@ -387,40 +387,50 @@ const tartozkodas = [
                     az RPO- és RTO-értékekkel, ütemezéssel és visszaállási tervvel; párhuzamos
                     építés, amelynek során az új környezet előbb felépül; teszt-migráció, mert
                     élesben semmit nem próbálunk ki először; végül éles átállás egyeztetett
-                    időablakban, amit a folyamatos üzemeltetés követ.
+                    időablakban, amit a folyamatos üzemeltetés követ. A sávok a sorrendet és az
+                    egymásba érést mutatják, nem az egyes fázisok időtartamát.
                   </title>
 
                   <text class="abra__mono" x="0" y="14">AZ ÁTÁLLÁS FÁZISAI — A RÉGI KÖRNYEZET KÖZBEN VÉGIG FUT</text>
+                  <text class="abra__mono" x="880" y="14" text-anchor="end">IDŐ →</text>
 
                   <text class="abra__mono" x="0" y="52">RÉGI KÖRNYEZET</text>
-                  <rect class="abra__sav" x="270" y="34" width="530" height="26" rx="3" />
+                  <rect class="abra__meder" x="270" y="34" width="610" height="26" rx="3" />
+                  <rect class="abra__mult" x="270" y="34" width="530" height="26" rx="3" />
                   <text class="abra__kicsi" x="286" y="52">élesben marad — a szolgáltatás nem áll meg</text>
 
                   <text class="abra__mono" x="0" y="86">ÚJ KÖRNYEZET</text>
-                  <rect class="abra__kiemelt" x="450" y="68" width="430" height="26" rx="3" />
+                  <rect class="abra__meder" x="270" y="68" width="610" height="26" rx="3" />
+                  <rect class="abra__fazis" x="450" y="68" width="430" height="26" rx="3" />
                   <text class="abra__kicsi" x="466" y="86">párhuzamosan épül fel, nem a régi helyén</text>
 
-                  <text class="abra__mono" x="0" y="129">01 · FELMÉRÉS</text>
-                  <text class="abra__kicsi" x="0" y="143">szerverek, alkalmazások, adat, hálózat</text>
-                  <rect class="abra__fazis" x="270" y="118" width="120" height="22" rx="3" />
+                  <text class="abra__mono" x="0" y="127">01 · FELMÉRÉS</text>
+                  <text class="abra__kicsi" x="0" y="141">szerverek, alkalmazások, adat, hálózat</text>
+                  <rect class="abra__meder" x="270" y="116" width="610" height="26" rx="3" />
+                  <rect class="abra__fazis" x="270" y="116" width="120" height="26" rx="3" />
 
-                  <text class="abra__mono" x="0" y="165">02 · CÉLARCHITEKTÚRA</text>
-                  <text class="abra__kicsi" x="0" y="179">RPO/RTO, ütemezés, visszaállási terv</text>
-                  <rect class="abra__fazis" x="360" y="154" width="120" height="22" rx="3" />
+                  <text class="abra__mono" x="0" y="163">02 · CÉLARCHITEKTÚRA</text>
+                  <text class="abra__kicsi" x="0" y="177">RPO/RTO, ütemezés, visszaállási terv</text>
+                  <rect class="abra__meder" x="270" y="152" width="610" height="26" rx="3" />
+                  <rect class="abra__fazis" x="360" y="152" width="120" height="26" rx="3" />
 
-                  <text class="abra__mono" x="0" y="201">03 · PÁRHUZAMOS ÉPÍTÉS</text>
-                  <text class="abra__kicsi" x="0" y="215">az új környezet előbb felépül</text>
-                  <rect class="abra__fazis" x="450" y="190" width="210" height="22" rx="3" />
+                  <text class="abra__mono" x="0" y="199">03 · PÁRHUZAMOS ÉPÍTÉS</text>
+                  <text class="abra__kicsi" x="0" y="213">az új környezet előbb felépül</text>
+                  <rect class="abra__meder" x="270" y="188" width="610" height="26" rx="3" />
+                  <rect class="abra__fazis" x="450" y="188" width="210" height="26" rx="3" />
 
-                  <text class="abra__mono" x="0" y="237">04 · TESZT-MIGRÁCIÓ</text>
-                  <text class="abra__kicsi" x="0" y="251">élesben semmit nem próbálunk először</text>
-                  <rect class="abra__fazis" x="630" y="226" width="140" height="22" rx="3" />
+                  <text class="abra__mono" x="0" y="235">04 · TESZT-MIGRÁCIÓ</text>
+                  <text class="abra__kicsi" x="0" y="249">élesben semmit nem próbálunk először</text>
+                  <rect class="abra__meder" x="270" y="224" width="610" height="26" rx="3" />
+                  <rect class="abra__fazis" x="630" y="224" width="140" height="26" rx="3" />
 
-                  <text class="abra__mono" x="0" y="273">05 · ÉLES ÁTÁLLÁS</text>
-                  <text class="abra__kicsi" x="0" y="287">egyeztetett ablakban, majd üzemeltetés</text>
-                  <rect class="abra__zaro" x="740" y="262" width="140" height="22" rx="3" />
+                  <text class="abra__mono" x="0" y="271">05 · ÉLES ÁTÁLLÁS</text>
+                  <text class="abra__kicsi" x="0" y="285">egyeztetett ablakban, majd üzemeltetés</text>
+                  <rect class="abra__meder" x="270" y="260" width="610" height="26" rx="3" />
+                  <rect class="abra__zaro" x="740" y="260" width="140" height="26" rx="3" />
 
-                  <text class="abra__mono" x="440" y="316" text-anchor="middle">AZ ÉLES ÁTÁLLÁS EGYEZTETETT IDŐABLAKBAN, VISSZAÁLLÁSI FORGATÓKÖNYVVEL</text>
+                  <text class="abra__mono" x="440" y="318" text-anchor="middle">AZ ÉLES ÁTÁLLÁS EGYEZTETETT IDŐABLAKBAN, VISSZAÁLLÁSI FORGATÓKÖNYVVEL</text>
+                  <text class="abra__mono" x="440" y="338" text-anchor="middle">A SÁVOK A SORRENDET ÉS AZ ÁTFEDÉST MUTATJÁK, NEM AZ IDŐTARTAMOT</text>
                 </svg>
               </figure>
             )}
@@ -981,10 +991,26 @@ const tartozkodas = [
     stroke-width: 2;
     fill: none;
   }
-  /* Az átállás-ábra fázissávjai. Kitöltés kell nekik: a globális
-     .abra__doboz fehér belsővel készült dobozoknak, amikbe felirat kerül —
-     üresen hagyva félkész keretnek látszottak, nem sávnak. A szürke a régi
-     környezeté, a márkakék a most zajló munkáé. */
+  /* Az átállás-ábra sávjai.
+
+     Minden sor egy teljes szélességű, zárt meder (.abra__meder), és abban a
+     kitöltött szakasz mutatja, meddig tart az adott fázis. Enélkül a sávok a
+     semmiben lebegtek, és az ábra elcsúszott táblázatnak látszott: nem volt
+     mihez igazodniuk. A meder adja a közös bal és jobb szélt, a kitöltés
+     pedig az információt.
+
+     A szín is jelent valamit: a szürke a meglévő környezet, a márkakék a most
+     zajló munka. */
+  .abra__meder {
+    fill: var(--c-paper);
+    stroke: var(--c-line);
+    stroke-width: 1;
+  }
+  .abra__mult {
+    fill: var(--c-mist);
+    stroke: var(--c-line);
+    stroke-width: 1;
+  }
   .abra__fazis {
     fill: var(--c-brand-wash);
     stroke: var(--c-brand);
