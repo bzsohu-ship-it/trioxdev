@@ -1,23 +1,26 @@
+{/* A hosszkorlátok szándékosan egyeznek a functions/api/kapcsolat.ts
+    ellenőrzésével: így a böngésző már a küldés előtt szól, és nem a szerver
+    422-es válaszából derül ki a hiba. */}
 <form class="urlap" id="kapcsolat-urlap" novalidate>
   <label class="field">
     <span>Név</span>
-    <input name="nev" type="text" required autocomplete="name" />
+    <input name="nev" type="text" required minlength="2" maxlength="80" autocomplete="name" />
   </label>
   <label class="field">
     <span>Cég</span>
-    <input name="ceg" type="text" autocomplete="organization" />
+    <input name="ceg" type="text" maxlength="120" autocomplete="organization" />
   </label>
   <label class="field">
     <span>E-mail</span>
-    <input name="email" type="email" required autocomplete="email" />
+    <input name="email" type="email" required maxlength="200" autocomplete="email" />
   </label>
   <label class="field">
     <span>Telefon</span>
-    <input name="telefon" type="tel" autocomplete="tel" />
+    <input name="telefon" type="tel" maxlength="40" autocomplete="tel" />
   </label>
   <label class="field">
     <span>Miben segíthetünk?</span>
-    <textarea name="uzenet" rows="5" required></textarea>
+    <textarea name="uzenet" rows="5" required minlength="10" maxlength="4000"></textarea>
   </label>
 
   <!-- mézesbödön: ember nem tölti ki -->
@@ -42,7 +45,8 @@
       if (adat.ceges_fax) return; // bot
       if (!urlap.checkValidity()) {
         jelzes.dataset.state = 'err';
-        jelzes.textContent = 'Hiányzik a név, az e-mail vagy az üzenet.';
+        // A konkrét okot a böngésző mondja meg a hibás mezőnél.
+        jelzes.textContent = 'Nézze át a megjelölt mezőket.';
         urlap.reportValidity();
         return;
       }
@@ -61,16 +65,25 @@
         });
         // A végpont a felhasználónak szóló magyar hibaszöveget is visszaadja.
         const test = await valasz.json().catch(() => null);
-        if (!valasz.ok || !test?.ok) throw new Error(test?.hiba ?? '');
-        urlap.reset();
-        jelzes.dataset.state = 'ok';
-        jelzes.textContent = 'Megkaptuk. 2 munkanapon belül válaszolunk.';
-      } catch (err) {
-        const reszlet = err instanceof Error && err.message ? err.message : '';
+
+        if (valasz.ok && test?.ok) {
+          urlap.reset();
+          jelzes.dataset.state = 'ok';
+          jelzes.textContent = 'Megkaptuk. 2 munkanapon belül válaszolunk.';
+          return;
+        }
+
         jelzes.dataset.state = 'err';
-        jelzes.textContent = reszlet
-          ? `${reszlet} Ha nem oldódik meg, írjon ide: info@triox.hu`
-          : 'A küldés nem sikerült. Írjon közvetlenül: info@triox.hu';
+        // A 422 a látogató mezőiről szól — ott a „írjon ide" mentőöv csak
+        // zavarna, nincs mit megoldani, csak javítani kell a mezőt. Minden
+        // más hiba a mi oldalunkon van, ott viszont kell a kiút.
+        jelzes.textContent =
+          valasz.status === 422 && test?.hiba
+            ? test.hiba
+            : `${test?.hiba ?? 'A küldés nem sikerült.'} Ha nem oldódik meg, írjon ide: info@triox.hu`;
+      } catch {
+        jelzes.dataset.state = 'err';
+        jelzes.textContent = 'A küldés nem sikerült. Írjon közvetlenül: info@triox.hu';
       } finally {
         gomb.disabled = false;
       }
