@@ -145,14 +145,58 @@ curl -s -X POST http://127.0.0.1:8788/api/kapcsolat -H 'Content-Type: applicatio
 
 ## Hibakeresés
 
-A Function `console.error` sorai a Cloudflare dashboard → Pages projekt →
-**Functions** → Real-time logs nézetben látszanak.
+A Function `console.error` sorai **futásidejű** naplóba kerülnek, nem a build
+naplójába. A build napló (ahol a „Compiled Worker successfully" áll) sosem
+tartalmazza őket. Az élő naplóhoz: Deployments → a deploy `Details` linkje →
+**Functions** → *Begin log stream*, és közben kell beküldeni egy kérést.
+
+### A Graph-hívás reprodukálása PowerShellből
+
+Ez gyorsabb, mint az élő naplót elkapni: ugyanazt csinálja, mint a Function, és
+kiírja a Graph pontos hibáját.
+
+```powershell
+$tenant = "<O365_TENANT_ID>"; $appId = "<O365_CLIENT_ID>"; $secret = "<O365_CLIENT_SECRET>"
+$token = (Invoke-RestMethod -Method Post -Uri "https://login.microsoftonline.com/$tenant/oauth2/v2.0/token" -Body @{client_id=$appId; client_secret=$secret; scope="https://graph.microsoft.com/.default"; grant_type="client_credentials"}).access_token
+$level = @{ message = @{ subject = "Graph teszt"; body = @{ contentType = "Text"; content = "Ellenorzo level." }; toRecipients = @(@{ emailAddress = @{ address = "info@triox.hu" } }) }; saveToSentItems = $true } | ConvertTo-Json -Depth 6
+try { Invoke-RestMethod -Method Post -Uri "https://graph.microsoft.com/v1.0/users/noreply@triox.hu/sendMail" -Headers @{ Authorization = "Bearer $token" } -ContentType "application/json" -Body $level; "SIKER" } catch { "HIBA:"; $_.ErrorDetails.Message }
+```
+
+### Tünettár
 
 | Tünet | Valószínű ok |
 |---|---|
 | `Connect-ExchangeOnline ... is not recognized` | nincs telepítve az `ExchangeOnlineManagement` modul — lásd 3.1 |
-| 403 a token után, `Access is denied` | nincs rendszergazdai jóváhagyás a `Mail.Send`-re |
-| 403 `ApplicationAccessPolicy` említéssel | a 3. pont szabálya kizárja a feladó fiókot |
+| 403 `ErrorAccessDenied`, `Access is denied. Check credentials` | nincs rendszergazdai jóváhagyás a `Mail.Send`-re |
+| 403 `ErrorAccessDenied`, `[RAOP] : Blocked by tenant configured AppOnly AccessPolicy settings` | a 3.2 hozzáférési szabálya tiltja a feladó fiókot — lásd alább |
 | 401 a tokenkérésnél | lejárt vagy elgépelt `O365_CLIENT_SECRET` |
 | `MailboxNotEnabledForRESTAPI` | a feladó fióknak nincs Exchange Online licence |
-| A látogató „A levélküldés jelenleg nem elérhető" üzenetet lát | hiányzik valamelyik környezeti változó, vagy nem volt új deploy |
+| A végpont 500-at ad | a Function nem látja a környezeti változókat: elmaradt az új deploy, vagy csak Preview alá kerültek |
+| A végpont 502-t ad | a változók megvannak, de a token vagy a `sendMail` bukik — a fenti PowerShell megmondja, melyik |
+
+### A `[RAOP]` blokk
+
+Ez a hozzáférési szabály tiltása, **nem** a hiányzó jóváhagyásé. Megtévesztő,
+hogy a `Test-ApplicationAccessPolicy` közben `Granted`-et adhat: a `Test-`
+közvetlenül értékel ki, a tényleges levélküldési út viszont gyorsítótárból.
+
+Két dolgot kell megnézni. Először, hogy van-e több szabály ugyanarra az appra —
+ha van tiltó, az nyer:
+
+```powershell
+Get-ApplicationAccessPolicy | Format-List Identity,AppId,AccessRight,ScopeName,ScopeIdentity,Description
+```
+
+A `PolicyScopeGroupId` csak a létrehozó parancs *paramétere*, a visszaadott
+objektumon `ScopeName` és `ScopeIdentity` néven szerepel — a rossz névre a
+`Format-List` némán üres kimenetet ad.
+
+Másodszor, hogy a feladó fiók valóban tagja-e a hatókör-csoportnak:
+
+```powershell
+Get-DistributionGroupMember -Identity "<ScopeName>" | Select-Object PrimarySmtpAddress
+Add-DistributionGroupMember -Identity "<ScopeName>" -Member "noreply@triox.hu"   # ha hiányzik
+```
+
+Ha mindkettő rendben van, terjedési késés: a szabály és a csoporttagság
+érvényesülése akár egy óra.
