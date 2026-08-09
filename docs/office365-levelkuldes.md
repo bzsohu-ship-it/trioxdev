@@ -83,7 +83,7 @@ működik; ha egyszer megszűnne, arra kell átállni.
 
 ## 4. Cloudflare Pages változók
 
-Cloudflare dashboard → Workers & Pages → `triox-web` → Settings →
+Cloudflare dashboard → Workers & Pages → **`trioxdev`** → Settings →
 **Environment variables**. Mind a **Production**, mind a **Preview**
 környezetben vedd fel őket, különben az előnézeti ágakon nem működik az űrlap.
 
@@ -95,7 +95,15 @@ környezetben vedd fel őket, különben az előnézeti ágakon nem működik az
 | `O365_FELADO` | plain | `noreply@triox.hu` |
 | `O365_CIMZETT` | plain | `info@triox.hu` |
 
-A változó felvétele után **új deploy kell**, hogy a Function lássa őket.
+A változó felvétele után **új deploy kell**, hogy a Function lássa őket: a
+Cloudflare csak az azután készült deployokba építi be a változókat, a meglévő
+attól nem látja meg őket, hogy felvettük. Deployments fül → a legutóbbi deploy →
+**Retry deployment**.
+
+Ha a végpont ezután **500**-at ad (`A levélküldés jelenleg nem elérhető`), a
+Function nem látja a változókat: elmaradt az új deploy, vagy csak a Preview
+környezetbe kerültek. Ha **502**-t ad, a változók megvannak, de valamelyik érték
+rossz — a Real-time logs megmondja, melyik.
 
 ## 5. SPF, DKIM, DMARC
 

@@ -42,7 +42,7 @@ Kézi deploy (megkerüli a CI-t, hibakereséshez jó):
 
 ```bash
 npm run build
-npx wrangler pages deploy dist --project-name=triox-web
+npx wrangler pages deploy dist --project-name=trioxdev
 ```
 
 ## Fejlécek és átirányítások
