@@ -1,69 +1,1195 @@
 ---
 import Base from '../layouts/Base.astro';
 
-const projektek = [
+/**
+ * Esettanulmányok.
+ *
+ * FONTOS a szövegezésre: a négy környezet ténye a Rólunk oldalról származik
+ * (`src/pages/rolunk.astro`, „Akikkel dolgozunk"). Minden technikai állítás,
+ * amivel itt kibontjuk őket, egy máshol már kiadott, megerősített tételre
+ * megy vissza — a szolgáltatásoldalak platform-katalógusára, a /technologia/
+ * kártyáira, a /biztonsag/ rétegeire vagy a /rolunk/ számaira.
+ *
+ * Amit ezen az oldalon SOHA nem írunk le, amíg Zsolt meg nem erősíti:
+ * ügyfélnév, ágazati alszegmens, iparági utalás, ami beazonosíthatóvá tesz,
+ * továbbá bármilyen mért szám (adatmennyiség, VM-darabszám, felhasználószám,
+ * migrációs időtartam, állásidő, megtakarítás, elért rendelkezésre állás).
+ * A nyitott kérdések: `docs/esettanulmanyok-megerositendo.md` (nincs a buildben).
+ *
+ * A csillag (*) mind a négy környezetnév mellett ott áll, és a lap alján lévő
+ * `#nevekrol` lábjegyzetre mutat. Szándékosan apró: a diszkréció tény, nem
+ * üzenet — nem ez az oldal mondanivalója.
+ */
+
+interface Eset {
+  /** Rövid kategória-név. Ugyanaz, mint az áttekintő táblázat sorában. */
+  cimke: string;
+  /** A környezet megnevezése — ez kap csillagot. */
+  nev: string;
+  cim: string;
+  /** Első bekezdés a kiinduló helyzet, a többi a megoldás. */
+  allitas: string[];
+  kulcs: string;
+  /** Melyik beágyazott ábra tartozik hozzá. */
+  abra?: 'migracio' | 'izolacio' | 'ketszintu';
+  reszletek: { cimke?: string; szoveg: string }[];
+  hivatkozasok: { szoveg: string; url: string }[];
+}
+
+const esetek: Eset[] = [
   {
-    cim: 'Országos lefedettségű médiaszolgáltató',
-    leiras: 'Teljes belső hálózati, web- és adatinfrastruktúra kialakítása és üzemeltetése, migrációval a meglévő környezetből.',
+    cimke: 'Teljes infrastruktúra és migráció',
+    nev: 'Országos lefedettségű médiaszolgáltató',
+    cim: 'Működő országos szolgáltatás alatt cseréltük ki az infrastruktúrát',
+    allitas: [
+      'A feladat a teljes belső hálózati, web- és adatinfrastruktúra kialakítása és üzemeltetése volt — de nem üres lapról. A rendszer működött, országos lefedettséggel, és a költöztetés alatt is működnie kellett. Egy ilyen szolgáltatónál a leállás nem üzemeltetési kellemetlenség: kieső szolgáltatás.',
+      'Ezért az új környezet nem a régi helyén épült fel, hanem mellette. Előbb állt fel teljesen, mielőtt bármi átkerült volna rá; a teszt-migráció után jött csak az éles átállás, egyeztetett időablakban, visszaállási forgatókönyvvel. A terhelés nagy erőforrás- és tárigényű, a gerinchálózat ezért itt is a redundáns 2×10 Gbps kiépítés — egy uplink vagy egy switch kiesése nem jelent szolgáltatáskiesést.',
+      'A projekt nem az átállással ért véget: a környezet azóta is a mi üzemeltetésünkben fut, felügyelettel, mentéssel és dokumentációval együtt.',
+    ],
+    kulcs: 'A migráció akkor sikerült, ha a nézőnek fel sem tűnt, hogy volt.',
+    abra: 'migracio',
+    reszletek: [
+      { cimke: 'Hálózat', szoveg: 'belső hálózati infrastruktúra kialakítása, VLAN-alapú szegmentálás, ügyfelenként dedikált átjáró' },
+      { cimke: 'Gerinc', szoveg: 'redundáns 2×10 Gbps — a szűk keresztmetszet ritkán a CPU, sokkal gyakrabban a hálózat vagy a tároló' },
+      { cimke: 'Erőforrás', szoveg: 'a terheléshez méretezett CPU-, memória- és tárkiosztás, nem előre gyártott csomag' },
+      { cimke: 'Web- és adatréteg', szoveg: 'a publikus (web) és a belső (adatbázis, alkalmazás) réteg külön hálózati szinten' },
+      { cimke: 'Migráció', szoveg: 'párhuzamos építés, teszt-migráció, éles átállás egyeztetett időablakban, visszaállási forgatókönyvvel' },
+      { cimke: 'Üzemeltetés', szoveg: 'folyamatos felügyelet, mentés több független célpontra, off-site replika a kritikus terhelésekhez' },
+    ],
+    hivatkozasok: [
+      { szoveg: 'Miért nem a szerver a szűk keresztmetszet', url: '/technologia/' },
+      { szoveg: 'DCaaS — a teljes környezet kiszervezve', url: '/szolgaltatasok/dcaas/' },
+    ],
   },
   {
-    cim: 'Biotechnológiai kutatólabor',
-    leiras: 'Teljesen izolált, az internetről nem elérhető IT infrastruktúra nagy adatmennyiséget kezelő kutatási terhelésekhez.',
+    cimke: 'Izolált környezet',
+    nev: 'Biotechnológiai kutatólabor',
+    cim: 'Olyan környezet, amely felé az internet felől nem vezet útvonal',
+    allitas: [
+      'Nagy adatmennyiséget kezelő kutatási terhelések, olyan adaton, amelynek a jellege nem enged internetes elérhetőséget. Ilyenkor nem az a kérdés, hogy elég erős-e a tűzfalszabály, hanem az, hogy van-e egyáltalán szabály, amit el lehetne rontani.',
+      'A megoldás teljesen izolált infrastruktúra: privát alhálózat, saját virtuális vagy fizikai switchen, publikált szolgáltatás nélkül. Az internet felől nincs útvonal a környezetbe — nem tiltás miatt, hanem mert nincs mit tiltani. A hozzáférés dedikált VPN-endpointon keresztül történik, a kezelőfelület pedig az out-of-band management hálózaton áll, ami szintén nem elérhető kívülről.',
+      'Ez ma nem terv nálunk, hanem működő gyakorlat: az érzékeny adatot kezelő ügyfeleink környezete így fut.',
+    ],
+    kulcs: 'Az izoláció itt nem beállítás, hanem topológia. A beállítást el lehet rontani, a topológiát nem.',
+    abra: 'izolacio',
+    reszletek: [
+      { cimke: 'Izoláció', szoveg: 'saját virtuális vagy fizikai switch, privát alhálózat, az internetről nem elérhető környezet' },
+      { cimke: 'Hozzáférés', szoveg: 'ügyfelenként dedikált VPN-endpoint — IPsec, WireGuard, OpenVPN vagy SSTP' },
+      { cimke: 'Erőforrás', szoveg: 'nagy adatmennyiséget és nagy erőforrásigényt kezelő terhelésekre méretezett kiosztás' },
+      { cimke: 'Mentés', szoveg: 'a mentési célpontok is a zárt környezet részei, egymástól függetlenül' },
+      { cimke: 'Menedzsment', szoveg: 'dedikált, out-of-band management hálózat — nincs kitett kezelőfelület' },
+      { cimke: 'Hardverszint', szoveg: 'iDRAC és iLO: a szerver akkor is kezelhető, ha az operációs rendszer el sem indul' },
+    ],
+    hivatkozasok: [
+      { szoveg: 'A szegmentálás és az izoláció rétege', url: '/biztonsag/' },
+      { szoveg: 'Ügyfél-izoláció a gyakorlatban', url: '/technologia/' },
+    ],
   },
   {
-    cim: 'Pénzügyi szolgáltató',
-    leiras: 'Kétszintű, szegmentált alkalmazás-stack: az adatbázis- és alkalmazásréteg élesen elválasztva a publikus szolgáltatásoktól.',
+    cimke: 'Szegmentált alkalmazás-stack',
+    nev: 'Pénzügyi szolgáltató',
+    cim: 'Két szint, hogy a publikus oldalról ne legyen út az adatig',
+    allitas: [
+      'Egy pénzügyi szolgáltatónál a rendszer legkitettebb és legérzékenyebb pontja ugyanaz a rendszer: a publikus felületnek kívülről elérhetőnek kell lennie, az adatnak viszont a lehető legvédettebbnek. Lapos hálózaton ez a kettő egy ugrásnyira van egymástól.',
+      'Ezért a stack kétszintű: az adatbázis- és alkalmazásréteg élesen elválasztva a publikus szolgáltatásoktól. A környezet előtt ügyfelenként dedikált átjáró áll, saját tűzfal-, NAT- és VPN-szabályokkal, és saját publikus IPv4-címmel a mi címtartományunkból — így a szolgáltatás és a levelezés IP-reputációja nem függ attól, mit csinál egy másik ügyfél.',
+      'A gyakorlati következmény egyszerű: ha a publikus réteg egy komponense elesik, az egy komponens elvesztése marad. Nem nyílik meg vele az adatbázis.',
+    ],
+    kulcs: 'Nem az a kérdés, bejut-e valaha a támadó az első gépre. Az, hogy onnan meddig jut el.',
+    abra: 'ketszintu',
+    reszletek: [
+      { cimke: 'Kétszintű felosztás', szoveg: 'külön belső (adatbázis, alkalmazás) és publikus (web, mail) hálózati réteg' },
+      { cimke: 'Átjáró', szoveg: 'ügyfelenként dedikált tűzfal, NAT és VPN-endpoint, saját szabályrendszerrel' },
+      { cimke: 'Publikus IP', szoveg: 'dedikált publikus IPv4-cím a saját címtartományunkból, névre szólóan' },
+      { cimke: 'Szegmens-izoláció', szoveg: 'a szegmensek között nincs átjárás — egy másik ügyfél környezetéből ez nem látszik' },
+      { cimke: 'Tanúsítványok', szoveg: 'nyilvános és belső TLS-tanúsítványok kezelése, lejárat-figyeléssel' },
+      { cimke: 'Mentés', szoveg: 'alkalmazás-tudatos, adatbázis-konzisztens mentés — nem csak fájlszintű másolat' },
+    ],
+    hivatkozasok: [
+      { szoveg: 'A védelem hét rétege — és hol áll meg egy támadás', url: '/biztonsag/' },
+      { szoveg: 'SaaS — alkalmazás-hosting menedzselt környezetben', url: '/szolgaltatasok/saas/' },
+    ],
   },
   {
-    cim: 'Kereskedelmi és szolgáltató cégek',
-    leiras: 'Web-, fájl- és címtárkörnyezetek kiszervezett üzemeltetése.',
+    cimke: 'Kiszervezett üzemeltetés',
+    nev: 'Kereskedelmi és szolgáltató cégek',
+    cim: 'A rendszer működött. Csak épp egyetlen ember tudta, hogyan',
+    allitas: [
+      'Ez a negyedik eset nem egyetlen nagy projekt, hanem több cég ugyanabban a helyzetben: web-, fájl- és címtárkörnyezet, ami évek óta megy, de dokumentálatlanul. A tudás egy fejben van, a mentésről senki nem tudja biztosan, hogy visszaállítható, a jogosultságokról pedig már régen nem tudja senki, ki mihez fér hozzá.',
+      'Az átvétel ilyenkor nem költöztetéssel kezdődik, hanem felméréssel: mi fut, min fut, mi hiányzik. Utána jön a dokumentálás, a monitorozás bevezetése, majd a stabilizálás — a feltárt hiányosságok javítása: hiányzó frissítések, mentési hézagok, elavult jogosultságok. Csak ezután lesz a rendszerből folyamatosan üzemeltetett környezet, rendszeres riporttal.',
+      'Ahol a hardvernek a telephelyen kell maradnia — mert oda köti egy gyártásvezérlő, egy mérőműszer vagy egy adatkezelési szabály —, ott nem költöztetünk. Ugyanazt az eljárásrendet visszük ki a helyszínre.',
+    ],
+    kulcs: 'A kulcsemberfüggőség nem akkor derül ki, amikor a kolléga dolgozik. Hanem amikor nem.',
+    reszletek: [
+      { cimke: 'Címtár', szoveg: 'Active Directory tartomány, csoportházirendek, redundáns tartományvezérlők' },
+      { cimke: 'Fájlszolgáltatás', szoveg: 'fájlszerver-környezet, jogosultsági struktúra rendbetételével' },
+      { cimke: 'Webkörnyezet', szoveg: 'web- és levelezőkiszolgálók a publikus rétegen, TLS-tanúsítványok lejárat-figyeléssel' },
+      { cimke: 'Átvétel', szoveg: 'állapotfelmérés és kockázati lista, majd dokumentált átadás-átvétel — akár a távozó kollégával egyeztetve' },
+      { cimke: 'Stabilizálás', szoveg: 'az első hetekben a feltárt hiányosságok javítása: frissítések, mentési hézagok, jogosultságok' },
+      { cimke: 'Üzemeltetés', szoveg: 'monitorozás, helpdesk, frissítéskezelés, napi mentés-ellenőrzés, rendszeres riport' },
+    ],
+    hivatkozasok: [
+      { szoveg: 'Menedzselt IT üzemeltetés — az üzemeltető is jár hozzá', url: '/szolgaltatasok/menedzselt-it-uzemeltetes/' },
+      { szoveg: 'Ha a szervernek a telephelyen kell maradnia', url: '/szolgaltatasok/helyi-uzemeltetes/' },
+    ],
+  },
+];
+
+/**
+ * Hero alatti gyorsnézet. Egyik szám sem új: mind a Rólunk oldal
+ * „Számokban" táblázatából jön.
+ */
+const gyorsnezet = [
+  { ertek: '4 környezet', szoveg: 'a médiaszolgáltatótól az izolált kutatólaborig' },
+  { ertek: '20+ év', szoveg: 'vállalati IT üzemeltetési tapasztalat mögötte' },
+  { ertek: '1 ügyfél = 1 hálózat', szoveg: 'mind a négy környezet dedikált szegmensen fut' },
+  { ertek: '2 helyszín', szoveg: 'budapesti adatközpont, egymástól függetlenül' },
+];
+
+/** Áttekintő táblázat. A sorrend azonos az esetkártyákéval. */
+const attekintes = [
+  {
+    kornyezet: 'Országos lefedettségű médiaszolgáltató',
+    kiindulas: 'Működő, országos szolgáltatás egy meglévő környezetben, amit át kellett venni és át kellett költöztetni.',
+    feladat: 'Teljes belső hálózati, web- és adatinfrastruktúra kialakítása, migrációval és folyamatos üzemeltetéssel.',
+    kulcselem: 'Párhuzamos építés és teszt-migráció, redundáns 2×10 Gbps gerincen.',
+  },
+  {
+    kornyezet: 'Biotechnológiai kutatólabor',
+    kiindulas: 'Nagy adatmennyiséget kezelő kutatási terhelés olyan adaton, ami nem lehet kitéve az internetnek.',
+    feladat: 'Teljesen izolált, az internetről nem elérhető IT infrastruktúra.',
+    kulcselem: 'Privát alhálózat saját switchen, dedikált VPN-endpoint, out-of-band management.',
+  },
+  {
+    kornyezet: 'Pénzügyi szolgáltató',
+    kiindulas: 'Kifelé nyitott publikus felület és a legérzékenyebb adat ugyanabban a rendszerben.',
+    feladat: 'Kétszintű, szegmentált alkalmazás-stack.',
+    kulcselem: 'Az adatbázis- és alkalmazásréteg élesen elválasztva a publikus szolgáltatásoktól.',
+  },
+  {
+    kornyezet: 'Kereskedelmi és szolgáltató cégek',
+    kiindulas: 'Évek óta működő, de dokumentálatlan rendszer, egyetlen kolléga tudásán.',
+    feladat: 'Web-, fájl- és címtárkörnyezetek kiszervezett üzemeltetése.',
+    kulcselem: 'Átvétel dokumentálással, monitorozás, stabilizálás, napi mentés-ellenőrzés.',
+  },
+];
+
+/**
+ * Mit kap papíron. Mindegyik tétel egy máshol már leírt szolgáltatási
+ * lépéshez tartozik — a forrás a `dcaas.md` 8. pontja, a
+ * `menedzselt-it-uzemeltetes.md` „Hogyan kezdünk neki?" fejezete és az
+ * `audit-restore-validation.md`.
+ */
+const dokumentumok = [
+  {
+    dokumentum: 'Állapotfelmérés és kockázati lista',
+    tartalom: 'Szerverek, hálózat, munkaállomások, licencek, mentés és a feltárt kockázatok — konkrétan, nem becsléssel.',
+    mikor: 'A döntés előtt. A felmérés nem kötelezettségvállalás.',
+  },
+  {
+    dokumentum: 'Célarchitektúra, RPO és RTO',
+    tartalom: 'Rendszerenként meghatározva, mennyi állásidő és mennyi adatvesztés fogadható el.',
+    mikor: 'Az ajánlat előtt.',
+  },
+  {
+    dokumentum: 'Migrációs terv és visszaállási forgatókönyv',
+    tartalom: 'Ütemezés, sorrend, teszt-migráció, és az is, mi történik, ha vissza kell lépni.',
+    mikor: 'Az átállás előtt. Kritikus rendszer élesben, előkészítés nélkül nem költözik.',
+  },
+  {
+    dokumentum: 'Szolgáltatási szerződés (SLA)',
+    tartalom: 'Rendelkezésre állás, reakcióidő, karbantartási ablakok, mentési és megőrzési szabályok — írásban.',
+    mikor: 'A szolgáltatás indulásakor.',
+  },
+  {
+    dokumentum: 'Rendszerdokumentáció',
+    tartalom: 'A működő környezet átadható leírása. Ez az a pont, ahol a tudás kikerül egyetlen ember fejéből.',
+    mikor: 'Átvételkor, majd változáskövetéssel folyamatosan.',
+  },
+  {
+    dokumentum: 'Visszaállítási jegyzőkönyv',
+    tartalom: 'A mentésből valóban elindul-e a rendszer — elkülönített tesztkörnyezetben, minősítéssel.',
+    mikor: 'A visszaállítási teszt után, önálló szolgáltatásként.',
+  },
+  {
+    dokumentum: 'Üzemeltetési riport',
+    tartalom: 'Mi történt a környezetében, és mire érdemes a következő időszakban készülni.',
+    mikor: 'Az üzemeltetés alatt, ütemezetten.',
+  },
+];
+
+/** „Ismerős a helyzet?" — a mondat, amit a felmérésen hallunk, és hova vezet. */
+const helyzetek = [
+  {
+    tapasztalat: '„Működik, de csak egy kolléga tudja, hogyan.”',
+    jelentes: 'Kulcsemberfüggőség. A tudás nincs dokumentálva, tehát nem is átadható.',
+    hova: { szoveg: '04. eset · Menedzselt üzemeltetés', url: '/szolgaltatasok/menedzselt-it-uzemeltetes/' },
+  },
+  {
+    tapasztalat: '„Költöznénk, de a szolgáltatás nem állhat meg.”',
+    jelentes: 'Migrációs kockázat. Nem a cél a nehéz, hanem az odavezető út.',
+    hova: { szoveg: '01. eset · DCaaS', url: '/szolgaltatasok/dcaas/' },
+  },
+  {
+    tapasztalat: '„Ez az adat nem lehet fent az interneten.”',
+    jelentes: 'Izolációs követelmény. Itt a szabály kevés — topológia kell hozzá.',
+    hova: { szoveg: '02. eset · Biztonság', url: '/biztonsag/' },
+  },
+  {
+    tapasztalat: '„A webes felületünk kifelé nyitott, az adatbázis meg mögötte van.”',
+    jelentes: 'Szegmentálási hiány. Egy kompromittált webszerver rálát az adatra.',
+    hova: { szoveg: '03. eset · Biztonság', url: '/biztonsag/' },
+  },
+  {
+    tapasztalat: '„Van mentés, de sosem próbáltuk még vissza.”',
+    jelentes: 'Nem igazolt helyreállíthatóság. A hiba a visszaállításkor derül ki.',
+    hova: { szoveg: 'Audit Restore Validation', url: '/szolgaltatasok/audit-restore-validation/' },
+  },
+  {
+    tapasztalat: '„Nem tudjuk pontosan, ki mihez fér hozzá.”',
+    jelentes: 'Karbantartatlan jogosultsági struktúra. Egy fiók elvesztése sokba kerül.',
+    hova: { szoveg: 'AI az irodában: mit lát valójában?', url: '/blog/ai-az-irodaban-jogosultsagok/' },
+  },
+  {
+    tapasztalat: '„A szerver az irodai szekrényben áll.”',
+    jelentes: 'Fizikai kockázat: tűz, beázás, hőség, áramszünet — és mind egyszerre viszi az élest és a mentést.',
+    hova: { szoveg: 'Helyi és hibrid üzemeltetés', url: '/szolgaltatasok/helyi-uzemeltetes/' },
+  },
+];
+
+const tartozkodas = [
+  {
+    cim: 'Nem írunk ki ügyfélnevet',
+    szoveg:
+      'Egy üzemeltetőnél az, hogy ki a partnere, önmagában is információ — arról, hol áll az adott cég infrastruktúrája, és kinél van hozzá kulcs. Ezt nem tesszük ki egy honlapra. Ha a döntéséhez referencia kell, kérdezzen rá a felmérésen: megnézzük, mit tudunk az érintett partner hozzájárulásával megosztani.',
+  },
+  {
+    cim: 'Nem írunk ki számot, amit nem mértünk',
+    szoveg:
+      'Nincs ezen az oldalon megspórolt óra, százalékos gyorsulás vagy elért rendelkezésre állás. Ami szám itt szerepel — 20+ év, két adatközponti helyszín, 2×10 Gbps —, az mind visszakereshető a honlap többi oldalán is. A vállalt rendelkezésre állás és reakcióidő a szolgáltatási szerződésbe való, nem egy esettanulmányba.',
+  },
+  {
+    cim: 'Az esettanulmány nem árlista',
+    szoveg:
+      'A leírt megoldás az adott környezetre készült. Nem sablonokat árulunk: az infrastruktúrát és az üzemeltetési szolgáltatást is az adott igényekhez szabjuk, tehát abból, hogy egy hasonló cégnél mi vált be, még nem következik az Ön ajánlata.',
+  },
+  {
+    cim: 'Nem állítjuk, hogy minden projekt sima volt',
+    szoveg:
+      'Egy migrációnál mindig van olyan, ami nem a terv szerint alakul. Éppen ezért készül hozzá visszaállási forgatókönyv, és ezért nem élesben próbálunk ki semmit először. A különbség nem az, hogy nincs meglepetés, hanem hogy van rá válasz.',
   },
 ];
 ---
 
-<Base cim="Esettanulmányok" leiras="Megvalósított projektek: hálózati infrastruktúra, izolált kutatói környezet, szegmentált pénzügyi stack és kiszervezett üzemeltetés.">
+<Base
+  cim="Esettanulmányok"
+  leiras="Négy megvalósult környezet: országos médiaszolgáltató teljes infrastruktúrája migrációval, izolált kutatólabor, kétszintű szegmentált pénzügyi stack és kiszervezett web-, fájl- és címtárüzemeltetés."
+>
   <section class="band">
-    <div class="wrap prose">
-      <p class="eyebrow">Esettanulmányok</p>
-      <h1>A megoldott feladat a főszereplő</h1>
-      <p class="lead">A partnereink nevét nem tesszük közzé.</p>
+    <div class="wrap">
+      <div class="hero">
+        <p class="eyebrow">Esettanulmányok</p>
+        <h1>Négy környezet, négy egészen más feladat — ugyanazzal az alappal</h1>
+        <p class="lead">
+          Az alábbi négy környezet valós, megvalósult projekt. Mindegyiknél az szerepel, hogy mi volt
+          a kiinduló helyzet, mit kellett megoldani, és milyen technikai döntés döntötte el a
+          végeredményt. Az ügyfelek nevét
+          <a class="csillag-hiv" href="#nevekrol">nem tesszük közzé</a> — a megoldott feladat a
+          főszereplő.
+        </p>
+      </div>
+
+      <ul class="gyorsnezet">
+        {gyorsnezet.map((g) => (
+          <li>
+            <span class="gyorsnezet__ertek">{g.ertek}</span>
+            <span class="gyorsnezet__szoveg">{g.szoveg}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   </section>
 
   <section class="band band--mist">
     <div class="wrap">
-      <div class="projektek">
-        {projektek.map((p) => (
-          <div class="projekt">
-            <h2>{p.cim}</h2>
-            <p>{p.leiras}</p>
-          </div>
+      <h2 class="szekcio__cim">A négy környezet egy nézetben</h2>
+      <p class="szekcio__lead">
+        Egy médiaszolgáltató, egy kutatólabor, egy pénzügyi szolgáltató és több kereskedelmi cég
+        nem ugyanazt kéri. Az alábbi táblázat azt mutatja, hol tér el a feladat — a részletes
+        leírás mindegyikhez lejjebb olvasható.
+      </p>
+
+      <div class="tabla-doboz">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th scope="col">
+                Környezet<sup class="csillag"><a href="#nevekrol" aria-label="Megjegyzés az ügyfélnevekről">*</a></sup>
+              </th>
+              <th scope="col">Kiinduló helyzet</th>
+              <th scope="col">A megoldott feladat</th>
+              <th scope="col">A döntő technikai elem</th>
+            </tr>
+          </thead>
+          <tbody>
+            {attekintes.map((a, i) => (
+              <tr>
+                <th scope="row">
+                  <span class="tabla__idx">{String(i + 1).padStart(2, '0')}</span>
+                  {a.kornyezet}
+                </th>
+                <td>{a.kiindulas}</td>
+                <td>{a.feladat}</td>
+                <td>{a.kulcselem}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <h2 class="szekcio__cim">A négy környezet részletesen</h2>
+      <p class="szekcio__lead">
+        Minden eset ugyanazt a szerkezetet követi: mi volt a helyzet, mit tettünk, és mi ebből a
+        lényeg. A technikai részletek lenyithatók, a hivatkozások pedig oda visznek, ahol az adott
+        megoldás általánosan is le van írva.
+      </p>
+
+      <div class="ekartyak">
+        {esetek.map((e, i) => (
+          <article class="ekartya">
+            <div class="ekartya__fej">
+              <span class="ekartya__idx">{String(i + 1).padStart(2, '0')}</span>
+              <span class="ekartya__cimke">{e.cimke}</span>
+            </div>
+
+            <p class="ekartya__nev">
+              {e.nev}
+              <sup class="csillag"><a href="#nevekrol" aria-label="Megjegyzés az ügyfélnevekről">*</a></sup>
+            </p>
+
+            <h3>{e.cim}</h3>
+
+            {e.allitas.map((bek) => <p>{bek}</p>)}
+
+            <p class="ekartya__kulcs">{e.kulcs}</p>
+
+            {e.abra === 'migracio' && (
+              <figure class="abra">
+                <svg viewBox="0 0 880 326" role="img" aria-labelledby="abra-migracio">
+                  <title id="abra-migracio">
+                    Az átállás fázisai idővonalon. A meglévő környezet a felméréstől az éles
+                    átállásig végig élesben marad, az új környezet pedig párhuzamosan épül fel
+                    mellette. Öt fázis követi egymást, egymásba érő szakaszokkal: felmérés a
+                    szerverekről, alkalmazásokról, adatról és hálózatról; célarchitektúra és terv
+                    az RPO- és RTO-értékekkel, ütemezéssel és visszaállási tervvel; párhuzamos
+                    építés, amelynek során az új környezet előbb felépül; teszt-migráció, mert
+                    élesben semmit nem próbálunk ki először; végül éles átállás egyeztetett
+                    időablakban, amit a folyamatos üzemeltetés követ.
+                  </title>
+
+                  <text class="abra__mono" x="0" y="14">AZ ÁTÁLLÁS FÁZISAI — A RÉGI KÖRNYEZET KÖZBEN VÉGIG FUT</text>
+
+                  <text class="abra__mono" x="0" y="52">RÉGI KÖRNYEZET</text>
+                  <rect class="abra__sav" x="270" y="34" width="530" height="26" rx="3" />
+                  <text class="abra__kicsi" x="286" y="52">élesben marad — a szolgáltatás nem áll meg</text>
+
+                  <text class="abra__mono" x="0" y="86">ÚJ KÖRNYEZET</text>
+                  <rect class="abra__kiemelt" x="450" y="68" width="430" height="26" rx="3" />
+                  <text class="abra__kicsi" x="466" y="86">párhuzamosan épül fel, nem a régi helyén</text>
+
+                  <text class="abra__mono" x="0" y="129">01 · FELMÉRÉS</text>
+                  <text class="abra__kicsi" x="0" y="143">szerverek, alkalmazások, adat, hálózat</text>
+                  <rect class="abra__doboz" x="270" y="118" width="120" height="22" rx="3" />
+
+                  <text class="abra__mono" x="0" y="165">02 · CÉLARCHITEKTÚRA</text>
+                  <text class="abra__kicsi" x="0" y="179">RPO/RTO, ütemezés, visszaállási terv</text>
+                  <rect class="abra__doboz" x="360" y="154" width="120" height="22" rx="3" />
+
+                  <text class="abra__mono" x="0" y="201">03 · PÁRHUZAMOS ÉPÍTÉS</text>
+                  <text class="abra__kicsi" x="0" y="215">az új környezet előbb felépül</text>
+                  <rect class="abra__doboz" x="450" y="190" width="210" height="22" rx="3" />
+
+                  <text class="abra__mono" x="0" y="237">04 · TESZT-MIGRÁCIÓ</text>
+                  <text class="abra__kicsi" x="0" y="251">élesben semmit nem próbálunk először</text>
+                  <rect class="abra__doboz" x="630" y="226" width="140" height="22" rx="3" />
+
+                  <text class="abra__mono" x="0" y="273">05 · ÉLES ÁTÁLLÁS</text>
+                  <text class="abra__kicsi" x="0" y="287">egyeztetett ablakban, majd üzemeltetés</text>
+                  <rect class="abra__kiemelt" x="740" y="262" width="140" height="22" rx="3" />
+
+                  <text class="abra__mono" x="440" y="316" text-anchor="middle">AZ ÉLES ÁTÁLLÁS EGYEZTETETT IDŐABLAKBAN, VISSZAÁLLÁSI FORGATÓKÖNYVVEL</text>
+                </svg>
+              </figure>
+            )}
+
+            {e.abra === 'izolacio' && (
+              <figure class="abra">
+                <svg viewBox="0 0 880 322" role="img" aria-labelledby="abra-izolalt">
+                  <title id="abra-izolalt">
+                    Az izolált kutatói környezet öt rétege. Az internet felől nincs publikált
+                    szolgáltatás: a szegmens felé nem vezet útvonal, tehát nincs olyan szabály,
+                    amit el lehetne rontani. A kutatói hozzáférés ügyfelenként dedikált
+                    VPN-endpointon keresztül történik, IPsec, WireGuard, OpenVPN vagy SSTP
+                    protokollal. A számítási és tárolási réteg privát alhálózaton, saját virtuális
+                    vagy fizikai switchen áll. A mentési célpontok is a zárt környezet részei,
+                    egymástól függetlenül. A menedzsment out-of-band hálózaton fut, ami az
+                    internetről nem elérhető.
+                  </title>
+
+                  <text class="abra__mono" x="0" y="14">IZOLÁLT KUTATÓI KÖRNYEZET — MI VEZET BE, ÉS MI NEM</text>
+
+                  <rect class="abra__sav" x="0" y="30" width="250" height="48" rx="3" />
+                  <text class="abra__mono" x="16" y="59">INTERNET FELŐL</text>
+                  <rect class="abra__doboz" x="258" y="30" width="622" height="48" rx="3" />
+                  <text class="abra__cimke" x="276" y="52">Nincs publikált szolgáltatás</text>
+                  <text class="abra__kicsi" x="276" y="69">a szegmens felé nem vezet útvonal — nincs szabály, amit el lehetne rontani</text>
+                  <path class="abra__tiltas" d="M832 44 L856 64 M856 44 L832 64" />
+
+                  <rect class="abra__sav" x="0" y="82" width="250" height="48" rx="3" />
+                  <text class="abra__mono" x="16" y="111">KUTATÓI HOZZÁFÉRÉS</text>
+                  <rect class="abra__kiemelt" x="258" y="82" width="622" height="48" rx="3" />
+                  <text class="abra__cimke" x="276" y="104">Dedikált VPN-endpoint</text>
+                  <text class="abra__kicsi" x="276" y="121">ügyfelenként saját végpont — IPsec, WireGuard, OpenVPN vagy SSTP</text>
+
+                  <rect class="abra__sav" x="0" y="134" width="250" height="48" rx="3" />
+                  <text class="abra__mono" x="16" y="163">SZÁMÍTÁS ÉS TÁROLÁS</text>
+                  <rect class="abra__doboz" x="258" y="134" width="622" height="48" rx="3" />
+                  <text class="abra__cimke" x="276" y="156">Privát alhálózat, saját switchen</text>
+                  <text class="abra__kicsi" x="276" y="173">nagy adatmennyiséget kezelő terhelés, a valós igényhez méretezett erőforrással</text>
+
+                  <rect class="abra__sav" x="0" y="186" width="250" height="48" rx="3" />
+                  <text class="abra__mono" x="16" y="215">MENTÉS</text>
+                  <rect class="abra__doboz" x="258" y="186" width="622" height="48" rx="3" />
+                  <text class="abra__cimke" x="276" y="208">Több, egymástól független célpont</text>
+                  <text class="abra__kicsi" x="276" y="225">a mentési célpontok is a zárt környezet részei — nem ugyanazon a tárolón</text>
+
+                  <rect class="abra__sav" x="0" y="238" width="250" height="48" rx="3" />
+                  <text class="abra__mono" x="16" y="267">MENEDZSMENT</text>
+                  <rect class="abra__kiemelt" x="258" y="238" width="622" height="48" rx="3" />
+                  <text class="abra__cimke" x="276" y="260">Out-of-band, az internetről nem elérhető</text>
+                  <text class="abra__kicsi" x="276" y="277">a kezelőfelületet nem jelszó védi, hanem az, hogy nincs kitéve</text>
+
+                  <text class="abra__mono" x="440" y="312" text-anchor="middle">AZ IZOLÁCIÓ NEM BEÁLLÍTÁS, HANEM TOPOLÓGIA</text>
+                </svg>
+              </figure>
+            )}
+
+            {e.abra === 'ketszintu' && (
+              <figure class="abra">
+                <svg viewBox="0 0 880 344" role="img" aria-labelledby="abra-ketszintu">
+                  <title id="abra-ketszintu">
+                    A kétszintű, szegmentált alkalmazás-stack felépítése. Az internet felől érkező
+                    forgalom ügyfelenként dedikált átjárón halad át, amely a tűzfalat, a NAT-ot és a
+                    VPN-t is ellátja. Az átjáró mögött az ügyfél dedikált szegmense áll, két
+                    szinten. A publikus rétegen a web, az API és a levelezés fut, saját publikus
+                    IPv4-címmel a Triox címtartományából. A két szint között szegmenshatár húzódik,
+                    amelyen csak az indokolt forgalom halad át. A belső rétegen az alkalmazásszerver
+                    és az adatbázis áll, ami kívülről nem elérhető. Alul a mentés és a replikáció:
+                    független célpontok két helyszínen, off-site replikával. A publikus réteg
+                    kompromittálódása nem ad rálátást az adatbázisra.
+                  </title>
+
+                  <text class="abra__mono" x="350" y="14">ÜGYFÉL DEDIKÁLT SZEGMENSE — KÉTSZINTŰ FELOSZTÁS</text>
+
+                  <rect class="abra__doboz" x="0" y="140" width="100" height="50" rx="4" />
+                  <text class="abra__cimke" x="50" y="170" text-anchor="middle">Internet</text>
+                  <path class="abra__vonal" d="M100 165 H128" />
+                  <path class="abra__nyil" d="M134 165 L126 160 L126 170 Z" />
+
+                  <rect class="abra__doboz" x="140" y="128" width="170" height="74" rx="4" />
+                  <text class="abra__cimke" x="225" y="158" text-anchor="middle">Dedikált átjáró</text>
+                  <text class="abra__mono" x="225" y="178" text-anchor="middle">TŰZFAL · NAT · VPN</text>
+                  <path class="abra__vonal" d="M310 165 H338" />
+                  <path class="abra__nyil" d="M344 165 L336 160 L336 170 Z" />
+
+                  <rect class="abra__kiemelt" x="350" y="20" width="530" height="292" rx="4" />
+
+                  <rect class="abra__sav" x="370" y="40" width="490" height="76" rx="3" />
+                  <text class="abra__cimke" x="390" y="66">Publikus réteg</text>
+                  <text class="abra__kicsi" x="390" y="86">web, API és levelezés — ez az, ami kívülről elérhető</text>
+                  <text class="abra__kicsi" x="390" y="104">saját publikus IPv4-cím a Triox címtartományából</text>
+
+                  <text class="abra__mono" x="615" y="134" text-anchor="middle">SZEGMENSHATÁR — CSAK AZ INDOKOLT FORGALOM</text>
+                  <path class="abra__hatar" d="M370 142 H860" />
+
+                  <rect class="abra__sav" x="370" y="160" width="490" height="76" rx="3" />
+                  <text class="abra__cimke" x="390" y="186">Belső réteg</text>
+                  <text class="abra__kicsi" x="390" y="206">alkalmazásszerver és adatbázis — kívülről nem elérhető</text>
+                  <text class="abra__kicsi" x="390" y="224">a publikus rétegből nincs közvetlen út az adatig</text>
+
+                  <rect class="abra__sav" x="370" y="254" width="490" height="52" rx="3" />
+                  <text class="abra__cimke" x="390" y="278">Mentés és replikáció</text>
+                  <text class="abra__kicsi" x="390" y="296">független célpontok két helyszínen, off-site replikával</text>
+
+                  <text class="abra__mono" x="440" y="336" text-anchor="middle">A PUBLIKUS RÉTEG KOMPROMITTÁLÓDÁSA NEM AD RÁLÁTÁST AZ ADATBÁZISRA</text>
+                </svg>
+              </figure>
+            )}
+
+            <ul class="ekartya__hiv">
+              {e.hivatkozasok.map((h) => (
+                <li><a href={h.url}>{h.szoveg} →</a></li>
+              ))}
+            </ul>
+
+            <details class="reszletek">
+              <summary>Technikai részletek</summary>
+              <ul>
+                {e.reszletek.map((r) => (
+                  <li>
+                    {r.cimke && <strong>{r.cimke}:</strong>}
+                    {' '}{r.szoveg}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          </article>
         ))}
       </div>
+    </div>
+  </section>
+
+  <section class="band band--mist">
+    <div class="wrap">
+      <h2 class="szekcio__cim">Ami mind a négy környezetben ugyanaz</h2>
+      <p class="szekcio__lead">
+        A négy feladat nagyon különbözik egymástól, az alap viszont nem. Ez nem opció egy árlistán,
+        hanem az a kiindulás, amiről minden környezet indul nálunk — a többi ehhez képest a
+        testreszabás.
+      </p>
+
+      <figure class="abra">
+        <svg viewBox="0 0 880 316" role="img" aria-labelledby="abra-kozos">
+          <title id="abra-kozos">
+            Bal oldalon az, ami mind a négy környezetben azonos: két budapesti adatközponti
+            helyszín, ügyfelenként dedikált átjáró, elválasztott hálózati szegmens, több egymástól
+            független mentési célpont, out-of-band management és naprakész, átadható dokumentáció.
+            Jobb oldalon az, ami esetenként különbözik: a virtualizációs platform, az izoláció
+            szintje, az, hogy hol áll a hardver, milyen alkalmazás fut rajta, ki üzemelteti a
+            végpontokat, és milyen migrációval indult a projekt.
+          </title>
+
+          <text class="abra__mono" x="0" y="14">AMI MINDEN KÖRNYEZETBEN UGYANAZ</text>
+          <text class="abra__mono" x="450" y="14">AMI ESETENKÉNT KÜLÖNBÖZIK</text>
+
+          <rect class="abra__kiemelt" x="0" y="30" width="430" height="36" rx="3" />
+          <text class="abra__cimke" x="18" y="53">Két budapesti adatközponti helyszín</text>
+          <rect class="abra__doboz" x="450" y="30" width="430" height="36" rx="3" />
+          <text class="abra__cimke" x="468" y="53">A virtualizációs platform</text>
+
+          <rect class="abra__kiemelt" x="0" y="74" width="430" height="36" rx="3" />
+          <text class="abra__cimke" x="18" y="97">Ügyfelenként dedikált átjáró</text>
+          <rect class="abra__doboz" x="450" y="74" width="430" height="36" rx="3" />
+          <text class="abra__cimke" x="468" y="97">Az izoláció szintje</text>
+
+          <rect class="abra__kiemelt" x="0" y="118" width="430" height="36" rx="3" />
+          <text class="abra__cimke" x="18" y="141">Elválasztott hálózati szegmens</text>
+          <rect class="abra__doboz" x="450" y="118" width="430" height="36" rx="3" />
+          <text class="abra__cimke" x="468" y="141">Hol áll a hardver: nálunk vagy Önnél</text>
+
+          <rect class="abra__kiemelt" x="0" y="162" width="430" height="36" rx="3" />
+          <text class="abra__cimke" x="18" y="185">Több, egymástól független mentés</text>
+          <rect class="abra__doboz" x="450" y="162" width="430" height="36" rx="3" />
+          <text class="abra__cimke" x="468" y="185">Milyen alkalmazás fut rajta</text>
+
+          <rect class="abra__kiemelt" x="0" y="206" width="430" height="36" rx="3" />
+          <text class="abra__cimke" x="18" y="229">Out-of-band management</text>
+          <rect class="abra__doboz" x="450" y="206" width="430" height="36" rx="3" />
+          <text class="abra__cimke" x="468" y="229">Ki üzemelteti a végpontokat</text>
+
+          <rect class="abra__kiemelt" x="0" y="250" width="430" height="36" rx="3" />
+          <text class="abra__cimke" x="18" y="273">Átadható rendszerdokumentáció</text>
+          <rect class="abra__doboz" x="450" y="250" width="430" height="36" rx="3" />
+          <text class="abra__cimke" x="468" y="273">Milyen migrációval indult</text>
+
+          <text class="abra__mono" x="440" y="308" text-anchor="middle">A BAL OSZLOP NEM OPCIÓ AZ ÁRLISTÁN — MINDEN KÖRNYEZET EZEN INDUL</text>
+        </svg>
+      </figure>
+
+      <p class="kulcs">
+        Ezért nem kell külön „biztonsági csomagot” rendelnie: az alap nem felár, hanem a kiindulás.
+        A részletek a <a href="/technologia/">Technológia</a> és a <a href="/biztonsag/">Biztonság</a>
+        oldalon állnak.
+      </p>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <h2 class="szekcio__cim">Mit kap papíron</h2>
+      <p class="szekcio__lead">
+        Egy projekt akkor ér valamit, ha a végén nem csak működik valami, hanem le is van írva. Az
+        alábbi dokumentumok mind a négy környezetben ugyanúgy elkészültek — ezek azok, amelyek egy
+        auditnál, egy szolgáltatóváltásnál vagy egy incidens után számítanak.
+      </p>
+
+      <div class="tabla-doboz">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th scope="col">Dokumentum</th>
+              <th scope="col">Mit tartalmaz</th>
+              <th scope="col">Mikor keletkezik</th>
+            </tr>
+          </thead>
+          <tbody>
+            {dokumentumok.map((d) => (
+              <tr>
+                <th scope="row">{d.dokumentum}</th>
+                <td>{d.tartalom}</td>
+                <td>{d.mikor}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="paros">
+        <div>
+          <h3>Miért kezdünk mindig felméréssel</h3>
+          <p>
+            A négy környezet közül egyiknél sem az volt az első lépés, hogy ajánlatot adtunk. Előbb
+            fel kell térképezni, mi fut ma, min fut, mi hiányzik, és mi az, ami holnap reggel
+            eltörhet. Enélkül az ajánlat becslés lenne, a migrációs terv pedig találgatás.
+          </p>
+          <ul>
+            <li>szerverek, alkalmazások, adatmennyiség, hálózat és a valós erőforrás-igény</li>
+            <li>a mentés tényleges állapota — nem az, hogy elindul-e, hanem hogy visszaáll-e</li>
+            <li>jogosultsági struktúra és a hozzáférések nyilvántartása</li>
+            <li>rendszerenként RPO és RTO: mennyi állásidő és mennyi adatvesztés fogadható el</li>
+          </ul>
+          <p class="paros__hiv">
+            <a href="/szolgaltatasok/menedzselt-it-uzemeltetes/">A felmérés nem kötelezettségvállalás →</a>
+          </p>
+        </div>
+        <div>
+          <h3>Mi marad Önnél, ha egyszer elválnak útjaink</h3>
+          <p>
+            Ez ritkán kerül szóba egy ajánlatkérésnél, pedig ez méri le a legjobban, mennyire
+            átlátható egy üzemeltető. Nálunk a környezet dokumentált és átadható, a jogosultságok
+            nyilvántartottak, a mentések visszaállíthatósága pedig jegyzőkönyvvel igazolt.
+          </p>
+          <ul>
+            <li>naprakész rendszerdokumentáció — nem az üzemeltető fejében</li>
+            <li>változáskövetés: mi módosult a környezetben, mikor és miért</li>
+            <li>hozzáférési és eszkalációs útvonalak leírva</li>
+            <li>az adat minden esetben az Öné — mi tárolási és üzemeltetési szolgáltatást adunk hozzá</li>
+          </ul>
+          <p class="paros__hiv">
+            <a href="/szolgaltatasok/audit-restore-validation/">Igazolt visszaállítás, jegyzőkönyvvel →</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band band--mist">
+    <div class="wrap">
+      <h2 class="szekcio__cim">Ismerős a helyzet?</h2>
+      <p class="szekcio__lead">
+        Ezek azok a mondatok, amelyeket a felméréseken a leggyakrabban halljuk. Mindegyik mögött
+        ugyanaz áll: egy kockázat, amiről a cégen belül mindenki tud, csak épp senkinek nem az ő
+        dolga. A jobb oldali hivatkozás odavisz, ahol ezt már megoldottuk.
+      </p>
+
+      <div class="tabla-doboz">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th scope="col">Amit ma tapasztal</th>
+              <th scope="col">Mit jelent ez</th>
+              <th scope="col">Hol néztük ezt már meg</th>
+            </tr>
+          </thead>
+          <tbody>
+            {helyzetek.map((h) => (
+              <tr>
+                <th scope="row">{h.tapasztalat}</th>
+                <td>{h.jelentes}</td>
+                <td><a href={h.hova.url}>{h.hova.szoveg} →</a></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <p class="labjegyzet">
+        Ha a felsorolásból több sor is ismerős, az nem kivétel: a legtöbb környezetben ezek együtt
+        járnak. A <a href="/gyik/">GYIK</a> oldalon a leggyakoribb kérdésekre — köztük arra is, hogy
+        ki fér hozzá az adataihoz — rövid válaszok állnak.
+      </p>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <h2 class="szekcio__cim">Amit erről az oldalról szándékosan kihagytunk</h2>
+      <p class="szekcio__lead">
+        Egy esettanulmány-oldalon a legkönnyebb dolog túlígérni. Ezért kimondjuk azt is, mi az, amit
+        nem írunk le — ez ugyanolyan információ, mint a többi.
+      </p>
+
+      <div class="tartozkodas">
+        {tartozkodas.map((t) => (
+          <article>
+            <h3>{t.cim}</h3>
+            <p>{t.szoveg}</p>
+          </article>
+        ))}
+      </div>
+
+      <p class="labjegyzet" id="nevekrol">
+        <span class="csillag" aria-hidden="true">*</span> A fenti négy környezet valós, megvalósult
+        projekt. Ügyfeleink nevét nem tesszük közzé — sem itt, sem a honlap más oldalán. Egy
+        üzemeltetőnél az, hogy ki a partnere, önmagában is információ arról, hol áll az adott cég
+        infrastruktúrája; ezt nem hozzuk nyilvánosságra. A leírások ezért az ágazatot és a megoldott
+        feladatot nevezik meg, a céget nem. Ugyanezen okból nem szerepel az oldalon mért teljesítmény-,
+        méret- vagy megtakarítási adat. A <a href="/rolunk/">Rólunk</a> oldalon szereplő számok —
+        20+ év tapasztalat, két budapesti adatközponti helyszín, redundáns 2×10 Gbps gerinchálózat —
+        a saját infrastruktúránkra vonatkoznak, nem az ügyfelek környezetére.
+      </p>
+    </div>
+  </section>
+
+  <section class="band band--sotet">
+    <img class="vizjel vizjel--cta" src="/logo-feher.svg" alt="" aria-hidden="true" />
+    <div class="wrap cta">
+      <h2>Az ötödik eset lehet az Öné</h2>
+      <p class="lead">
+        Kezdjük ugyanott, ahol a másik négyet: egy felméréssel. A végén kap egy dokumentált
+        állapotképet és egy kockázati listát — akkor is, ha nem velünk dolgozik tovább.
+      </p>
+      <a class="btn" href="/kapcsolat/">Kérek egy felmérést</a>
     </div>
   </section>
 </Base>
 
 <style>
-  .projektek {
+  /* --- szekciófejek: azonos a Biztonság és a Partnerek oldaléval --- */
+
+  .szekcio__cim {
+    margin-bottom: 0.5rem;
+  }
+  .szekcio__lead {
+    max-width: 62ch;
+    color: var(--c-steel);
+    margin-bottom: 2rem;
+  }
+
+  /* --- hero és gyorsnézet --- */
+
+  .hero .lead {
+    max-width: 60ch;
+  }
+
+  .gyorsnezet {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 1.25rem;
+    margin: 2.5rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .gyorsnezet li {
+    border-top: 3px solid var(--c-brand);
+    padding-top: 0.9rem;
+  }
+  .gyorsnezet__ertek {
+    display: block;
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 1.15rem;
+    line-height: 1.2;
+    margin-bottom: 0.35rem;
+  }
+  .gyorsnezet__szoveg {
+    display: block;
+    color: var(--c-steel);
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  /* --- csillag: a diszkréció jelölése ---
+     Apró és visszafogott, mert nem ez az oldal mondanivalója. A jel a lap
+     alján lévő lábjegyzetre ugrik; a lábjegyzetben ugyanez a jel áll, ott
+     viszont aria-hidden, mert a szöveg magától érthető. */
+
+  .csillag {
+    color: var(--c-brand);
+    font-size: 0.75em;
+  }
+  .csillag a {
+    text-decoration: none;
+  }
+  .csillag a:hover {
+    text-decoration: underline;
+  }
+  .csillag-hiv {
+    text-decoration: none;
+    border-bottom: 1px solid var(--c-brand-wash);
+  }
+  .csillag-hiv:hover {
+    border-bottom-color: var(--c-brand);
+  }
+
+  /* --- esetkártyák (a /technologia/ és a /biztonsag/ kártyáival egyező) --- */
+
+  .ekartyak {
+    display: grid;
     gap: 1.5rem;
   }
-  .projekt {
+  .ekartya {
+    /* Grid-elem alapból min-width: auto, ezért az ábra min-width-je szétfeszítené
+       a rácsot. Nullázva az ábra a saját konténerében görgethető. */
+    min-width: 0;
     background: var(--c-paper);
     border: 1px solid var(--c-line);
     border-left: 4px solid var(--c-brand);
     border-radius: var(--r);
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+  }
+  .ekartya__fej {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.6rem;
+  }
+  .ekartya__idx,
+  .ekartya__cimke {
+    font-family: var(--f-util);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .ekartya__idx {
+    color: var(--c-brand);
+  }
+  .ekartya__cimke {
+    color: var(--c-steel);
+  }
+  /* A környezet megnevezése a cím fölött áll, nem címsorként: a címsor a
+     megoldott feladatot mondja ki, az ágazat csak besorolás. */
+  .ekartya__nev {
+    margin-bottom: 0.35rem;
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  .ekartya h3 {
+    font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+    margin-bottom: 0.7rem;
+  }
+  .ekartya p {
+    color: var(--c-steel);
+    font-size: 0.98rem;
+  }
+  /* Sorkizárt törzsszöveg, elválasztással — enélkül a hosszú magyar szavak
+     folyókat nyitnának a széles hasábban. */
+  .ekartya p:not(.ekartya__kulcs):not(.ekartya__nev) {
+    text-align: justify;
+    hyphens: auto;
+  }
+  .ekartya__kulcs {
+    border-left: 2px solid var(--c-brand);
+    padding-left: 1rem;
+    margin: 1.4rem 0;
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 1.02rem;
+    line-height: 1.45;
+  }
+  .ekartya__hiv {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.75rem;
+    margin: 1.4rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.9rem;
+  }
+  .ekartya__hiv a,
+  .paros__hiv a {
+    text-decoration: none;
+  }
+  .ekartya__hiv a:hover,
+  .paros__hiv a:hover {
+    text-decoration: underline;
+  }
+
+  /* --- lenyitható technikai részletek (a /technologia/ accordionjával egyező) --- */
+
+  .reszletek {
+    border-top: 1px solid var(--c-line);
+    padding-top: 1rem;
+    margin-top: 1.4rem;
+  }
+  .reszletek summary {
+    font-family: var(--f-util);
+    font-size: 0.74rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-brand);
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .reszletek summary::-webkit-details-marker {
+    display: none;
+  }
+  .reszletek summary::before {
+    content: '+';
+    font-size: 1rem;
+    line-height: 1;
+    width: 1rem;
+    text-align: center;
+  }
+  .reszletek[open] summary::before {
+    content: '–';
+  }
+  .reszletek summary:hover {
+    color: var(--c-brand-deep);
+  }
+  .reszletek ul {
+    margin: 1rem 0 0;
+    padding-left: 1.1rem;
+  }
+  .reszletek li {
+    color: var(--c-steel);
+    font-size: 0.94rem;
+    margin-bottom: 0.45rem;
+  }
+  .reszletek li strong {
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-weight: 600;
+    margin-right: 0.3rem;
+  }
+
+  /* --- ábra-kiegészítők ---
+     Két elem hiányzik a globális készletből: a „nincs útvonal" jelölés és a
+     szegmenshatár. Mindkettő szaggatott, mert nem forgalmat ábrázol. */
+
+  .abra__tiltas {
+    stroke: var(--c-steel);
+    stroke-width: 2;
+    fill: none;
+  }
+  .abra__hatar {
+    stroke: var(--c-brand);
+    stroke-width: 1.5;
+    stroke-dasharray: 6 4;
+    fill: none;
+  }
+
+  /* --- táblázatok: a Biztonság oldaléval egyezően --- */
+
+  .tabla-doboz {
+    overflow-x: auto;
+  }
+  .tabla {
+    width: 100%;
+    min-width: 44rem;
+    border-collapse: collapse;
+    font-size: 0.93rem;
+  }
+  .tabla th,
+  .tabla td {
+    text-align: left;
+    padding: 0.6rem 0.9rem;
+    border: 1px solid var(--c-line);
+    vertical-align: top;
+  }
+  .tabla thead th {
+    background: var(--c-ink);
+    color: #e9ecf2;
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+  }
+  .tabla thead th .csillag a {
+    color: #e9ecf2;
+  }
+  .tabla tbody th {
+    background: var(--c-paper);
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: var(--c-ink);
+    width: 15rem;
+  }
+  .tabla td {
+    background: var(--c-paper);
+    color: var(--c-steel);
+  }
+  .tabla tbody tr:nth-child(even) th,
+  .tabla tbody tr:nth-child(even) td {
+    background: var(--c-mist);
+  }
+  .tabla a {
+    text-decoration: none;
+  }
+  .tabla a:hover {
+    text-decoration: underline;
+  }
+  /* Sorszám az áttekintő táblázatban — ugyanaz a szám, mint az esetkártyán,
+     hogy a két nézet összekapcsolható legyen. */
+  .tabla__idx {
+    display: block;
+    margin-bottom: 0.2rem;
+    font-family: var(--f-util);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    color: var(--c-brand);
+  }
+
+  /* --- kétoszlopos szövegblokk --- */
+
+  .paros {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-top: 2.5rem;
+  }
+  @media (min-width: 46rem) {
+    .paros {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .paros h3 {
+    font-size: 1.08rem;
+    margin-bottom: 0.6rem;
+  }
+  .paros p {
+    color: var(--c-steel);
+    font-size: 0.96rem;
+  }
+  .paros ul {
+    margin: 0 0 1rem;
+    padding-left: 1rem;
+    list-style: none;
+  }
+  .paros li {
+    position: relative;
+    margin-bottom: 0.4rem;
+    color: var(--c-steel);
+    font-size: 0.92rem;
+    line-height: 1.45;
+  }
+  .paros li::before {
+    content: '';
+    position: absolute;
+    left: -1rem;
+    top: 0.58em;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--c-brand);
+  }
+  .paros__hiv {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+
+  /* --- „amit kihagytunk" kártyák --- */
+
+  .tartozkodas {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  @media (min-width: 46rem) {
+    .tartozkodas {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  /* Szándékosan visszafogott: nem hirdetés, hanem kiegészítés — ezért nincs
+     rajta márkakék hangsúly. */
+  .tartozkodas article {
+    background: var(--c-mist);
+    border: 1px solid var(--c-line);
+    border-radius: var(--r);
     padding: 1.5rem;
   }
-  .projekt h2 {
+  .tartozkodas h3 {
     font-size: 1.05rem;
     margin-bottom: 0.5rem;
   }
-  .projekt p {
-    color: var(--c-steel);
-    font-size: 0.95rem;
+  .tartozkodas p {
     margin: 0;
+    color: var(--c-steel);
+    font-size: 0.94rem;
+  }
+
+  /* --- kiemelt mondat és lábjegyzet --- */
+
+  .kulcs {
+    max-width: 62ch;
+    border-left: 2px solid var(--c-brand);
+    padding-left: 1rem;
+    margin: 2.5rem 0 0;
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 1.05rem;
+    line-height: 1.45;
+  }
+
+  .labjegyzet {
+    max-width: 72ch;
+    margin: 2rem 0 0;
+    color: var(--c-steel);
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+  /* A lábjegyzetre ugrás után a szöveg ne tapadjon a fejléc alá. */
+  #nevekrol {
+    scroll-margin-top: 6rem;
+  }
+
+  .vizjel--cta {
+    right: -4rem;
+    bottom: -6rem;
+    width: 22rem;
+    opacity: 0.07;
+  }
+  .cta {
+    text-align: center;
+  }
+  .cta .lead {
+    margin-inline: auto;
+    max-width: 58ch;
+  }
+
+  /* Keskeny hasábon a sorkizárás tátongó szóközöket nyit. */
+  @media (max-width: 40rem) {
+    .ekartya p:not(.ekartya__kulcs):not(.ekartya__nev) {
+      text-align: left;
+    }
+  }
+  @media (max-width: 34rem) {
+    .ekartya__kulcs,
+    .kulcs {
+      font-size: 0.98rem;
+      padding-left: 0.8rem;
+    }
+    .gyorsnezet {
+      gap: 1rem;
+    }
+    .ekartya__hiv {
+      gap: 0.4rem;
+      flex-direction: column;
+    }
+    .cta .btn {
+      width: 100%;
+      justify-content: center;
+    }
   }
 </style>
