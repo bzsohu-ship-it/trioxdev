@@ -26,8 +26,14 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      # A v4-es lépések Node.js 20-at céloztak, amit a futtatók már kényszerből
+      # Node 24-en indítanak — ez ma figyelmeztetés, később hiba lesz. A v5-től
+      # az action-ök natívan Node 24-en futnak.
+      #
+      # A node-version alább a projekt Node-verziója, nem az action-öké — a
+      # kettőnek nincs köze egymáshoz, ezért marad 22 (aktív LTS).
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
