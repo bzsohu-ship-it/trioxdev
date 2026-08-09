@@ -4,119 +4,744 @@ import Base from '../layouts/Base.astro';
 /**
  * Partnerek. Új partner hozzáadása:
  *   1. a logót tedd a `public/partnerek/` mappába (SVG a legjobb, mert éles marad)
- *   2. vedd fel ide egy sorral, a `logo` a fájlnév a mappán belül
+ *   2. vedd fel a megfelelő csoport `tagok` tömbjébe, a `logo` a fájlnév a mappán belül
  *
  * A `logo` elhagyható: amíg nincs jóváhagyott logófájl, a csempe a nevet
- * mutatja. Így az oldal félkész logó nélkül sem néz befejezetlennek.
+ * mutatja szedve. Így az oldal félkész logó nélkül sem néz befejezetlennek.
  *
  * Csak olyan partner kerüljön ide, akinek a megjelenítésére van engedélyünk —
  * a gyártói logók használatát márkahasználati szabályzat köti.
+ *
+ * FONTOS a szövegezésre: a `szerep` mező azt írja le, hogy az adott gyártó
+ * terméke MIT CSINÁL a Triox által üzemeltetett környezetekben. Formális
+ * partnerfokozatot ("Gold Partner", "Premier Partner", tanúsítványszám) csak
+ * akkor írjunk ki, ha Zsolt megerősítette és van mögötte élő szerződés.
+ * A Microsoft CSP/SPLA státusz megerősített — az IaaS és a DCaaS oldal is
+ * hivatkozik rá. A többi gyártónál a viszonteladói/partnerfokozat egyelőre
+ * KITÖLTENDŐ: lásd `docs/partnerek-megerositendo.md` (nincs a buildben).
  */
 interface Partner {
   nev: string;
+  /** Teljes cégnév, ha a köznapi név rövidítés. A csempén kisebb betűvel. */
+  teljes?: string;
+  /** Egy mondat: mit ad a stackhez. */
   szerep: string;
+  /** 2–3 konkrétum arról, mire használjuk. */
+  hasznalat: string[];
   /** Fájlnév a `public/partnerek/` mappán belül. Ha hiányzik, a név látszik. */
   logo?: string;
 }
 
-const partnerek: Partner[] = [
+interface Csoport {
+  cim: string;
+  ikon: 'szerver' | 'halozat' | 'tarolas' | 'licenc';
+  leiras: string;
+  tagok: Partner[];
+}
+
+const csoportok: Csoport[] = [
   {
-    nev: 'Microsoft',
-    szerep: 'CSP viszonteladó · SPLA szerződéses partner',
+    cim: 'Szerver és számítási kapacitás',
+    ikon: 'szerver',
+    leiras:
+      'A vas, amin a virtuális gépei futnak — az adatközpontunkban és az Ön telephelyén egyaránt. Mindegyik gyártónál out-of-band menedzsmenttel dolgozunk: a szerver akkor is kezelhető, ha az operációs rendszer el sem indul.',
+    tagok: [
+      {
+        nev: 'Dell',
+        teljes: 'Dell Technologies',
+        szerep: 'PowerEdge szerverplatform, iDRAC out-of-band menedzsmenttel.',
+        hasznalat: [
+          'Enterprise szerverpark az adatközponti virtualizáció alatt',
+          'Meglévő PowerEdge park átvétele üzemeltetésre, csere nélkül',
+        ],
+      },
+      {
+        nev: 'HP / HPE',
+        teljes: 'Hewlett Packard Enterprise',
+        szerep: 'ProLiant szerverplatform, iLO out-of-band menedzsmenttel.',
+        hasznalat: [
+          'Telephelyi és adatközponti szerverek üzemeltetése',
+          'Firmware- és életciklus-követés a hardver teljes életútján',
+        ],
+      },
+      {
+        nev: 'Lenovo',
+        szerep: 'x86 szerverplatform — az IBM-től átvett szervervonal folytatása.',
+        hasznalat: [
+          'Szerverek üzemeltetése és bővítése meglévő parkban',
+          'Beszerzés-támogatás: konfiguráció a tényleges terheléshez méretezve',
+        ],
+      },
+      {
+        nev: 'IBM',
+        szerep: 'Örökölt IBM szerverek és platformok üzemeltetése.',
+        hasznalat: [
+          'Régebbi IBM System x gépek átvétele és felügyelete',
+          'Az x86-vonal 2014-ben a Lenovóhoz került — a folytonosságot mi tartjuk',
+        ],
+      },
+    ],
+  },
+  {
+    cim: 'Hálózat',
+    ikon: 'halozat',
+    leiras:
+      'A hálózat az, ami az ügyfeleket egymástól elválasztja. Ügyfelenként dedikált átjáró áll a környezet előtt, saját tűzfalszabályokkal, saját VPN-endpointtal és saját publikus IP-vel.',
+    tagok: [
+      {
+        nev: 'Cisco',
+        szerep: 'Vállalati hálózati eszközök a gerinc- és a hozzáférési rétegben.',
+        hasznalat: [
+          'Switching és routing a redundáns 2×10 Gbps gerinchálózatban',
+          'Telephelyi hálózatok üzemeltetése és dokumentálása',
+        ],
+      },
+      {
+        nev: 'MikroTik',
+        szerep: 'RouterOS — routing, tűzfal, VPN és VLAN egy eszközön.',
+        hasznalat: [
+          'Ügyfelenként dedikált átjáró: tűzfal, NAT és VPN-endpoint',
+          'VLAN-alapú szegmentálás a publikus és a belső réteg között',
+        ],
+      },
+    ],
+  },
+  {
+    cim: 'Tárolás, mentés és replikáció',
+    ikon: 'tarolas',
+    leiras:
+      'A mentés nálunk nem az éles rendszer mellékterméke, hanem külön infrastruktúra: több, egymástól fizikailag független célponton, több helyszínen. A kritikus terhelésekhez off-site VM-replika is tartozik.',
+    tagok: [
+      {
+        nev: 'Veeam',
+        szerep: 'Backup & Replication és Veeam Agent — a mentési lánc gerince.',
+        hasznalat: [
+          'Virtualizált és fizikai gépek mentése, VM-replikáció off-site célpontra',
+          'Visszaállítási tesztek: a mentésből tényleg elindul-e a rendszer',
+        ],
+      },
+      {
+        nev: 'Synology',
+        szerep: 'NAS-tárolás és önálló mentési célpont.',
+        hasznalat: [
+          'Független backup target — nem ugyanaz a tároló, mint amin az éles rendszer fut',
+          'Fájlszolgáltatás és helyi mentés kisebb telephelyeken',
+        ],
+      },
+    ],
+  },
+  {
+    cim: 'Platform és licenc',
+    ikon: 'licenc',
+    leiras:
+      'A szoftverlicenc ott lesz kockázat, ahol senki nem tartja nyilván. A bérelt környezetben futó Microsoft-termékek licencei a mi nevünkön, havi tényleges használat alapján kerülnek jelentésre.',
+    tagok: [
+      {
+        nev: 'Microsoft',
+        szerep: 'CSP viszonteladó · SPLA szerződéses partner.',
+        hasznalat: [
+          'SPLA: Windows Server, RDS és SQL Server havi használat alapján',
+          'CSP: Microsoft 365 és felhőkiegészítők egy számlán, magyar támogatással',
+          'Hyper-V, Windows Server, Entra ID és Exchange üzemeltetése',
+        ],
+      },
+    ],
+  },
+];
+
+/**
+ * A partnerek száma a bevezetőben betűvel áll, mert magyarul a folyó szövegben
+ * a kis számok kiírva olvashatók. A számjegyes alak a tartalék, ha a lista
+ * egyszer tizenkettőnél hosszabbra nőne.
+ */
+const szamnevek = [
+  'nulla', 'egy', 'két', 'három', 'négy', 'öt', 'hat',
+  'hét', 'nyolc', 'kilenc', 'tíz', 'tizenegy', 'tizenkét',
+];
+const osszesPartner = csoportok.reduce((n, cs) => n + cs.tagok.length, 0);
+const partnerSzam = szamnevek[osszesPartner] ?? String(osszesPartner);
+
+const elonyok = [
+  {
+    cim: 'Egy szerződés az egészre',
+    szoveg:
+      'Nem Önnek kell a szerverszállító, a hálózati szállító és a licencforgalmazó között egyeztetnie, amikor valami nem működik. Egy szerződéses partnere van, és az intézi a gyártói hátteret.',
+  },
+  {
+    cim: 'A licencaudit kockázata a miénk',
+    szoveg:
+      'A bérelt környezetben futó Microsoft-licencek SPLA-szerződésen, a szolgáltató nevén szerepelnek. A megfelelő licencmennyiség jelentése a mi feladatunk és a mi felelősségünk — minden hónapban.',
+    link: { szoveg: 'Hogyan működik az SPLA és a CSP', url: '/szolgaltatasok/iaas/' },
+  },
+  {
+    cim: 'Nem kötjük egy gyártóhoz',
+    szoveg:
+      'Nem vagyunk elkötelezve egyetlen gyártó mellett sem. Ha a meglévő parkja HPE, akkor HPE marad; ha a feladathoz a MikroTik a jó válasz, akkor nem azért lesz más, mert nekünk úgy kényelmesebb.',
+  },
+  {
+    cim: 'Kezelhető akkor is, ha áll',
+    szoveg:
+      'Az iDRAC és az iLO out-of-band menedzsment azt jelenti, hogy a szerverhez akkor is hozzáférünk, ha az operációs rendszer el sem indul. Nem kell kiszállni ahhoz, hogy lássuk, mi a baj.',
   },
 ];
 ---
 
-<Base cim="Partnerek" leiras="Technológiai partnereink és minősítéseink.">
+<Base
+  cim="Partnerek"
+  leiras="Dell, HP, IBM, Lenovo, Cisco, MikroTik, Veeam, Synology és Microsoft — a gyártói háttér, ami a Triox által üzemeltetett környezetek mögött áll. Önnek egyetlen szerződése van az egészre."
+>
   <section class="band">
     <div class="wrap prose">
       <p class="eyebrow">Partnerek</p>
-      <h1>Akikkel dolgozunk</h1>
+      <h1>A gyártói háttér a mi dolgunk. Önnek egy szerződése van</h1>
       <p class="lead">
-        A licencelést és a gyártói hátteret is mi intézzük — Önnek egy szerződéses
-        partnere van az egészre.
+        Egy működő környezetben {partnerSzam} gyártó terméke dolgozik együtt: szerver, hálózat,
+        tároló, mentés és licenc. Ezt a láncot mi tartjuk össze — a beszerzéstől a havi
+        licencjelentésen át az életciklus-tervezésig.
+      </p>
+    </div>
+  </section>
+
+  <section class="band band--mist">
+    <div class="wrap">
+      <h2 class="szekcio__cim">Hol áll melyik gyártó</h2>
+      <p class="szekcio__lead">
+        Egy üzemeltetett környezet hat rétegből áll. Mindegyik réteghez tartozik gyártó, szerződés,
+        frissítési ciklus és hibabejelentési út — és mind a hat ugyanannak a csapatnak a felelőssége.
       </p>
 
-      <ul class="partnerracs">
-        {partnerek.map((p) => (
-          <li class="partner">
-            <div class="partner__jel">
-              {p.logo ? (
-                <img src={`/partnerek/${p.logo}`} alt={p.nev} loading="lazy" />
-              ) : (
-                <span class="partner__nev">{p.nev}</span>
+      <figure class="abra">
+        <svg viewBox="0 0 880 372" role="img" aria-labelledby="abra-retegek">
+          <title id="abra-retegek">
+            Egy üzemeltetett környezet hat rétege és a hozzájuk tartozó gyártók. Felülről lefelé:
+            licenc és platform — Microsoft, SPLA és CSP szerződésen; virtualizáció — Microsoft
+            Hyper-V, VMware, Proxmox; szerver és számítás — Dell, HP/HPE, Lenovo, IBM, iDRAC és iLO
+            out-of-band menedzsmenttel; hálózat — Cisco és MikroTik, ügyfelenként dedikált átjáróval;
+            tárolás — Synology NAS, valamint SAN, iSCSI és RAID; mentés és replikáció — Veeam és
+            Synology, több független célponton. Mind a hat réteget ugyanaz a csapat üzemelteti.
+          </title>
+
+          <text class="abra__mono" x="0" y="14">EGY ÜZEMELTETETT KÖRNYEZET RÉTEGEI</text>
+
+          <rect class="abra__sav" x="0" y="30" width="270" height="48" rx="3" />
+          <text class="abra__mono" x="16" y="59">LICENC ÉS PLATFORM</text>
+          <rect class="abra__kiemelt" x="278" y="30" width="602" height="48" rx="3" />
+          <text class="abra__cimke" x="296" y="52">Microsoft</text>
+          <text class="abra__kicsi" x="296" y="69">Windows Server · SQL Server · Microsoft 365 — SPLA és CSP szerződésen</text>
+
+          <rect class="abra__sav" x="0" y="82" width="270" height="48" rx="3" />
+          <text class="abra__mono" x="16" y="111">VIRTUALIZÁCIÓ</text>
+          <rect class="abra__doboz" x="278" y="82" width="602" height="48" rx="3" />
+          <text class="abra__cimke" x="296" y="104">Microsoft Hyper-V · VMware · Proxmox</text>
+          <text class="abra__kicsi" x="296" y="121">mind a három platform üzemel — nem kell platformot váltania</text>
+
+          <rect class="abra__sav" x="0" y="134" width="270" height="48" rx="3" />
+          <text class="abra__mono" x="16" y="163">SZERVER ÉS SZÁMÍTÁS</text>
+          <rect class="abra__doboz" x="278" y="134" width="602" height="48" rx="3" />
+          <text class="abra__cimke" x="296" y="156">Dell · HP / HPE · Lenovo · IBM</text>
+          <text class="abra__kicsi" x="296" y="173">PowerEdge és ProLiant — iDRAC, iLO out-of-band menedzsmenttel</text>
+
+          <rect class="abra__sav" x="0" y="186" width="270" height="48" rx="3" />
+          <text class="abra__mono" x="16" y="215">HÁLÓZAT</text>
+          <rect class="abra__doboz" x="278" y="186" width="602" height="48" rx="3" />
+          <text class="abra__cimke" x="296" y="208">Cisco · MikroTik</text>
+          <text class="abra__kicsi" x="296" y="225">routing, tűzfal, VLAN, VPN — ügyfelenként dedikált átjáró</text>
+
+          <rect class="abra__sav" x="0" y="238" width="270" height="48" rx="3" />
+          <text class="abra__mono" x="16" y="267">TÁROLÁS</text>
+          <rect class="abra__doboz" x="278" y="238" width="602" height="48" rx="3" />
+          <text class="abra__cimke" x="296" y="260">Synology · SAN / iSCSI / RAID</text>
+          <text class="abra__kicsi" x="296" y="277">NAS és blokkszintű tárolás, a terheléshez méretezve</text>
+
+          <rect class="abra__sav" x="0" y="290" width="270" height="48" rx="3" />
+          <text class="abra__mono" x="16" y="319">MENTÉS ÉS REPLIKÁCIÓ</text>
+          <rect class="abra__kiemelt" x="278" y="290" width="602" height="48" rx="3" />
+          <text class="abra__cimke" x="296" y="312">Veeam · Synology</text>
+          <text class="abra__kicsi" x="296" y="329">Backup &amp; Replication és Agent — több, egymástól független célponton</text>
+
+          <text class="abra__mono" x="440" y="362" text-anchor="middle">MIND A HAT RÉTEG UGYANANNAK A CSAPATNAK A FELELŐSSÉGE</text>
+        </svg>
+      </figure>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <h2 class="szekcio__cim">Akikkel dolgozunk</h2>
+      <p class="szekcio__lead">
+        Az alábbi gyártók termékei a Triox által üzemeltetett környezetekben napi szinten futnak.
+        A felsorolás nem katalógus: mindegyiknél az szerepel, hogy pontosan mire használjuk.
+      </p>
+
+      {csoportok.map((cs) => (
+        <section class="csoport">
+          <div class="csoport__fej">
+            <span class="csoport__ikon" aria-hidden="true">
+              {cs.ikon === 'szerver' && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="5" rx="1.5" />
+                  <rect x="3" y="14.5" width="18" height="5" rx="1.5" />
+                  <line x1="6.5" y1="6.5" x2="6.5" y2="6.5" />
+                  <line x1="6.5" y1="17" x2="6.5" y2="17" />
+                  <line x1="10" y1="6.5" x2="17" y2="6.5" />
+                  <line x1="10" y1="17" x2="17" y2="17" />
+                </svg>
               )}
+              {cs.ikon === 'halozat' && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="4.5" r="2.5" />
+                  <circle cx="5" cy="19" r="2.5" />
+                  <circle cx="19" cy="19" r="2.5" />
+                  <path d="M12 7v4.5M5 16.5V12h14v4.5" />
+                </svg>
+              )}
+              {cs.ikon === 'tarolas' && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <ellipse cx="12" cy="6" rx="8" ry="3" />
+                  <path d="M4 6v6c0 1.66 3.58 3 8 3s8-1.34 8-3V6" />
+                  <path d="M4 12v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6" />
+                </svg>
+              )}
+              {cs.ikon === 'licenc' && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 3l7.5 3v5.5c0 4.4-3.1 8-7.5 9.5-4.4-1.5-7.5-5.1-7.5-9.5V6z" />
+                  <path d="M9 12l2.2 2.2L15.5 10" />
+                </svg>
+              )}
+            </span>
+            <div>
+              <h3>{cs.cim}</h3>
+              <p class="csoport__leiras">{cs.leiras}</p>
             </div>
-            <p class="partner__szerep">{p.szerep}</p>
-          </li>
-        ))}
-      </ul>
+          </div>
 
-      <p class="megjegyzes">
-        A megvalósított projektekről az <a href="/esettanulmanyok/">Esettanulmányok</a>
-        oldalon olvashat. Ügyfeleink nevét nem tesszük közzé.
+          <ul class="partnerracs">
+            {cs.tagok.map((p) => (
+              <li class="partner">
+                <div class="partner__jel">
+                  {p.logo ? (
+                    <img src={`/partnerek/${p.logo}`} alt={p.nev} loading="lazy" />
+                  ) : (
+                    <span class="partner__nev">{p.nev}</span>
+                  )}
+                </div>
+                {p.teljes && <p class="partner__teljes">{p.teljes}</p>}
+                <p class="partner__szerep">{p.szerep}</p>
+                <ul class="partner__lista">
+                  {p.hasznalat.map((h) => <li>{h}</li>)}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
+  </section>
+
+  <section class="band band--mist">
+    <div class="wrap">
+      <h2 class="szekcio__cim">Miért számít ez Önnek</h2>
+      <p class="szekcio__lead">
+        A gyártói lista önmagában senkit nem érdekel. Az számít, hogy hány szerződést kell kézben
+        tartania, és kit hív, amikor áll a rendszer.
       </p>
+
+      <figure class="abra">
+        <svg viewBox="0 0 880 306" role="img" aria-labelledby="abra-szerzodes">
+          <title id="abra-szerzodes">
+            Két elrendezés összehasonlítása. Bal oldalon: az Ön cége közvetlenül, külön-külön áll
+            kapcsolatban hat szállítóval — szerver, hálózat, tárolás, mentés, virtualizáció és licenc
+            —, tehát hat szerződés és hat kapcsolattartó van, és egyikük sem látja a teljes képet.
+            Jobb oldalon: az Ön cége egyetlen szerződéssel a Trioxhoz kapcsolódik, és a hat gyártói
+            irány mind a Trioxon keresztül fut — egy kapcsolattartó, egy felelős a teljes láncért.
+          </title>
+
+          <text class="abra__mono" x="200" y="14" text-anchor="middle">GYÁRTÓNKÉNT KÜLÖN</text>
+          <rect class="abra__doboz" x="0" y="112" width="104" height="52" rx="4" />
+          <text class="abra__cimke" x="52" y="143" text-anchor="middle">Az Ön cége</text>
+
+          <path class="abra__vonal abra__vonal--halvany" d="M104 138 L246 44" />
+          <path class="abra__vonal abra__vonal--halvany" d="M104 138 L246 82" />
+          <path class="abra__vonal abra__vonal--halvany" d="M104 138 L246 120" />
+          <path class="abra__vonal abra__vonal--halvany" d="M104 138 L246 158" />
+          <path class="abra__vonal abra__vonal--halvany" d="M104 138 L246 196" />
+          <path class="abra__vonal abra__vonal--halvany" d="M104 138 L246 234" />
+
+          <rect class="abra__doboz" x="246" y="30" width="154" height="28" rx="3" />
+          <text class="abra__kicsi" x="260" y="49">Szerverszállító</text>
+          <rect class="abra__doboz" x="246" y="68" width="154" height="28" rx="3" />
+          <text class="abra__kicsi" x="260" y="87">Hálózati szállító</text>
+          <rect class="abra__doboz" x="246" y="106" width="154" height="28" rx="3" />
+          <text class="abra__kicsi" x="260" y="125">Tárolószállító</text>
+          <rect class="abra__doboz" x="246" y="144" width="154" height="28" rx="3" />
+          <text class="abra__kicsi" x="260" y="163">Mentési szállító</text>
+          <rect class="abra__doboz" x="246" y="182" width="154" height="28" rx="3" />
+          <text class="abra__kicsi" x="260" y="201">Virtualizációs licenc</text>
+          <rect class="abra__doboz" x="246" y="220" width="154" height="28" rx="3" />
+          <text class="abra__kicsi" x="260" y="239">Licencforgalmazó</text>
+
+          <text class="abra__mono" x="200" y="272" text-anchor="middle">HAT SZERZŐDÉS · HAT KAPCSOLATTARTÓ</text>
+          <text class="abra__mono" x="200" y="290" text-anchor="middle">ÉS EGYIKÜK SEM LÁTJA A TELJES KÉPET</text>
+
+          <path class="abra__valaszto" d="M424 24 V282" />
+
+          <text class="abra__mono" x="660" y="14" text-anchor="middle">A TRIOXSZAL</text>
+          <rect class="abra__doboz" x="448" y="112" width="104" height="52" rx="4" />
+          <text class="abra__cimke" x="500" y="143" text-anchor="middle">Az Ön cége</text>
+
+          <path class="abra__vonal" d="M552 138 H592" />
+          <path class="abra__nyil" d="M598 138 L590 133 L590 143 Z" />
+
+          <rect class="abra__kiemelt" x="604" y="104" width="112" height="68" rx="4" />
+          <text class="abra__cimke" x="660" y="134" text-anchor="middle">Triox</text>
+          <text class="abra__mono" x="660" y="152" text-anchor="middle">EGY SZERZŐDÉS</text>
+
+          <path class="abra__vonal" d="M716 138 L760 44" />
+          <path class="abra__vonal" d="M716 138 L760 82" />
+          <path class="abra__vonal" d="M716 138 L760 120" />
+          <path class="abra__vonal" d="M716 138 L760 158" />
+          <path class="abra__vonal" d="M716 138 L760 196" />
+          <path class="abra__vonal" d="M716 138 L760 234" />
+
+          <rect class="abra__sav" x="760" y="30" width="120" height="28" rx="3" />
+          <text class="abra__kicsi" x="772" y="49">Szerver</text>
+          <rect class="abra__sav" x="760" y="68" width="120" height="28" rx="3" />
+          <text class="abra__kicsi" x="772" y="87">Hálózat</text>
+          <rect class="abra__sav" x="760" y="106" width="120" height="28" rx="3" />
+          <text class="abra__kicsi" x="772" y="125">Tárolás</text>
+          <rect class="abra__sav" x="760" y="144" width="120" height="28" rx="3" />
+          <text class="abra__kicsi" x="772" y="163">Mentés</text>
+          <rect class="abra__sav" x="760" y="182" width="120" height="28" rx="3" />
+          <text class="abra__kicsi" x="772" y="201">Virtualizáció</text>
+          <rect class="abra__sav" x="760" y="220" width="120" height="28" rx="3" />
+          <text class="abra__kicsi" x="772" y="239">Licenc</text>
+
+          <text class="abra__mono" x="660" y="272" text-anchor="middle">EGY SZERZŐDÉS · EGY KAPCSOLATTARTÓ</text>
+          <text class="abra__mono" x="660" y="290" text-anchor="middle">EGY FELELŐS A TELJES LÁNCÉRT</text>
+        </svg>
+      </figure>
+
+      <div class="elonyok">
+        {elonyok.map((e, i) => (
+          <article class="elony">
+            <span class="elony__idx">{String(i + 1).padStart(2, '0')}</span>
+            <h3>{e.cim}</h3>
+            <p>{e.szoveg}</p>
+            {e.link && (
+              <p class="elony__hiv"><a href={e.link.url}>{e.link.szoveg} →</a></p>
+            )}
+          </article>
+        ))}
+      </div>
+
+      <p class="kulcs">
+        A gyártó legyen döntés, ne kényszer. Azt nézzük, mi oldja meg a feladatot — nem azt, melyik
+        logó néz ki jobban egy ajánlaton.
+      </p>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap prose">
+      <h2>Amit ez a gyakorlatban jelent</h2>
+      <p>
+        Ha ma egy szerver alkatrésze meghibásodik, Önnek nem kell tudnia, hogy melyik gyártó
+        támogatásához kell fordulni, milyen szerződésszámmal és milyen nyelven. Ha egy hálózati
+        eszköz firmware-e biztonsági frissítést kap, Önnek nem kell figyelnie a gyártói értesítőt.
+        Ha a Microsoft licencelési feltételei változnak, azt nem Önnek kell lekövetnie.
+      </p>
+      <p>
+        Ez a különbség egy szállítói lista és egy üzemeltetési szerződés között. A lista attól még
+        ott van — csak nem az Ön asztalán.
+      </p>
+      <p class="zaro">
+        A megvalósított projektekről az <a href="/esettanulmanyok/">Esettanulmányok</a> oldalon
+        olvashat, a mögöttük álló infrastruktúráról pedig a
+        <a href="/technologia/">Technológia</a> oldalon. Ügyfeleink nevét nem tesszük közzé.
+      </p>
+      <p class="vedjegy">
+        A felsorolt márkanevek és terméknevek a jogtulajdonosaik védjegyei. Megjelenítésük a
+        használt technológiák azonosítását szolgálja.
+      </p>
+    </div>
+  </section>
+
+  <section class="band band--sotet">
+    <img class="vizjel vizjel--cta" src="/logo-feher.svg" alt="" aria-hidden="true" />
+    <div class="wrap cta">
+      <h2>Nézzük meg, mi áll ma az Ön rendszere mögött</h2>
+      <p class="lead">
+        Egy átvilágítás során feltérképezzük, milyen gyártói szerződések, támogatási időszakok és
+        licencek futnak most Önnél — és hol van közöttük lyuk.
+      </p>
+      <a class="btn" href="/kapcsolat/">Kérek egy infrastruktúra-átvilágítást</a>
     </div>
   </section>
 </Base>
 
 <style>
+  /* --- szekciófejek --- */
+
+  .szekcio__cim {
+    margin-bottom: 0.5rem;
+  }
+  .szekcio__lead {
+    max-width: 62ch;
+    color: var(--c-steel);
+    margin-bottom: 2rem;
+  }
+
+  /* --- gyártói csoportok --- */
+
+  .csoport + .csoport {
+    margin-top: 3rem;
+    padding-top: 3rem;
+    border-top: 1px solid var(--c-line);
+  }
+
+  .csoport__fej {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  /* Az ikon a márkaszínt viszi, de nem tartalom: a szöveg mellette áll. */
+  .csoport__ikon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--r);
+    background: var(--c-brand-wash);
+    color: var(--c-brand);
+  }
+  .csoport__ikon svg {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  .csoport__fej h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.35rem;
+  }
+  .csoport__leiras {
+    max-width: 68ch;
+    margin: 0;
+    color: var(--c-steel);
+    font-size: 0.96rem;
+  }
+
+  /* --- gyártói csempék --- */
+
+  /* auto-fill, nem auto-fit: a kétszereplős csoportokban is ugyanolyan széles
+     marad a csempe, mint a négyszereplősben — az üres sávok megmaradnak. */
   .partnerracs {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(13rem, 14rem));
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
     gap: 1.25rem;
-    justify-content: start;
-    margin: 2rem 0 0;
+    margin: 0;
     padding: 0;
     list-style: none;
   }
 
   .partner {
     margin: 0;
+    display: flex;
+    flex-direction: column;
   }
 
-  /* Egységes magasság, hogy az eltérő arányú logók egy vonalban álljanak. */
+  /* Egységes magasság, hogy az eltérő arányú logók egy vonalban álljanak.
+     Logó híján a név áll benne szedve — a csempe így sem néz félkésznek. */
   .partner__jel {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 6rem;
+    height: 5rem;
     padding: 1rem;
     border: 1px solid var(--c-line);
+    border-top: 3px solid var(--c-brand);
     border-radius: var(--r);
     background: var(--c-paper);
   }
 
   .partner__jel img {
     max-width: 100%;
-    max-height: 3rem;
+    max-height: 2.75rem;
     object-fit: contain;
   }
 
   .partner__nev {
     font-family: var(--f-display);
     font-weight: 600;
-    font-size: 1.15rem;
+    font-size: 1.2rem;
+    letter-spacing: 0.01em;
     color: var(--c-ink);
+    text-align: center;
+  }
+
+  .partner__teljes {
+    margin: 0.7rem 0 0;
+    font-family: var(--f-util);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--c-steel);
   }
 
   .partner__szerep {
-    margin: 0.6rem 0 0;
-    color: var(--c-steel);
-    font-size: 0.88rem;
-    line-height: 1.4;
+    margin: 0.55rem 0 0;
+    color: var(--c-ink);
+    font-size: 0.92rem;
+    line-height: 1.45;
+  }
+  /* Ha nincs teljes cégnév, a szerep közvetlenül a csempe alá kerül. */
+  .partner__jel + .partner__szerep {
+    margin-top: 0.7rem;
   }
 
-  .megjegyzes {
+  .partner__lista {
+    margin: 0.65rem 0 0;
+    padding-left: 1rem;
+    list-style: none;
+  }
+  .partner__lista li {
+    position: relative;
+    margin-bottom: 0.35rem;
+    color: var(--c-steel);
+    font-size: 0.87rem;
+    line-height: 1.4;
+  }
+  .partner__lista li::before {
+    content: '';
+    position: absolute;
+    left: -1rem;
+    top: 0.55em;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--c-brand);
+  }
+
+  /* --- ábra-kiegészítők --- */
+
+  /* A bal panel "szétszórt" kapcsolatai szándékosan halványak: a rendezetlenség
+     maga az üzenet, nem szabad a jobb panel márkakék vonalaival versenyeznie. */
+  .abra__vonal--halvany {
+    stroke: var(--c-steel);
+    stroke-width: 1;
+    opacity: 0.5;
+  }
+  .abra__valaszto {
+    stroke: var(--c-line);
+    stroke-width: 1;
+    stroke-dasharray: 4 5;
+    fill: none;
+  }
+
+  /* --- előnyök --- */
+
+  /* Négy kártya: fix kéthasábos rács, nem auto-fit. Az auto-fit a szokásos
+     1280-as ablakban 3 + 1-re tördelte, ami félbehagyottnak látszott. */
+  .elonyok {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
     margin-top: 2.5rem;
+  }
+  @media (min-width: 46rem) {
+    .elonyok {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .elony {
+    background: var(--c-paper);
+    border: 1px solid var(--c-line);
+    border-left: 4px solid var(--c-brand);
+    border-radius: var(--r);
+    padding: 1.5rem;
+  }
+  .elony__idx {
+    display: block;
+    font-family: var(--f-util);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    color: var(--c-brand);
+    margin-bottom: 0.5rem;
+  }
+  .elony h3 {
+    font-size: 1.08rem;
+    margin-bottom: 0.5rem;
+  }
+  .elony p {
+    margin: 0;
+    color: var(--c-steel);
+    font-size: 0.94rem;
+  }
+  .elony__hiv {
+    margin-top: 0.7rem !important;
+    font-size: 0.88rem;
+  }
+  .elony__hiv a {
+    text-decoration: none;
+  }
+  .elony__hiv a:hover {
+    text-decoration: underline;
+  }
+
+  .kulcs {
+    max-width: 60ch;
+    border-left: 2px solid var(--c-brand);
+    padding-left: 1rem;
+    margin: 2.5rem 0 0;
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 1.05rem;
+    line-height: 1.45;
+  }
+
+  /* --- záró blokk --- */
+
+  .zaro {
+    margin-top: 2rem;
     color: var(--c-steel);
     font-size: 0.95rem;
+  }
+  .vedjegy {
+    margin: 0.8rem 0 0;
+    color: var(--c-steel);
+    font-size: 0.82rem;
+  }
+
+  .vizjel--cta {
+    right: -4rem;
+    bottom: -6rem;
+    width: 22rem;
+    opacity: 0.07;
+  }
+  .cta {
+    text-align: center;
+  }
+  .cta .lead {
+    margin-inline: auto;
+    max-width: 54ch;
   }
 
   @media (max-width: 34rem) {
     .partnerracs {
       grid-template-columns: 1fr;
       gap: 1rem;
+    }
+    .csoport__fej {
+      gap: 0.75rem;
+    }
+    .kulcs {
+      font-size: 1rem;
+      padding-left: 0.8rem;
+    }
+    .cta .btn {
+      width: 100%;
+      justify-content: center;
     }
   }
 </style>
