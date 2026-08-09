@@ -11,11 +11,17 @@ SMTP AUTH-ot (basic auth) kivezeti, új bérlőkben alapból tiltott.
 ## 1. Postafiók
 
 Kell egy valódi, licencelt postafiók a küldéshez — a Graph `sendMail` nem tud
-licenc nélküli fiókból küldeni. Javaslat: `noreply@triox.hu` (Exchange Online
-Plan 1 elég). Ha nem akarunk külön licencet, az `info@triox.hu` is lehet a
-feladó; ekkor a saját fiókjában látszanak az Elküldött elemek között.
+licenc nélküli fiókból küldeni.
 
-<!-- KITÖLTENDŐ: melyik postafiók legyen a feladó, és van-e rá licenc -->
+A beállított értékek:
+
+| Szerep | Cím | Hol állítjuk |
+|---|---|---|
+| feladó | `noreply@triox.hu` (`UserMailbox`) | `O365_FELADO` — ennek kell a hozzáférési szabály hatókörében lennie |
+| címzett | `support@triox.hu` | `O365_CIMZETT` — ide érkeznek a megkeresések |
+
+A címzett szabadon átírható, jogosultsági hatása nincs. A feladó viszont nem:
+ha megváltozik, a 3.2 hatókör-csoportot is módosítani kell.
 
 ## 2. Entra ID app-regisztráció
 
@@ -93,7 +99,7 @@ környezetben vedd fel őket, különben az előnézeti ágakon nem működik az
 | `O365_CLIENT_ID` | plain | az app-regisztráció alkalmazásazonosítója |
 | `O365_CLIENT_SECRET` | **Secret** (titkosított) | a 2. pontban kapott titok |
 | `O365_FELADO` | plain | `noreply@triox.hu` |
-| `O365_CIMZETT` | plain | `info@triox.hu` |
+| `O365_CIMZETT` | plain | `support@triox.hu` — ide érkeznek a megkeresések |
 
 A változó felvétele után **új deploy kell**, hogy a Function lássa őket: a
 Cloudflare csak az azután készült deployokba építi be a változókat, a meglévő
