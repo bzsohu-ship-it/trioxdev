@@ -41,30 +41,11 @@ const perc = Math.max(1, Math.round(szavak / 200));
      ezért a tartalomra vonatkozó szabályok mind :global()-ok. A .cikk viszont
      a sablonban áll, így a szabályok nem szivárognak ki más oldalakra. */
 
+  /* A cikk a .wrap teljes szélességét használja, mint a többi oldal. Volt egy
+     kísérlet szűkebb szövegoszloppal (38rem, ~72 karakter/sor), de a gyakorlatban
+     túl keskenynek bizonyult, ezért visszaállt. */
   .cikk {
     margin-top: 1.75rem;
-    /* A folyó szöveg mértéke. Range-dzsel mérve 38rem ~72 karakter soronként,
-       ami a 60-75-ös olvasási sávba esik; a konténer teljes 78rem-én egy
-       bekezdés 110 karakteres sorokat adott. A .wrap szélessége nem változik,
-       csak a szövegoszlopé. */
-    --w-szoveg: 38rem;
-    /* A széles elemek (ábra, táblázat) ennél tovább mehetnek, de nem a
-       konténer széléig — így a cikknek két mértéke van, nem három. */
-    --w-media: 55rem;
-  }
-
-  /* Csak a szövegtörzs korlátozott; a széles elemek balra igazodva túlnyúlnak.
-     A gyerekelemek a markdownból jönnek, ezért a scope a .cikk-en marad. */
-  .cikk > :global(p),
-  .cikk > :global(ul),
-  .cikk > :global(ol),
-  .cikk > :global(h2),
-  .cikk > :global(h3),
-  .cikk > :global(blockquote),
-  .cikk > :global(details),
-  .cikk > :global(.osszefoglalo),
-  .cikk > :global(.zaras) {
-    max-width: var(--w-szoveg);
   }
 
   .cikk :global(h2) {
@@ -155,16 +136,8 @@ const perc = Math.max(1, Math.round(szavak / 200));
     margin-bottom: 0;
   }
 
-  /* A globális .abra középre igazít; a keskenyebb szövegoszlop mellett ez
-     kibillenne, ezért itt a bal élhez zárjuk. */
-  .cikk > :global(.abra) {
-    max-width: var(--w-media);
-    margin-inline: 0;
-  }
-
   .cikk :global(table) {
     width: 100%;
-    max-width: var(--w-media);
     border-collapse: collapse;
     font-size: 0.93rem;
     margin-block: 1.5rem;
@@ -203,7 +176,6 @@ const perc = Math.max(1, Math.round(szavak / 200));
   }
 
   .cikk :global(pre) {
-    max-width: var(--w-media);
     overflow-x: auto;
     background: var(--c-mist);
     border: 1px solid var(--c-line);
