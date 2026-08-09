@@ -39,5 +39,6 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-        env:
-          PUBLIC_N8N_WEBHOOK: ${{ secrets.PUBLIC_N8N_WEBHOOK }}
+      # A levélküldés a functions/ alatti Pages Functionben van, azt az Astro
+      # build nem fordítja. A típusait a check lépés nézi át.
+      - run: npm run check

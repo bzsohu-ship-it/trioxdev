@@ -1,8 +1,4 @@
----
-const webhook = import.meta.env.PUBLIC_N8N_WEBHOOK ?? '';
----
-
-<form class="urlap" id="kapcsolat-urlap" data-webhook={webhook} novalidate>
+<form class="urlap" id="kapcsolat-urlap" novalidate>
   <label class="field">
     <span>Név</span>
     <input name="nev" type="text" required autocomplete="name" />
@@ -51,30 +47,30 @@ const webhook = import.meta.env.PUBLIC_N8N_WEBHOOK ?? '';
         return;
       }
 
-      const cel = urlap.dataset.webhook;
-      if (!cel) {
-        jelzes.dataset.state = 'err';
-        jelzes.textContent = 'Az űrlap még nincs bekötve. Írj a info@triox.hu címre.';
-        return;
-      }
-
       gomb.disabled = true;
       jelzes.dataset.state = '';
       jelzes.textContent = 'Küldés…';
 
       try {
-        const valasz = await fetch(cel, {
+        // A saját domainünkön futó Pages Function, onnan megy ki a levél az
+        // Office 365-ből. Lásd functions/api/kapcsolat.ts
+        const valasz = await fetch('/api/kapcsolat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...adat, forras: 'triox.hu', ido: new Date().toISOString() }),
+          body: JSON.stringify(adat),
         });
-        if (!valasz.ok) throw new Error(String(valasz.status));
+        // A végpont a felhasználónak szóló magyar hibaszöveget is visszaadja.
+        const test = await valasz.json().catch(() => null);
+        if (!valasz.ok || !test?.ok) throw new Error(test?.hiba ?? '');
         urlap.reset();
         jelzes.dataset.state = 'ok';
-        jelzes.textContent = 'Megkaptuk. Munkanapon belül válaszolunk.';
-      } catch {
+        jelzes.textContent = 'Megkaptuk. 2 munkanapon belül válaszolunk.';
+      } catch (err) {
+        const reszlet = err instanceof Error && err.message ? err.message : '';
         jelzes.dataset.state = 'err';
-        jelzes.textContent = 'A küldés nem sikerült. Írj közvetlenül: info@triox.hu';
+        jelzes.textContent = reszlet
+          ? `${reszlet} Ha nem oldódik meg, írjon ide: info@triox.hu`
+          : 'A küldés nem sikerült. Írjon közvetlenül: info@triox.hu';
       } finally {
         gomb.disabled = false;
       }

@@ -20,6 +20,7 @@ A tartalom markdownban van, a design tokenek egy helyen: `src/styles/global.css`
 | Színek, betűk, térköz | `src/styles/global.css` (csak a `:root` tokeneket!) |
 | Logó, favicon, megosztókép | `public/` — lásd az **Arculat** fejezetet |
 | Kapcsolati űrlap mezői | `src/components/Kapcsolatform.astro` |
+| Az űrlap levélküldése (Office 365 / Graph) | `functions/api/kapcsolat.ts` — beállítás: `docs/office365-levelkuldes.md` |
 | Átirányítás régi URL-ről | `public/_redirects` |
 | HTTP fejlécek | `public/_headers` |
 
@@ -29,12 +30,18 @@ A tartalom markdownban van, a design tokenek egy helyen: `src/styles/global.css`
 3. Minden oldal a `Base` layoutot használja, `cim` és `leiras` proppal (SEO).
 4. Piszkozat blogbejegyzés: `piszkozat: true` — nem kerül be a buildbe.
 5. Változtatás után mindig fusson le: `npm run build`. Ha hibázik, ne commitolj.
+   A `functions/` mappát az Astro build nem fordítja, azt a `npm run check` nézi.
 6. Ne írj tényadatot (ár, reakcióidő, referencia) találomra. Ha hiányzik, hagyj
    `<!-- KITÖLTENDŐ: ... -->` jelölést, és szólj róla. **Figyelem:** az Astro 7
    markdown-feldolgozója (Sätteri) a HTML-megjegyzéseket változatlanul kiírja a
    publikus oldalba, és remark-plugin nem köthető be. Ha a jegyzet nem való
    nyilvánosságra — például az, hogy mit *nem* vállalunk —, akkor `docs/`-ba
    kerüljön, ami nincs a buildben (lásd `docs/helyi-uzemeltetes-megerositendo.md`).
+7. **Levelet csak a `functions/api/kapcsolat.ts` küld**, Microsoft Graph
+   `sendMail` hívással az Office 365-ből. Új levélküldő funkció ne hívjon külső
+   szolgáltatást (n8n, Resend, SendGrid) és ne próbáljon SMTP-t — a Workers
+   futtatókörnyezet nem tud nyers TCP-t. A titkok szerveroldali környezeti
+   változók, `PUBLIC_` előtagú változóba nem kerülhetnek.
 
 ## Arculat
 
@@ -91,5 +98,9 @@ Inter (`--f-body`) a folyó szöveg. JetBrains Mono (`--f-util`) a mono jelölé
 ```bash
 npm run dev      # helyi szerver :4321
 npm run build    # statikus build a dist/ mappába
-npm run check    # típus- és sablonellenőrzés
+npm run check    # típus- és sablonellenőrzés (ez fedi a functions/ mappát is)
+
+# A levélküldő végpont helyi próbája (az astro dev nem futtat Functiont):
+cp .dev.vars.example .dev.vars
+npm run build && npm run functions   # :8788
 ```
