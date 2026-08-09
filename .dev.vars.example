@@ -1,0 +1,11 @@
+# Az Office 365 levélküldés titkai a Pages Functionnek.
+# Másold `.dev.vars` néven (az gitignorált), és töltsd ki a helyi teszthez:
+#   npm run build && npm run functions
+# Éles és preview környezetben ugyanezek a Cloudflare Pages változói.
+# A beállítás lépései: docs/office365-levelkuldes.md
+
+O365_TENANT_ID=00000000-0000-0000-0000-000000000000
+O365_CLIENT_ID=00000000-0000-0000-0000-000000000000
+O365_CLIENT_SECRET=
+O365_FELADO=noreply@triox.hu
+O365_CIMZETT=info@triox.hu
