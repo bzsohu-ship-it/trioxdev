@@ -36,20 +36,52 @@ const szeles = sz.data.szelesLayout;
     margin-top: 1.5rem;
   }
 
-  .tartalom-szeles h2 {
+  /* A markdownból rendelt elemekre nem kerül rá az Astro scope-attribútuma,
+     ezért ezek is :global()-ok. Enélkül a szabály néma marad: a lenti négy
+     eddig nem érvényesült, a címsorok térköz nélkül álltak és a listák a
+     böngésző 40px-es alapbehúzását kapták. */
+  .tartalom-szeles :global(h2) {
     margin-top: 2.5rem;
   }
 
-  .tartalom-szeles h3 {
+  .tartalom-szeles :global(h3) {
     margin-top: 1.5rem;
   }
 
-  .tartalom-szeles ul {
+  .tartalom-szeles :global(ul) {
     padding-left: 1.2rem;
   }
 
-  .tartalom-szeles li {
+  .tartalom-szeles :global(li) {
     margin-bottom: 0.4rem;
+  }
+
+  /* Mono jelölés a szövegben — enélkül a böngésző alap monospace betűjét
+     kapná a JetBrains Mono helyett. */
+  .tartalom-szeles :global(code) {
+    font-family: var(--f-util);
+    font-size: 0.88em;
+    background: var(--c-mist);
+    border: 1px solid var(--c-line);
+    border-radius: 3px;
+    padding: 0.1em 0.35em;
+  }
+
+  .tartalom-szeles :global(pre) {
+    overflow-x: auto;
+    background: var(--c-mist);
+    border: 1px solid var(--c-line);
+    border-radius: var(--r);
+    padding: 1rem 1.25rem;
+    margin-block: 1.5rem;
+  }
+
+  /* Kódblokkban a keret és a háttér a <pre>-é, nem minden soré. */
+  .tartalom-szeles :global(pre code) {
+    background: none;
+    border: 0;
+    padding: 0;
+    font-size: 0.86rem;
   }
 
   /* Táblázatok görgethetők mobilon */
