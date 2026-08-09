@@ -1,79 +1,1251 @@
 ---
 import Base from '../layouts/Base.astro';
+
+/**
+ * Biztonsági megközelítés.
+ *
+ * FONTOS a szövegezésre: ezen az oldalon minden állítás mögött állnia kell egy
+ * másik oldalon már kiadott, megerősített tételnek — a szolgáltatásoldalak
+ * platform-katalógusának, a /technologia/ kártyáinak vagy a /rolunk/ számainak.
+ * Új biztonsági állítás (tanúsítvány, SIEM, EDR-termék, pentest, DDoS-védelem,
+ * titkosítási eljárás, rendelkezésre állási vagy reakcióidő-szám) csak akkor
+ * kerülhet ki, ha Zsolt megerősítette. A nyitott kérdések:
+ * `docs/biztonsag-megerositendo.md` (nincs a buildben).
+ *
+ * A rétegkártyák sorrendje szándékosan azonos a „védelem rétegei" ábráéval:
+ * az olvasó kívülről befelé halad, és a kártya ugyanazt a réteget bontja ki,
+ * amit az ábrán az imént látott.
+ */
+
+interface Reteg {
+  /** Rövid réteg-név. Ugyanaz, mint az ábra bal oldali sávjában. */
+  cimke: string;
+  cim: string;
+  /** Első bekezdés a kockázat, második a válasz. */
+  allitas: string[];
+  kulcs: string;
+  reszletek: { cimke?: string; szoveg: string }[];
+  hivatkozas?: { szoveg: string; url: string };
+}
+
+const retegek: Reteg[] = [
+  {
+    cimke: 'Fizikai réteg',
+    cim: 'A szerver nem az irodai szekrényben áll',
+    allitas: [
+      'A legdrágább adatvesztések jelentős része nem támadásból származik, hanem egy elázott, túlmelegedett vagy feltört szerverszobából. Egy irodai gépszekrényt nem az őrzés, hanem a véletlen védi: amíg nincs baj, minden rendben van vele.',
+      'A nálunk futó környezetek két, egymástól független budapesti adatközponti helyszínen állnak, fizikailag védett géptérben, redundáns tápellátással és adatközponti hűtéssel. A hardver enterprise kategóriájú: redundáns tápegység, ECC memória, RAID-védett tárolók.',
+    ],
+    kulcs: 'A tűz, a beázás és az áramszünet nem biztonsági kérdésnek indul. Annak végződik.',
+    reszletek: [
+      { cimke: 'Helyszínek', szoveg: 'két budapesti adatközponti helyszín, egymástól függetlenül' },
+      { cimke: 'Gépterem', szoveg: 'fizikailag védett környezet, redundáns tápellátás, adatközponti hűtés és hőmérséklet-figyelés' },
+      { cimke: 'Hardver', szoveg: 'enterprise szerverpark redundáns tápegységgel, ECC memóriával, RAID-védett tárolókkal' },
+      { cimke: 'Gerinchálózat', szoveg: 'redundáns 2×10 Gbps — egy uplink vagy egy switch kiesése nem jelent szolgáltatáskiesést' },
+      { cimke: 'Telephelyi rendszereknél', szoveg: 'szünetmentes tápellátás (UPS) felügyelete, szabályos leállítással áramszünet esetén' },
+    ],
+    hivatkozas: { szoveg: 'Az infrastruktúra részletei a Technológia oldalon', url: '/technologia/' },
+  },
+  {
+    cimke: 'Hálózati perem',
+    cim: 'Ügyfelenként dedikált átjáró, nem közös sablon',
+    allitas: [
+      'Egy közös tűzfalon az Ön szabályai mellett ott vannak mások szabályai is. Egy másik ügyfél kedvéért kinyitott port, egy elrontott átirányítás vagy egy rontott hírnevű levelező-IP az Ön kockázata is lesz — akkor is, ha Ön mindent jól csinált.',
+      'Nálunk minden ügyfél saját átjárót kap: a tűzfal-, NAT- és portszabályok kizárólag az Ön környezetéhez tartoznak, a VPN-végpont dedikált, a publikus IPv4-cím pedig a saját címtartományunkból, névre szólóan az Öné.',
+    ],
+    kulcs: 'A saját publikus IP azt is jelenti, hogy a levelezése hírneve nem függ attól, mit csinál egy másik ügyfél.',
+    reszletek: [
+      { cimke: 'Átjáró', szoveg: 'ügyfelenként dedikált tűzfal, NAT és VPN-endpoint, saját szabályrendszerrel' },
+      { cimke: 'Publikus IP', szoveg: 'dedikált publikus IPv4 cím a saját címtartományunkból' },
+      { cimke: 'VPN', szoveg: 'site-to-site és kliens hozzáférés — IPsec, WireGuard, OpenVPN, SSTP' },
+      { cimke: 'Eszközök', szoveg: 'MikroTik RouterOS, Cisco, valamint Fortinet, pfSense és OPNsense tűzfalak' },
+      { cimke: 'Tanúsítványok', szoveg: 'nyilvános és belső TLS-tanúsítványok kezelése, lejárat-figyeléssel' },
+      { szoveg: 'Telephelyen: Wi-Fi infrastruktúra vendéghálózat-leválasztással' },
+    ],
+    hivatkozas: { szoveg: 'Melyik gyártó áll a hálózat mögött', url: '/partnerek/' },
+  },
+  {
+    cimke: 'Szegmentálás',
+    cim: 'A publikus réteg bukása ne érje el az adatbázist',
+    allitas: [
+      'A legtöbb súlyos incidensben nem az az érdekes, hogy a támadó bejutott az első gépre, hanem az, hogy onnan meddig jutott el. Egy lapos hálózaton egy kompromittált webszerver közvetlen rálátást ad a fájlszerverre és az adatbázisra.',
+      'Nálunk a belső réteg (adatbázis, alkalmazás) és a publikus réteg (web, mail) élesen elválik, az ügyfelek szegmensei pedig VLAN-alapú vagy fizikai szegmentálással különülnek el egymástól. Ahol az adat jellege megkívánja, a környezet az internetről egyáltalán nem elérhető — érzékeny adatot kezelő ügyfeleinknél ez már működő gyakorlat, nem terv.',
+    ],
+    kulcs: 'Auditnál a „logikailag elválasztva” gyakran kevés. Ezért adunk fizikai szegmentálást is.',
+    reszletek: [
+      { cimke: 'Kétszintű felosztás', szoveg: 'külön belső (adatbázis, alkalmazás) és publikus (web, mail) hálózati réteg' },
+      { cimke: 'Ügyfél-izoláció', szoveg: 'ügyfelenként dedikált szegmens, VLAN-alapú vagy fizikai szegmentálással' },
+      { cimke: 'Teljes izoláció', szoveg: 'igény esetén saját virtuális vagy fizikai switch, privát alhálózat, az internetről nem elérhető környezet' },
+      { szoveg: 'A szegmensek között nincs átjárás — egy ügyfél környezetéből a másiké nem látszik' },
+    ],
+    hivatkozas: { szoveg: 'Az izoláció ábrája és a megvalósult példák', url: '/esettanulmanyok/' },
+  },
+  {
+    cimke: 'Identitás',
+    cim: 'Az ellopott jelszó önmagában kevés legyen',
+    allitas: [
+      'A belépés a támadónak pontosan olyan könnyű, mint a kollégának — ha csak egy jelszó áll az útjában. A második gyakori hiba nem a belépésnél van, hanem utána: a legtöbb cégben senki nem tudja pontosan megmondani, egy adott fiók valójában mihez fér hozzá.',
+      'Ezért kettőt kérünk egyszerre: többfaktoros hitelesítést a belépéshez, és dokumentált, karbantartott jogosultsági struktúrát mögé. A be- és kilépő munkatársak fiókjai és eszközei folyamat szerint kerülnek be és ki — nem emlékezetből.',
+    ],
+    kulcs: 'A jogosultság akkor lesz kockázat, amikor már senki nem tudja, ki mihez fér hozzá.',
+    reszletek: [
+      { cimke: 'Hitelesítés', szoveg: 'többfaktoros hitelesítés, központi jogosultságkezelés' },
+      { cimke: 'Címtár', szoveg: 'Active Directory tartomány, csoportházirendek, redundáns tartományvezérlők' },
+      { cimke: 'Életciklus', szoveg: 'belépő és kilépő munkatársak fiók- és eszközkezelése, dokumentált jogosultsági struktúrával' },
+      { cimke: 'Felhő', szoveg: 'Microsoft 365 és Entra ID adminisztráció, e-mail- és adathalászat elleni védelem' },
+      { szoveg: 'Az infrastruktúrához kizárólag felhatalmazott Triox-munkatársak férnek hozzá, az üzemeltetéshez szükséges mértékben' },
+    ],
+    hivatkozas: {
+      szoveg: 'Mit lát valójában egy irodai AI-asszisztens — és miért a jogosultságokról szól',
+      url: '/blog/ai-az-irodaban-jogosultsagok/',
+    },
+  },
+  {
+    cimke: 'Végpont',
+    cim: 'A támadás nem a szerveren kezdődik',
+    allitas: [
+      'A belépési pont az esetek túlnyomó részében egy munkaállomás: egy megnyitott melléklet, egy elavult böngésző-bővítmény, egy két éve nem frissített alkalmazás. A szerver csak a második állomás.',
+      'A végpontokon védelem fut, központi konzolról felügyelve, a frissítéskezelés pedig ütemezett, tesztelt és visszakövethető folyamat — karbantartási ablakhoz kötve, nem alkalmi kattintgatás. Az eszközökről leltár van, az életciklusuk követve van.',
+    ],
+    kulcs: 'Amit senki nem néz, az addig működik, amíg nem.',
+    reszletek: [
+      { cimke: 'Végpontvédelem', szoveg: 'telepítés és felügyelet központi konzolról, munkaállomásokon és szervereken' },
+      { cimke: 'Frissítéskezelés', szoveg: 'Windows és Linux patch-ek ütemezett, karbantartási ablakhoz kötött telepítése (WSUS vagy RMM alapon)' },
+      { cimke: 'Távoli menedzsment', szoveg: 'RMM: végpont- és szerverfelügyelet, távoli beavatkozás, eszközleltár' },
+      { cimke: 'Eszköz-életciklus', szoveg: 'nyilvántartás, garancia- és supportkövetés, cseretervezés' },
+    ],
+    hivatkozas: {
+      szoveg: 'A végpontfelügyelet a menedzselt üzemeltetés része',
+      url: '/szolgaltatasok/menedzselt-it-uzemeltetes/',
+    },
+  },
+  {
+    cimke: 'Adat',
+    cim: 'A zsarolóvírus a mentést is keresi',
+    allitas: [
+      'Egy titkosító támadás első dolga nem az adat, hanem a mentés. Ha a mentés ugyanazon a hálózaton, ugyanabban a rackben vagy ugyanabban az épületben áll, mint az éles rendszer, akkor egyetlen esemény viszi mindkettőt.',
+      'Ezért a mentés nálunk nem az éles rendszer mellékterméke, hanem külön infrastruktúra: több, egymástól fizikailag független célponton, két helyszínen. A kritikus terhelésekhez off-site VM-replika is tartozik — azt nem visszaállítani kell, hanem elindítani.',
+    ],
+    kulcs: 'A kérdés nem az, van-e mentés. Az, hogy hol van, és mennyi idő alatt van fent.',
+    reszletek: [
+      { cimke: 'Mentési platform', szoveg: 'Veeam Backup & Replication és Veeam Agent, alternatívaként Synology, Iperius, BackupChain megoldások' },
+      { cimke: 'Célpontok', szoveg: 'elsődleges repository és külön fizikai másodlagos backup targetek, egymástól független eszközökön, két helyszínen' },
+      { cimke: '3-2-1 elv', szoveg: '3 példány, 2 különböző médián, 1 telephelyen kívül' },
+      { cimke: 'Replikáció', szoveg: 'off-site, futásra kész VM-replika a kritikus terhelésekhez' },
+      { cimke: 'Alkalmazás-tudatos mentés', szoveg: 'adatbázis- és levelezőrendszer-konzisztens mentés, nem csak fájlszintű másolat' },
+      { cimke: 'Ellenőrzés', szoveg: 'a mentési feladatok napi szintű ellenőrzése — nem csak az, hogy elindult, hanem hogy le is futott' },
+    ],
+    hivatkozas: {
+      szoveg: 'Hogy a mentés vissza is állítható, azt egy teszt igazolja',
+      url: '/szolgaltatasok/audit-restore-validation/',
+    },
+  },
+  {
+    cimke: 'Menedzsment-sík',
+    cim: 'Amit nem lehet elérni az internetről, azt nem lehet onnan feltörni',
+    allitas: [
+      'Egy infrastruktúra biztonsága gyakran nem az alkalmazásnál dől el, hanem ott, hogy honnan érhető el a szerverek, a hypervisor és a hálózati eszközök kezelőfelülete. Ez a legrövidebb út a teljes környezethez — egy kitett menedzsment-interfészt pedig az egész internet próbálgathat.',
+      'A Triox management-hálózata dedikált, és az internetről nem elérhető. Nincs kint olyan kezelőfelület, amit egy jelszónak kellene megvédenie. Az ügyfél-hozzáférés VPN-en, ügyfelenként dedikált endpointon keresztül történik.',
+    ],
+    kulcs: 'A legjobban védett kezelőfelület az, amelyik nincs kitéve.',
+    reszletek: [
+      { cimke: 'Out-of-band management', szoveg: 'dedikált, az internetről nem elérhető management hálózat' },
+      { cimke: 'Hardverszint', szoveg: 'iDRAC és iLO — a szerver akkor is kezelhető és felügyelhető, ha az operációs rendszer el sem indul' },
+      { cimke: 'Előjelzés', szoveg: 'tápegység, ventilátor, memória és lemez hibái sok esetben még meghibásodás előtt kiderülnek' },
+      { cimke: 'Ügyfél-hozzáférés', szoveg: 'VPN-en keresztül, ügyfelenként dedikált endpointon' },
+      { szoveg: 'Naprakész, átadható és auditálható rendszerdokumentáció — nem az üzemeltető fejében' },
+    ],
+    hivatkozas: { szoveg: 'Ki fér hozzá az adataimhoz? — GYIK', url: '/gyik/' },
+  },
+];
+
+/** Hero alatti gyorsnézet. Minden szám máshol is szerepel az oldalon. */
+const gyorsnezet = [
+  { ertek: '1 ügyfél = 1 hálózat', szoveg: 'ügyfélszintű izoláció, dedikált átjáróval' },
+  { ertek: '2 helyszín', szoveg: 'budapesti adatközpont, egymástól függetlenül' },
+  { ertek: '3 · 2 · 1', szoveg: 'példány, média, telephelyen kívüli másolat' },
+  { ertek: '0 kitett kezelőfelület', szoveg: 'a management hálózat az internetről nem elérhető' },
+];
+
+const kockazatok = [
+  {
+    kockazat: 'Zsarolóvírus',
+    nelkule: 'A hálózaton elérhető mentés is titkosítódik az éles adattal együtt.',
+    valasz: 'Több, egymástól fizikailag független mentési célpont két helyszínen, mellette off-site VM-replika.',
+    link: { szoveg: 'Mentés és replikáció', url: '/szolgaltatasok/helyi-uzemeltetes/' },
+  },
+  {
+    kockazat: 'Adathalászat, AI-alapú megszemélyesítés',
+    nelkule: 'Egy megszólalásig hiteles levél vagy hívás elég egy kifizetéshez.',
+    valasz: 'Többfaktoros hitelesítés, e-mail- és adathalászat elleni védelem, és írott belső eljárásrend a kifizetések előtt.',
+    link: { szoveg: 'Amikor a csaló a főnök hangján hív', url: '/blog/ai-csalas-hangklonozas/' },
+  },
+  {
+    kockazat: 'Ellopott jelszó',
+    nelkule: 'A támadónak ugyanolyan könnyű belépnie, mint a kollégának.',
+    valasz: 'Többfaktoros hitelesítés, és a jelszó nélküli belépés bevezetésének támogatása a kritikus fiókoktól kezdve.',
+    link: { szoveg: 'A jelszó, amit nem lehet ellopni', url: '/blog/passkey-jelszo-nelkuli-belepes/' },
+  },
+  {
+    kockazat: 'Túl tág jogosultság',
+    nelkule: 'Egyetlen fiók kompromittálódása a teljes fájlszerverre ad rálátást.',
+    valasz: 'Központi jogosultságkezelés, dokumentált struktúra, be- és kilépési folyamat.',
+    link: { szoveg: 'AI az irodában: mit lát valójában?', url: '/blog/ai-az-irodaban-jogosultsagok/' },
+  },
+  {
+    kockazat: 'Publikus szolgáltatás kompromittálódása',
+    nelkule: 'A támadó a webszerverről közvetlenül eléri az adatbázist.',
+    valasz: 'Kétszintű szegmentálás és ügyfelenként dedikált átjáró — a publikus réteg nem lát rá a belsőre.',
+    link: { szoveg: 'Ügyfél-izoláció', url: '/technologia/' },
+  },
+  {
+    kockazat: 'Kitett kezelőfelület',
+    nelkule: 'A menedzsment-interfészt az egész internet próbálgathatja.',
+    valasz: 'Dedikált, az internetről nem elérhető out-of-band management hálózat.',
+    link: { szoveg: 'Management-hozzáférés', url: '/technologia/' },
+  },
+  {
+    kockazat: 'Nem működő mentés',
+    nelkule: 'A hiba a visszaállításkor derül ki — amikor már késő.',
+    valasz: 'Napi mentés-ellenőrzés, és külön szolgáltatásként dokumentált visszaállítási teszt, jegyzőkönyvvel.',
+    link: { szoveg: 'Audit Restore Validation', url: '/szolgaltatasok/audit-restore-validation/' },
+  },
+  {
+    kockazat: 'Kulcsemberfüggőség',
+    nelkule: 'A tudás egyetlen fejben van — és az a fej szabadságra megy vagy kilép.',
+    valasz: 'Dokumentált, átadható környezet és csapat mögötte, nem egyetlen kolléga.',
+    link: { szoveg: 'Menedzselt IT üzemeltetés', url: '/szolgaltatasok/menedzselt-it-uzemeltetes/' },
+  },
+  {
+    kockazat: 'Tűz, beázás, elhúzódó áramszünet',
+    nelkule: 'Az éles rendszer és a mellette álló mentés egyszerre esik ki.',
+    valasz: 'Két budapesti adatközponti helyszín, telephelyen kívüli másolat és futásra kész replika.',
+    link: { szoveg: 'Rólunk — számokban', url: '/rolunk/' },
+  },
+  {
+    kockazat: 'Licencaudit',
+    nelkule: 'A megfelelő licencmennyiség igazolása az Ön kockázata és az Ön bírsága.',
+    valasz: 'SPLA-szerződésen a szolgáltató jelent havonta, és ő felel érte.',
+    link: { szoveg: 'SPLA és CSP', url: '/szolgaltatasok/iaas/' },
+  },
+];
+
+/**
+ * Felelősségi mátrix. A jelölés: T = Triox, K = közös, O = az ügyfélé.
+ * A táblázat tájékoztató — a végleges határt mindig a szerződés rögzíti,
+ * ezt a láblécjegyzet ki is mondja.
+ */
+type Felelos = 'T' | 'K' | 'O';
+
+const jeloles: Record<Felelos, { jel: string; sz: string }> = {
+  T: { jel: '●', sz: 'A Triox felelőssége' },
+  K: { jel: '◐', sz: 'Közös, a szerződés szerint' },
+  O: { jel: '○', sz: 'Az Ön oldalán marad' },
+};
+
+const modellek = ['IaaS', 'DCaaS', 'SaaS', 'Helyi és hibrid'];
+
+const matrix: { terulet: string; ertekek: Felelos[] }[] = [
+  { terulet: 'Fizikai környezet: gépterem, tápellátás, hűtés', ertekek: ['T', 'T', 'T', 'O'] },
+  { terulet: 'Hálózati perem: átjáró, tűzfal, VPN', ertekek: ['T', 'T', 'T', 'T'] },
+  { terulet: 'Hálózati szegmentálás', ertekek: ['T', 'T', 'T', 'T'] },
+  { terulet: 'Szerverhardver és hypervisor', ertekek: ['T', 'T', 'T', 'K'] },
+  { terulet: 'Operációs rendszer telepítése és frissítése', ertekek: ['O', 'T', 'T', 'T'] },
+  { terulet: 'Üzleti alkalmazás és annak konfigurációja', ertekek: ['O', 'O', 'T', 'K'] },
+  { terulet: 'Adatmentés üzemeltetése', ertekek: ['T', 'T', 'T', 'T'] },
+  { terulet: 'Visszaállítási teszt és jegyzőkönyv', ertekek: ['K', 'K', 'K', 'K'] },
+  { terulet: 'Felhasználói fiókok és jogosultságok', ertekek: ['O', 'K', 'K', 'K'] },
+  { terulet: 'Munkaállomások és végpontvédelem', ertekek: ['O', 'O', 'O', 'K'] },
+  { terulet: 'Az adat tartalma és jogszerű felhasználása', ertekek: ['O', 'O', 'O', 'O'] },
+];
+
+const nemAllitjuk = [
+  {
+    cim: 'Nem állítjuk, hogy nálunk nem történhet incidens',
+    szoveg:
+      'Aki ezt ígéri, vagy nem üzemeltetett még eleget, vagy nem mondja el az igazat. Azt állítjuk, hogy fel vagyunk rá készülve, hogy az esemény egy ügyfél szegmensén belül marad, és hogy van mihez visszanyúlni.',
+  },
+  {
+    cim: 'Nem írunk ki rendelkezésre állási százalékot a honlapon',
+    szoveg:
+      'A vállalt rendelkezésre állás és reakcióidő a választott szolgáltatáshoz igazodik, és a szolgáltatási szerződésben (SLA) rögzítjük — ott mérhető és ott számonkérhető. Egy marketingszám a főoldalon nem az.',
+  },
+  {
+    cim: 'Tanúsítványra csak akkor hivatkozunk, ha van mögötte auditlelet',
+    szoveg:
+      'Amit ezen az oldalon olvas, az működő gyakorlat, nem szándéknyilatkozat. Ha egy megfelelési elvárásnak konkrét tanúsítvánnyal kell megfelelnie, mondja el a felmérésnél — megnézzük, mit tudunk hozzátenni, és mit nem.',
+  },
+  {
+    cim: 'Egy megvásárolt eszköz önmagában nem védelem',
+    szoveg:
+      'Nem adunk el olyan biztonsági terméket, aminek a napi felügyeletére nincs kapacitás. Ami nincs felügyelve és frissítve, az nem véd — legfeljebb megnyugtat.',
+  },
+];
 ---
 
-<Base cim="Biztonság" leiras="Ügyfelenként dedikált hálózat, kétszintű szegmentálás, out-of-band management és enterprise backup — a Triox biztonsági megközelítése.">
+<Base
+  cim="Biztonság"
+  leiras="Hét réteg: fizikailag védett adatközpont, ügyfelenként dedikált átjáró, kétszintű szegmentálás, többfaktoros hitelesítés, végpontvédelem, független mentések és out-of-band management. A Triox biztonsági megközelítése, felelősségi mátrixszal."
+>
   <section class="band">
-    <div class="wrap prose">
-      <p class="eyebrow">Biztonság</p>
-      <h1>Izoláció, nem osztozás</h1>
-      <p class="lead">
-        Minden ügyfelünk saját hálózati szegmensen fut, egymástól elválasztva.
+    <div class="wrap">
+      <div class="hero">
+        <p class="eyebrow">Biztonság</p>
+        <h1>A védelem nem egy termék. Hét réteg, és mindegyiknek külön dolga van</h1>
+        <p class="lead">
+          Minden ügyfelünk saját hálózati szegmensen fut, dedikált átjáró mögött. Ez az alap. Erre
+          épül a többi réteg: az identitás, a végpont, az adat és a menedzsment-sík, amit az
+          internetről egyáltalán nem lehet elérni.
+        </p>
+      </div>
+
+      <ul class="gyorsnezet">
+        {gyorsnezet.map((g) => (
+          <li>
+            <span class="gyorsnezet__ertek">{g.ertek}</span>
+            <span class="gyorsnezet__szoveg">{g.szoveg}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="band band--mist">
+    <div class="wrap">
+      <h2 class="szekcio__cim">A védelem rétegei</h2>
+      <p class="szekcio__lead">
+        A rétegek egymástól függetlenek: nem egyetlen erős fal áll a környezet előtt, hanem hét
+        egymás utáni, amelyek közül bármelyik önmagában is meg tud állítani egy eseményt. Az alábbi
+        ábra kívülről befelé halad — ugyanebben a sorrendben bontjuk ki őket alább is.
+      </p>
+
+      <figure class="abra">
+        <svg viewBox="0 0 880 420" role="img" aria-labelledby="abra-retegek">
+          <title id="abra-retegek">
+            A védelem hét rétege kívülről befelé. Fizikai réteg: két budapesti adatközponti
+            helyszín, fizikailag védett géptérrel, redundáns tápellátással és hűtéssel. Hálózati
+            perem: ügyfelenként dedikált átjáró saját tűzfal-, NAT- és VPN-szabályokkal, saját
+            publikus IP-vel. Szegmentálás: kétszintű, ügyfelenként elválasztott hálózat, így a
+            publikus réteg kompromittálódása nem nyit utat az adatbázisokhoz. Identitás:
+            többfaktoros hitelesítés és központi jogosultságkezelés, hogy az ellopott jelszó
+            önmagában kevés legyen. Végpont: végpontvédelem és ütemezett frissítéskezelés, mert a
+            támadás jellemzően munkaállomáson kezdődik. Adat: több, egymástól független mentési
+            célpont és off-site replika, mert a zsarolóvírus a mentést is keresi. Menedzsment-sík:
+            out-of-band management, az internetről nem elérhető. Egy réteg áttörése nem jelenti a
+            környezet elvesztését.
+          </title>
+
+          <text class="abra__mono" x="0" y="14">A VÉDELEM HÉT RÉTEGE — KÍVÜLRŐL BEFELÉ</text>
+
+          <rect class="abra__sav" x="0" y="30" width="250" height="48" rx="3" />
+          <text class="abra__mono" x="16" y="59">01 · FIZIKAI RÉTEG</text>
+          <rect class="abra__doboz" x="258" y="30" width="622" height="48" rx="3" />
+          <text class="abra__cimke" x="276" y="52">Két budapesti adatközponti helyszín</text>
+          <text class="abra__kicsi" x="276" y="69">fizikailag védett gépterem, redundáns tápellátás és hűtés — nem az irodai szekrény</text>
+
+          <rect class="abra__sav" x="0" y="82" width="250" height="48" rx="3" />
+          <text class="abra__mono" x="16" y="111">02 · HÁLÓZATI PEREM</text>
+          <rect class="abra__doboz" x="258" y="82" width="622" height="48" rx="3" />
+          <text class="abra__cimke" x="276" y="104">Ügyfelenként dedikált átjáró</text>
+          <text class="abra__kicsi" x="276" y="121">saját tűzfal-, NAT- és VPN-szabályok, saját publikus IP — nem közös sablon</text>
+
+          <rect class="abra__sav" x="0" y="134" width="250" height="48" rx="3" />
+          <text class="abra__mono" x="16" y="163">03 · SZEGMENTÁLÁS</text>
+          <rect class="abra__kiemelt" x="258" y="134" width="622" height="48" rx="3" />
+          <text class="abra__cimke" x="276" y="156">Kétszintű, ügyfelenként elválasztott hálózat</text>
+          <text class="abra__kicsi" x="276" y="173">a publikus réteg kompromittálódása nem nyit utat az adatbázisokhoz</text>
+
+          <rect class="abra__sav" x="0" y="186" width="250" height="48" rx="3" />
+          <text class="abra__mono" x="16" y="215">04 · IDENTITÁS</text>
+          <rect class="abra__doboz" x="258" y="186" width="622" height="48" rx="3" />
+          <text class="abra__cimke" x="276" y="208">Többfaktoros hitelesítés, központi jogosultságkezelés</text>
+          <text class="abra__kicsi" x="276" y="225">az ellopott jelszó önmagában kevés a belépéshez</text>
+
+          <rect class="abra__sav" x="0" y="238" width="250" height="48" rx="3" />
+          <text class="abra__mono" x="16" y="267">05 · VÉGPONT</text>
+          <rect class="abra__doboz" x="258" y="238" width="622" height="48" rx="3" />
+          <text class="abra__cimke" x="276" y="260">Végpontvédelem és ütemezett frissítéskezelés</text>
+          <text class="abra__kicsi" x="276" y="277">a támadás jellemzően egy munkaállomáson kezdődik, nem a szerveren</text>
+
+          <rect class="abra__sav" x="0" y="290" width="250" height="48" rx="3" />
+          <text class="abra__mono" x="16" y="319">06 · ADAT</text>
+          <rect class="abra__doboz" x="258" y="290" width="622" height="48" rx="3" />
+          <text class="abra__cimke" x="276" y="312">Több független mentési célpont, off-site replika</text>
+          <text class="abra__kicsi" x="276" y="329">a zsarolóvírus a mentést is keresi — ezért nincs egy helyen</text>
+
+          <rect class="abra__sav" x="0" y="342" width="250" height="48" rx="3" />
+          <text class="abra__mono" x="16" y="371">07 · MENEDZSMENT-SÍK</text>
+          <rect class="abra__kiemelt" x="258" y="342" width="622" height="48" rx="3" />
+          <text class="abra__cimke" x="276" y="364">Out-of-band management, az internetről nem elérhető</text>
+          <text class="abra__kicsi" x="276" y="381">a kezelőfelületet kívülről nem lehet próbálgatni, mert nincs kint</text>
+
+          <text class="abra__mono" x="440" y="412" text-anchor="middle">EGY RÉTEG ÁTTÖRÉSE NEM A KÖRNYEZET ELVESZTÉSE</text>
+        </svg>
+      </figure>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <h2 class="szekcio__cim">Rétegről rétegre</h2>
+      <p class="szekcio__lead">
+        Minden réteg ugyanazt a szerkezetet követi: mi a konkrét kockázat, mit teszünk ellene, és
+        milyen technikai megoldás áll mögötte. A technikai részletek lenyithatók.
+      </p>
+
+      <div class="rkartyak">
+        {retegek.map((r, i) => (
+          <article class="rkartya">
+            <div class="rkartya__fej">
+              <span class="rkartya__idx">{String(i + 1).padStart(2, '0')}</span>
+              <span class="rkartya__cimke">{r.cimke}</span>
+            </div>
+
+            <h3>{r.cim}</h3>
+
+            {r.allitas.map((bek) => <p>{bek}</p>)}
+
+            <p class="rkartya__kulcs">{r.kulcs}</p>
+
+            {r.hivatkozas && (
+              <p class="rkartya__hiv"><a href={r.hivatkozas.url}>{r.hivatkozas.szoveg} →</a></p>
+            )}
+
+            <details class="reszletek">
+              <summary>Technikai részletek</summary>
+              <ul>
+                {r.reszletek.map((d) => (
+                  <li>
+                    {d.cimke && <strong>{d.cimke}:</strong>}
+                    {' '}{d.szoveg}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="band band--mist">
+    <div class="wrap">
+      <h2 class="szekcio__cim">Hol áll meg egy támadás</h2>
+      <p class="szekcio__lead">
+        A támadás nem egyetlen esemény, hanem lépések sora. A védekezés lényege, hogy ne az utolsó
+        lépésnél kelljen először beavatkozni: minden lépéshez tartozik egy kontroll, amelyik
+        önmagában is megszakítja a láncot.
+      </p>
+
+      <figure class="abra">
+        <svg viewBox="0 0 880 272" role="img" aria-labelledby="abra-lanc">
+          <title id="abra-lanc">
+            Egy tipikus támadási lánc öt lépése, és alatta az a kontroll, amelyik az adott lépést
+            megállítja. Első lépés adathalászat, megszólalásig hiteles levéllel vagy hívással —
+            ezt írott belső eljárásrend állítja meg a kifizetések előtt. Második lépés belépés
+            megszerzett jelszóval — ezt a többfaktoros hitelesítés állítja meg. Harmadik lépés
+            kártevő futtatása a munkaállomáson — ezt a végpontvédelem és az ütemezett
+            frissítéskezelés állítja meg. Negyedik lépés terjedés a szerverek és az adatbázis felé
+            — ezt a kétszintű szegmentálás és az ügyfelenként dedikált átjáró állítja meg. Ötödik
+            lépés az adatok és a mentés titkosítása — ezt a más helyszínen álló, független mentés
+            és a futásra kész replika állítja meg.
+          </title>
+
+          <text class="abra__mono" x="78" y="14" text-anchor="middle">01</text>
+          <text class="abra__mono" x="259" y="14" text-anchor="middle">02</text>
+          <text class="abra__mono" x="440" y="14" text-anchor="middle">03</text>
+          <text class="abra__mono" x="621" y="14" text-anchor="middle">04</text>
+          <text class="abra__mono" x="802" y="14" text-anchor="middle">05</text>
+
+          <rect class="abra__doboz" x="0" y="24" width="156" height="72" rx="4" />
+          <text class="abra__cimke" x="78" y="50" text-anchor="middle">Adathalászat</text>
+          <text class="abra__kicsi" x="78" y="68" text-anchor="middle">levél vagy hívás,</text>
+          <text class="abra__kicsi" x="78" y="84" text-anchor="middle">megszólalásig hiteles</text>
+          <path class="abra__nyil" d="M164 54 L176 60 L164 66 Z" />
+
+          <rect class="abra__doboz" x="181" y="24" width="156" height="72" rx="4" />
+          <text class="abra__cimke" x="259" y="50" text-anchor="middle">Belépés</text>
+          <text class="abra__kicsi" x="259" y="68" text-anchor="middle">megszerzett</text>
+          <text class="abra__kicsi" x="259" y="84" text-anchor="middle">jelszóval</text>
+          <path class="abra__nyil" d="M345 54 L357 60 L345 66 Z" />
+
+          <rect class="abra__doboz" x="362" y="24" width="156" height="72" rx="4" />
+          <text class="abra__cimke" x="440" y="50" text-anchor="middle">Kártevő</text>
+          <text class="abra__kicsi" x="440" y="68" text-anchor="middle">a munkaállomáson</text>
+          <text class="abra__kicsi" x="440" y="84" text-anchor="middle">fut le</text>
+          <path class="abra__nyil" d="M526 54 L538 60 L526 66 Z" />
+
+          <rect class="abra__doboz" x="543" y="24" width="156" height="72" rx="4" />
+          <text class="abra__cimke" x="621" y="50" text-anchor="middle">Terjedés</text>
+          <text class="abra__kicsi" x="621" y="68" text-anchor="middle">a szerverek és az</text>
+          <text class="abra__kicsi" x="621" y="84" text-anchor="middle">adatbázis felé</text>
+          <path class="abra__nyil" d="M707 54 L719 60 L707 66 Z" />
+
+          <rect class="abra__doboz" x="724" y="24" width="156" height="72" rx="4" />
+          <text class="abra__cimke" x="802" y="50" text-anchor="middle">Zsarolás</text>
+          <text class="abra__kicsi" x="802" y="68" text-anchor="middle">az adatok és a</text>
+          <text class="abra__kicsi" x="802" y="84" text-anchor="middle">mentés titkosítása</text>
+
+          <path class="abra__vonal" d="M78 150 V110" />
+          <path class="abra__nyil" d="M73 110 L83 110 L78 100 Z" />
+          <path class="abra__vonal" d="M259 150 V110" />
+          <path class="abra__nyil" d="M254 110 L264 110 L259 100 Z" />
+          <path class="abra__vonal" d="M440 150 V110" />
+          <path class="abra__nyil" d="M435 110 L445 110 L440 100 Z" />
+          <path class="abra__vonal" d="M621 150 V110" />
+          <path class="abra__nyil" d="M616 110 L626 110 L621 100 Z" />
+          <path class="abra__vonal" d="M802 150 V110" />
+          <path class="abra__nyil" d="M797 110 L807 110 L802 100 Z" />
+
+          <rect class="abra__kiemelt" x="0" y="150" width="156" height="76" rx="4" />
+          <text class="abra__kontroll" x="78" y="176" text-anchor="middle">Eljárásrend</text>
+          <text class="abra__kicsi" x="78" y="194" text-anchor="middle">írott szabály a</text>
+          <text class="abra__kicsi" x="78" y="210" text-anchor="middle">kifizetések előtt</text>
+
+          <rect class="abra__kiemelt" x="181" y="150" width="156" height="76" rx="4" />
+          <text class="abra__kontroll" x="259" y="176" text-anchor="middle">Többfaktoros belépés</text>
+          <text class="abra__kicsi" x="259" y="194" text-anchor="middle">a jelszó önmagában</text>
+          <text class="abra__kicsi" x="259" y="210" text-anchor="middle">nem elég</text>
+
+          <rect class="abra__kiemelt" x="362" y="150" width="156" height="76" rx="4" />
+          <text class="abra__kontroll" x="440" y="176" text-anchor="middle">Végpontvédelem</text>
+          <text class="abra__kicsi" x="440" y="194" text-anchor="middle">és ütemezett</text>
+          <text class="abra__kicsi" x="440" y="210" text-anchor="middle">frissítéskezelés</text>
+
+          <rect class="abra__kiemelt" x="543" y="150" width="156" height="76" rx="4" />
+          <text class="abra__kontroll" x="621" y="176" text-anchor="middle">Szegmentálás</text>
+          <text class="abra__kicsi" x="621" y="194" text-anchor="middle">kétszintű hálózat,</text>
+          <text class="abra__kicsi" x="621" y="210" text-anchor="middle">dedikált átjáró</text>
+
+          <rect class="abra__kiemelt" x="724" y="150" width="156" height="76" rx="4" />
+          <text class="abra__kontroll" x="802" y="176" text-anchor="middle">Független mentés</text>
+          <text class="abra__kicsi" x="802" y="194" text-anchor="middle">más helyszínen,</text>
+          <text class="abra__kicsi" x="802" y="210" text-anchor="middle">plusz replika</text>
+
+          <text class="abra__mono" x="440" y="256" text-anchor="middle">MINDEN LÉPÉSHEZ TARTOZIK EGY KONTROLL — A LÁNCOT ELÉG EGY PONTON MEGSZAKÍTANI</text>
+        </svg>
+      </figure>
+
+      <p class="kulcs">
+        A lánc első két szeme nem technikai. Ott egy írott szabály és egy másodperc gondolkodás
+        többet ér, mint bármelyik szűrő.
+      </p>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <h2 class="szekcio__cim">Tíz kockázat, és mit teszünk ellene</h2>
+      <p class="szekcio__lead">
+        Ezek nem elméleti fenyegetések, hanem azok az esetek, amelyekkel egy magyar
+        kis- és középvállalat ténylegesen találkozik. A jobb oldali hivatkozás minden sornál
+        odavisz, ahol a válasz részletesen is olvasható.
+      </p>
+
+      <div class="tabla-doboz">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th scope="col">Kockázat</th>
+              <th scope="col">Mi történik, ha nincs válasz rá</th>
+              <th scope="col">A mi válaszunk</th>
+              <th scope="col">Bővebben</th>
+            </tr>
+          </thead>
+          <tbody>
+            {kockazatok.map((k) => (
+              <tr>
+                <th scope="row">{k.kockazat}</th>
+                <td>{k.nelkule}</td>
+                <td>{k.valasz}</td>
+                <td><a href={k.link.url}>{k.link.szoveg} →</a></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="band band--mist">
+    <div class="wrap">
+      <h2 class="szekcio__cim">Ki miért felel</h2>
+      <p class="szekcio__lead">
+        A legtöbb incidens nem ott keletkezik, ahol valaki rosszul dolgozott, hanem ott, ahol
+        mindkét fél a másikra gondolt. Ezért tesszük ki előre, hogy melyik szolgáltatási modellben
+        hol húzódik a határ.
+      </p>
+
+      <div class="tabla-doboz">
+        <table class="tabla tabla--matrix">
+          <thead>
+            <tr>
+              <th scope="col">Terület</th>
+              {modellek.map((m) => <th scope="col">{m}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {matrix.map((sor) => (
+              <tr>
+                <th scope="row">{sor.terulet}</th>
+                {sor.ertekek.map((e) => (
+                  <td class="jel">
+                    <span class="jel__ikon" aria-hidden="true">{jeloles[e].jel}</span>
+                    <span class="jel__szo">{jeloles[e].sz}</span>
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <ul class="jelmagyarazat">
+        <li><span aria-hidden="true">●</span> A Triox felelőssége</li>
+        <li><span aria-hidden="true">◐</span> Közös, a szerződés szerint</li>
+        <li><span aria-hidden="true">○</span> Az Ön oldalán marad</li>
+      </ul>
+
+      <p class="labjegyzet">
+        A táblázat az alapesetet mutatja. A
+        <a href="/szolgaltatasok/menedzselt-it-uzemeltetes/">menedzselt IT üzemeltetés</a> az a
+        szolgáltatás, amellyel az „Ön” oszlopból is átkerülhetnek tételek hozzánk — a végleges
+        határt minden esetben a szolgáltatási szerződés rögzíti, nem ez a táblázat. A visszaállítási
+        teszt mindegyik modellben önálló szolgáltatás:
+        <a href="/szolgaltatasok/audit-restore-validation/">Audit Restore Validation</a>.
+      </p>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <h2 class="szekcio__cim">Amikor mégis történik valami</h2>
+      <p class="szekcio__lead">
+        A biztonsági megközelítés valódi próbája nem az, hogy mi van kiépítve, hanem hogy mi
+        történik az első órában. Nálunk ez nem improvizáció: minden általunk üzemeltetett rendszer
+        folyamatos, automatizált felügyelet alatt áll, a riasztás pedig definiált eszkalációs úton
+        indul el.
+      </p>
+
+      <figure class="abra">
+        <svg viewBox="0 0 880 392" role="img" aria-labelledby="abra-incidens">
+          <title id="abra-incidens">
+            Az incidenskezelés hat lépése. Észlelés: a monitoring jelez, nem a felhasználó, küszöb-
+            és eseményalapú riasztással. Eszkaláció: definiált eljárásrend szerint, névre szóló
+            felelőshöz, nem egy közös postafiókba. Behatárolás: melyik szegmens, melyik gép,
+            mikortól — a dokumentált környezet miatt ez nem nyomozás. Izoláció: az érintett rendszer
+            leválasztása a dedikált átjárón, más ügyfelet ez nem érint. Helyreállítás: mentésből
+            vagy a futásra kész off-site replikából, a rendszer súlyához mérten. Jegyzőkönyv: mi
+            történt, mi az oka, és mi változik, hogy ne ismétlődhessen meg. A konkrét reakcióidőt a
+            szolgáltatási szerződés rögzíti.
+          </title>
+
+          <text class="abra__mono" x="0" y="14">AMIKOR RIASZTÁS ÉRKEZIK</text>
+
+          <path class="abra__vonal" d="M64 44 V324" />
+
+          <rect class="abra__sav" x="88" y="24" width="792" height="44" rx="3" />
+          <circle class="abra__pont" cx="64" cy="44" r="7" />
+          <text class="abra__mono" x="0" y="48">01</text>
+          <text class="abra__cimke" x="104" y="43">Észlelés</text>
+          <text class="abra__kicsi" x="104" y="61">a monitoring jelez, nem a felhasználó — küszöbérték- és eseményalapú riasztással</text>
+
+          <rect class="abra__sav" x="88" y="80" width="792" height="44" rx="3" />
+          <circle class="abra__pont" cx="64" cy="100" r="7" />
+          <text class="abra__mono" x="0" y="104">02</text>
+          <text class="abra__cimke" x="104" y="99">Eszkaláció</text>
+          <text class="abra__kicsi" x="104" y="117">definiált eljárásrend szerint, névre szóló felelőshöz — nem egy közös postafiókba</text>
+
+          <rect class="abra__sav" x="88" y="136" width="792" height="44" rx="3" />
+          <circle class="abra__pont" cx="64" cy="156" r="7" />
+          <text class="abra__mono" x="0" y="160">03</text>
+          <text class="abra__cimke" x="104" y="155">Behatárolás</text>
+          <text class="abra__kicsi" x="104" y="173">melyik szegmens, melyik gép, mikortól — a dokumentált környezetben ez nem nyomozás</text>
+
+          <rect class="abra__kiemelt" x="88" y="192" width="792" height="44" rx="3" />
+          <circle class="abra__pont" cx="64" cy="212" r="7" />
+          <text class="abra__mono" x="0" y="216">04</text>
+          <text class="abra__cimke" x="104" y="211">Izoláció</text>
+          <text class="abra__kicsi" x="104" y="229">az érintett rendszer leválasztása a dedikált átjárón — más ügyfelet ez nem érint</text>
+
+          <rect class="abra__sav" x="88" y="248" width="792" height="44" rx="3" />
+          <circle class="abra__pont" cx="64" cy="268" r="7" />
+          <text class="abra__mono" x="0" y="272">05</text>
+          <text class="abra__cimke" x="104" y="267">Helyreállítás</text>
+          <text class="abra__kicsi" x="104" y="285">mentésből vagy a futásra kész off-site replikából, a rendszer súlyához mérten</text>
+
+          <rect class="abra__kiemelt" x="88" y="304" width="792" height="44" rx="3" />
+          <circle class="abra__pont" cx="64" cy="324" r="7" />
+          <text class="abra__mono" x="0" y="328">06</text>
+          <text class="abra__cimke" x="104" y="323">Jegyzőkönyv</text>
+          <text class="abra__kicsi" x="104" y="341">mi történt, mi az oka, és mi változik — hogy ne ismétlődhessen meg</text>
+
+          <text class="abra__mono" x="0" y="378">A KONKRÉT REAKCIÓIDŐT ÉS TÁMOGATÁSI IDŐABLAKOT A SZOLGÁLTATÁSI SZERZŐDÉS RÖGZÍTI</text>
+        </svg>
+      </figure>
+
+      <div class="paros">
+        <div>
+          <h3>Ami a riasztás előtt történik</h3>
+          <p>
+            A jó üzemeltetés jellemzője nem az, hogy gyorsan javít. Az, hogy a legtöbb hibából soha
+            nem lesz kiesés. A tele lemez, a hónapok óta hibás mentés, a lejárt tanúsítvány vagy a
+            két éve nem frissült szerver mind olyan hiba, amit gépi felügyelettel napokkal-hetekkel
+            a következmény előtt észre lehet venni.
+          </p>
+          <ul>
+            <li>infrastruktúra-monitoring: hálózati eszközök, szerverek, szolgáltatások, kapacitás- és trendfigyelés</li>
+            <li>mentés-ellenőrzés naponta — nem csak az, hogy elindult, hanem hogy le is futott</li>
+            <li>rendszeres, automatizált infrastruktúra-audit és változáskövetés</li>
+            <li>a saját környezetére szűrt állapot- és erőforrás-riport</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Ami a helyreállítás után marad</h3>
+          <p>
+            Egy incidens akkor ér véget, amikor dokumentálva van. A jegyzőkönyv nemcsak azért kell,
+            mert egy auditor vagy egy biztosító kérheti, hanem azért, mert enélkül ugyanaz a hiba
+            fél év múlva ugyanúgy megismétlődik.
+          </p>
+          <ul>
+            <li>mi történt, mikor, milyen rendszeren, és mi volt a kiváltó ok</li>
+            <li>milyen lépések történtek, és mi lett az eredményük</li>
+            <li>mi változik a környezetben vagy az eljárásrendben</li>
+            <li>naprakész, átadható rendszerdokumentáció — nem az üzemeltető fejében</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="kulcs">
+        Hibabejelentés meglévő ügyfeleinknek: <a href="/tamogatas/">a Támogatás oldalon</a>.
+        Sürgős esetben telefonon.
       </p>
     </div>
   </section>
 
   <section class="band band--mist">
-    <div class="wrap biz-grid">
+    <div class="wrap">
+      <h2 class="szekcio__cim">Megfelelés és bizonyíthatóság</h2>
+      <p class="szekcio__lead">
+        Egy auditnál, egy ügyfélátvilágításnál vagy egy biztosítói eseménynél nem az számít, mit
+        gondolunk a saját biztonságunkról, hanem az, hogy mit tudunk papírral igazolni.
+      </p>
 
-      <div class="biz-card">
-        <h2>Izoláció, nem osztozás</h2>
-        <p>Minden ügyfelünk saját hálózati szegmensen fut, egymástól elválasztva — VLAN-alapú vagy fizikai szegmentálással. Az érzékeny adatokat kezelő ügyfeleinknél már működő gyakorlat a teljesen zárt környezet: dedikált virtuális switch, privát alhálózat, az internetről egyáltalán nem elérhető rendszer.</p>
+      <div class="megfeleles">
+        <article>
+          <h3>Az adat Magyarországon marad</h3>
+          <p>
+            Az adatok Magyarországon, a saját üzemeltetésű infrastruktúránkon tárolódnak, két
+            budapesti helyszínen. Az infrastruktúrához kizárólag felhatalmazott Triox-munkatársak
+            férnek hozzá, az üzemeltetéshez szükséges mértékben. A pontos feltételeket a szerződés
+            rögzíti.
+          </p>
+        </article>
+        <article>
+          <h3>GDPR-konform adatkezelés</h3>
+          <p>
+            Dokumentált folyamatok, dokumentált jogosultsági struktúra és naprakész
+            környezet-dokumentáció. Az adat tartalmáért és annak jogszerű felhasználásáért Ön felel
+            — a technikai és szervezési feltételekért, amelyek között az adat áll, mi.
+          </p>
+        </article>
+        <article>
+          <h3>Igazolt visszaállítás</h3>
+          <p>
+            Egyre több audit és szabályozói vizsgálat írja elő a mentések visszaállítási tesztjének
+            igazolását. Ezt elkülönített tesztkörnyezetben végezzük, audit-kompatibilis
+            jegyzőkönyvvel, „megfelelt / megfelelt javítási javaslatokkal / nem felelt meg”
+            minősítéssel.
+          </p>
+          <p class="megfeleles__hiv">
+            <a href="/szolgaltatasok/audit-restore-validation/">Audit Restore Validation →</a>
+          </p>
+        </article>
+        <article>
+          <h3>Átlátható riportálás</h3>
+          <p>
+            Rendszeres, automatizált infrastruktúra-audit, változáskövetés és a saját környezetére
+            szűrt erőforrás-riport. Ha auditra készül — GDPR, NIS2 vagy ügyfélátvilágítás —, azt a
+            felmérésnél külön végigvesszük, hogy a dokumentáció a megfelelő formában álljon elő.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <h2 class="szekcio__cim">Amit nem állítunk</h2>
+      <p class="szekcio__lead">
+        Egy biztonsági oldalon a legkönnyebb dolog túlígérni. Ezért kimondjuk azt is, amit nem
+        vállalunk — ez ugyanolyan információ, mint a többi.
+      </p>
+
+      <div class="tagadas">
+        {nemAllitjuk.map((n) => (
+          <article>
+            <h3>{n.cim}</h3>
+            <p>{n.szoveg}</p>
+          </article>
+        ))}
       </div>
 
-      <div class="biz-card">
-        <h2>Dedikált gateway ügyfelenként</h2>
-        <p>Saját tűzfal- és NAT-szabályok, VPN-hozzáférés. A szabályrendszert az Ön igényeihez alakítjuk, nem egy közös, mindenkire vonatkozó sablont kap.</p>
-      </div>
+      <p class="zaro">
+        A mögöttes infrastruktúráról a <a href="/technologia/">Technológia</a> oldalon, a gyártói
+        háttérről a <a href="/partnerek/">Partnerek</a> oldalon, a megvalósult környezetekről pedig
+        az <a href="/esettanulmanyok/">Esettanulmányok</a> között olvashat. Ügyfeleink nevét nem
+        tesszük közzé.
+      </p>
+    </div>
+  </section>
 
-      <div class="biz-card">
-        <h2>Kétszintű hálózati szegmentálás</h2>
-        <p>A belső réteg (adatbázis, alkalmazás) és a publikus réteg (web, mail) élesen elválik. Egy publikus szolgáltatás kompromittálódása így nem nyit utat az adatbázisokhoz.</p>
-      </div>
-
-      <div class="biz-card">
-        <h2>Végpont- és hozzáférésvédelem</h2>
-        <p>Végpontvédelem a munkaállomásokon, központi jogosultságkezelés, többfaktoros hitelesítés, valamint biztonsági auditok a környezet rendszeres átvilágítására.</p>
-      </div>
-
-      <div class="biz-card">
-        <h2>Mentés és helyreállítás</h2>
-        <p>Enterprise szintű adatmentés, több egymástól független fizikai backup célpontra, több helyszínen. A kritikus terhelésekhez off-site VM replikációt biztosítunk, hogy egy helyszín kiesése ne jelentsen adatvesztést.</p>
-      </div>
-
-      <div class="biz-card">
-        <h2>Out-of-band management</h2>
-        <p>A menedzsment hálózatunk az internetről nem elérhető. A kezelőfelületek nem támadhatók kívülről.</p>
-      </div>
-
-      <div class="biz-card">
-        <h2>Megfelelés</h2>
-        <p>GDPR-konform adatkezelés, dokumentált folyamatok, rendszeres automatizált infrastruktúra-audit és riportálás.</p>
-      </div>
-
+  <section class="band band--sotet">
+    <img class="vizjel vizjel--cta" src="/logo-feher.svg" alt="" aria-hidden="true" />
+    <div class="wrap cta">
+      <h2>Nézzük meg, melyik réteg hiányzik ma Önnél</h2>
+      <p class="lead">
+        Egy átvilágítás során végigmegyünk mind a hét rétegen: hol áll a mentés, honnan érhető el a
+        kezelőfelület, ki mihez fér hozzá, és mi történne holnap reggel, ha egy gép nem indulna el.
+      </p>
+      <a class="btn" href="/kapcsolat/">Kérek egy biztonsági átvilágítást</a>
     </div>
   </section>
 </Base>
 
 <style>
-  .biz-grid {
+  /* --- szekciófejek: azonos a Partnerek oldaléval --- */
+
+  .szekcio__cim {
+    margin-bottom: 0.5rem;
+  }
+  .szekcio__lead {
+    max-width: 62ch;
+    color: var(--c-steel);
+    margin-bottom: 2rem;
+  }
+
+  /* --- hero és gyorsnézet --- */
+
+  .hero .lead {
+    max-width: 58ch;
+  }
+
+  /* A négy szám a hero alatt: nem díszítés, mindegyik visszakereshető
+     állítás — ugyanezek a számok szerepelnek a Rólunk oldal táblázatában. */
+  .gyorsnezet {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 1.25rem;
+    margin: 2.5rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .gyorsnezet li {
+    border-top: 3px solid var(--c-brand);
+    padding-top: 0.9rem;
+  }
+  .gyorsnezet__ertek {
+    display: block;
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 1.15rem;
+    line-height: 1.2;
+    margin-bottom: 0.35rem;
+  }
+  .gyorsnezet__szoveg {
+    display: block;
+    color: var(--c-steel);
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  /* --- rétegkártyák --- */
+
+  .rkartyak {
+    display: grid;
     gap: 1.5rem;
   }
-  .biz-card {
+  .rkartya {
+    /* Grid-elem alapból min-width: auto — nullázva a hosszú sorok nem
+       feszítik szét a rácsot. */
+    min-width: 0;
+    background: var(--c-paper);
+    border: 1px solid var(--c-line);
+    border-left: 4px solid var(--c-brand);
+    border-radius: var(--r);
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+  }
+  .rkartya__fej {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.9rem;
+  }
+  .rkartya__idx,
+  .rkartya__cimke {
+    font-family: var(--f-util);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .rkartya__idx {
+    color: var(--c-brand);
+  }
+  .rkartya__cimke {
+    color: var(--c-steel);
+  }
+  /* A rétegkártya címe h3, mert a szekció h2-je fölötte áll — a méret
+     viszont a /technologia/ kártyacímeivel egyezik. */
+  .rkartya h3 {
+    font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+    margin-bottom: 0.7rem;
+  }
+  .rkartya p {
+    color: var(--c-steel);
+    font-size: 0.98rem;
+  }
+  /* Sorkizárt törzsszöveg, elválasztással — enélkül a hosszú magyar szavak
+     folyókat nyitnának a széles hasábban. */
+  .rkartya p:not(.rkartya__kulcs):not(.rkartya__hiv) {
+    text-align: justify;
+    hyphens: auto;
+  }
+  .rkartya__kulcs {
+    border-left: 2px solid var(--c-brand);
+    padding-left: 1rem;
+    margin: 1.4rem 0;
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 1.02rem;
+    line-height: 1.45;
+  }
+  .rkartya__hiv {
+    font-size: 0.9rem;
+  }
+  .rkartya__hiv a,
+  .megfeleles__hiv a {
+    text-decoration: none;
+  }
+  .rkartya__hiv a:hover,
+  .megfeleles__hiv a:hover {
+    text-decoration: underline;
+  }
+
+  /* --- lenyitható technikai részletek (a /technologia/ accordionjával egyező) --- */
+
+  .reszletek {
+    border-top: 1px solid var(--c-line);
+    padding-top: 1rem;
+    margin-top: 1.4rem;
+  }
+  .reszletek summary {
+    font-family: var(--f-util);
+    font-size: 0.74rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-brand);
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .reszletek summary::-webkit-details-marker {
+    display: none;
+  }
+  .reszletek summary::before {
+    content: '+';
+    font-size: 1rem;
+    line-height: 1;
+    width: 1rem;
+    text-align: center;
+  }
+  .reszletek[open] summary::before {
+    content: '–';
+  }
+  .reszletek summary:hover {
+    color: var(--c-brand-deep);
+  }
+  .reszletek ul {
+    margin: 1rem 0 0;
+    padding-left: 1.1rem;
+  }
+  .reszletek li {
+    color: var(--c-steel);
+    font-size: 0.94rem;
+    margin-bottom: 0.45rem;
+  }
+  .reszletek li strong {
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-weight: 600;
+    margin-right: 0.3rem;
+  }
+
+  /* --- ábra-kiegészítők --- */
+
+  /* A .abra__cimke 15px-es Montserratja a lánc-ábra 156 px-es hasábjában
+     kilógna, ezért a kontrollnevek egy fokkal kisebbek. */
+  .abra__kontroll {
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 12.5px;
+    fill: var(--c-ink);
+  }
+  .abra__pont {
+    fill: var(--c-brand);
+  }
+
+  /* --- táblázatok: a szolgáltatásoldalak megjelenésével egyezően --- */
+
+  /* A tábla saját konténerben görget, hogy a szélessége ne feszítse szét
+     az oldalt keskeny nézetben. */
+  .tabla-doboz {
+    overflow-x: auto;
+  }
+  .tabla {
+    width: 100%;
+    min-width: 44rem;
+    border-collapse: collapse;
+    font-size: 0.93rem;
+  }
+  .tabla th,
+  .tabla td {
+    text-align: left;
+    padding: 0.6rem 0.9rem;
+    border: 1px solid var(--c-line);
+    vertical-align: top;
+  }
+  .tabla thead th {
+    background: var(--c-ink);
+    color: #e9ecf2;
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+  }
+  .tabla tbody th {
+    background: var(--c-paper);
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: var(--c-ink);
+    width: 15rem;
+  }
+  .tabla td {
+    background: var(--c-paper);
+    color: var(--c-steel);
+  }
+  .tabla tbody tr:nth-child(even) th,
+  .tabla tbody tr:nth-child(even) td {
+    background: var(--c-mist);
+  }
+  .tabla a {
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .tabla a:hover {
+    text-decoration: underline;
+  }
+
+  /* --- felelősségi mátrix --- */
+
+  .tabla--matrix tbody th {
+    width: 22rem;
+  }
+  .tabla--matrix thead th:not(:first-child) {
+    text-align: center;
+  }
+  .jel {
+    text-align: center;
+    white-space: nowrap;
+  }
+  /* A jel önmagában nem hordoz jelentést, ezért a szó is ott áll mellette:
+     nagy nézetben kiírva, keskenyben a jel marad. Színnel nem kódolunk. */
+  .jel__ikon {
+    font-size: 1.05rem;
+    line-height: 1;
+    color: var(--c-brand);
+  }
+  .jel__szo {
+    display: block;
+    margin-top: 0.25rem;
+    font-family: var(--f-util);
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--c-steel);
+    white-space: normal;
+  }
+
+  .jelmagyarazat {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.75rem;
+    margin: 1.25rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.88rem;
+    color: var(--c-steel);
+  }
+  .jelmagyarazat span {
+    color: var(--c-brand);
+    margin-right: 0.4rem;
+  }
+
+  .labjegyzet {
+    max-width: 68ch;
+    margin: 1.25rem 0 0;
+    color: var(--c-steel);
+    font-size: 0.88rem;
+  }
+
+  /* --- kétoszlopos szövegblokk az incidens-ábra alatt --- */
+
+  .paros {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+  @media (min-width: 46rem) {
+    .paros {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .paros h3 {
+    font-size: 1.08rem;
+    margin-bottom: 0.6rem;
+  }
+  .paros p {
+    color: var(--c-steel);
+    font-size: 0.96rem;
+  }
+  .paros ul {
+    margin: 0;
+    padding-left: 1rem;
+    list-style: none;
+  }
+  .paros li {
+    position: relative;
+    margin-bottom: 0.4rem;
+    color: var(--c-steel);
+    font-size: 0.92rem;
+    line-height: 1.45;
+  }
+  .paros li::before {
+    content: '';
+    position: absolute;
+    left: -1rem;
+    top: 0.58em;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--c-brand);
+  }
+
+  /* --- megfelelés és „amit nem állítunk" --- */
+
+  .megfeleles,
+  .tagadas {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  @media (min-width: 46rem) {
+    .megfeleles,
+    .tagadas {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .megfeleles article,
+  .tagadas article {
     background: var(--c-paper);
     border: 1px solid var(--c-line);
     border-radius: var(--r);
     padding: 1.5rem;
   }
-  .biz-card h2 {
+  .megfeleles article {
+    border-top: 3px solid var(--c-brand);
+  }
+  /* A tagadás-kártyák szándékosan visszafogottabbak: nem hirdetés, hanem
+     kiegészítés — ezért csak vékony keret, márkakék hangsúly nélkül. */
+  .tagadas article {
+    background: var(--c-mist);
+  }
+  .megfeleles h3,
+  .tagadas h3 {
     font-size: 1.05rem;
     margin-bottom: 0.5rem;
   }
-  .biz-card p {
+  .megfeleles p,
+  .tagadas p {
+    margin: 0;
+    color: var(--c-steel);
+    font-size: 0.94rem;
+  }
+  .megfeleles__hiv {
+    margin-top: 0.7rem !important;
+    font-size: 0.9rem;
+  }
+
+  /* --- kiemelt mondat és záró blokk --- */
+
+  .kulcs {
+    max-width: 62ch;
+    border-left: 2px solid var(--c-brand);
+    padding-left: 1rem;
+    margin: 2.5rem 0 0;
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 1.05rem;
+    line-height: 1.45;
+  }
+
+  .zaro {
+    max-width: 68ch;
+    margin-top: 2.5rem;
     color: var(--c-steel);
     font-size: 0.95rem;
-    margin: 0;
+  }
+
+  .vizjel--cta {
+    right: -4rem;
+    bottom: -6rem;
+    width: 22rem;
+    opacity: 0.07;
+  }
+  .cta {
+    text-align: center;
+  }
+  .cta .lead {
+    margin-inline: auto;
+    max-width: 58ch;
+  }
+
+  /* Keskeny hasábon a sorkizárás tátongó szóközöket nyit. */
+  @media (max-width: 40rem) {
+    .rkartya p:not(.rkartya__kulcs):not(.rkartya__hiv) {
+      text-align: left;
+    }
+  }
+  @media (max-width: 34rem) {
+    .rkartya__kulcs,
+    .kulcs {
+      font-size: 0.98rem;
+      padding-left: 0.8rem;
+    }
+    .gyorsnezet {
+      gap: 1rem;
+    }
+    .jel__szo {
+      display: none;
+    }
+    .cta .btn {
+      width: 100%;
+      justify-content: center;
+    }
   }
 </style>
