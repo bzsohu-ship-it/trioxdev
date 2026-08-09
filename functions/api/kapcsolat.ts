@@ -20,6 +20,19 @@ interface Env {
   O365_FELADO: string;
   /** Ide érkezik a belső értesítő, pl. `info@triox.hu`. */
   O365_CIMZETT: string;
+  /**
+   * A sebességkorlát számlálói. A dashboardon kötjük be (Settings → Functions →
+   * KV namespace bindings). Szándékosan opcionális: ha nincs bekötve, a végpont
+   * továbbra is működik, csak korlát nélkül — egy hiányzó kötés ne okozzon
+   * kiesést az űrlapon. A hiányt naplózzuk.
+   */
+  SEBESSEGKORLAT?: KVNevter;
+}
+
+/** A Cloudflare KV-ből csak ennyit használunk, így nem kell külön típuscsomag. */
+interface KVNevter {
+  get(kulcs: string): Promise<string | null>;
+  put(kulcs: string, ertek: string, opciok?: { expirationTtl?: number }): Promise<void>;
 }
 
 interface Kontextus {
@@ -47,6 +60,10 @@ const HATAROK = {
 /** A teljes JSON törzs felső korlátja bájtban — a nagy POST-ot el se olvassuk. */
 const TORZS_MAX = 16 * 1024;
 
+/** Sebességkorlát: ennyi elküldött megkeresés engedélyezett IP-nként, ablakonként. */
+const KORLAT_DARAB = 5;
+const KORLAT_ABLAK_MP = 10 * 60;
+
 const EMAIL_MINTA = /^[^\s@,;<>]+@[^\s@,;<>]+\.[a-z]{2,}$/i;
 
 const GRAPH = 'https://graph.microsoft.com/v1.0';
@@ -72,6 +89,12 @@ export const onRequestPost = async ({ request, env }: Kontextus): Promise<Respon
 
   const megkereses = ellenoriz(adat);
   if (typeof megkereses === 'string') return hiba(422, megkereses);
+
+  // A korlátot csak érvényes beküldésre nézzük: az elgépelt e-mail miatt
+  // visszadobott kísérlet ne fogyassza a látogató keretét.
+  if (await tullepteAKorlatot(request, env)) {
+    return hiba(429, 'Túl sok beküldés érkezett erről a hálózatról. Próbálja újra pár perc múlva.');
+  }
 
   const hianyzoBeallitas = (
     ['O365_TENANT_ID', 'O365_CLIENT_ID', 'O365_CLIENT_SECRET', 'O365_FELADO', 'O365_CIMZETT'] as const
@@ -120,6 +143,45 @@ function azonosOrigin(request: Request): boolean {
   try {
     return new URL(origin).host === new URL(request.url).host;
   } catch {
+    return false;
+  }
+}
+
+/**
+ * IP-nkénti sebességkorlát rögzített ablakkal, KV-ben tárolt számlálóval.
+ *
+ * A KV végső konzisztenciájú: egyszerre érkező kérések ugyanazt a számlálót
+ * olvashatják, tehát a korlát közelítő — spam ellen elég, precíz kvótának nem
+ * való. A rögzített ablak azt is jelenti, hogy két szomszédos ablak határán
+ * elvileg kétszer annyi kérés fér át; ezt a küszöb megválasztásánál elfogadjuk.
+ *
+ * Hiányzó KV-kötés vagy KV-hiba esetén **átenged**: a levélküldés fontosabb,
+ * mint a korlát, és a hiányt naplózzuk.
+ */
+async function tullepteAKorlatot(request: Request, env: Env): Promise<boolean> {
+  const kv = env.SEBESSEGKORLAT;
+  if (!kv) {
+    console.warn('Nincs bekötve a SEBESSEGKORLAT KV — a végpont korlát nélkül fut.');
+    return false;
+  }
+
+  const ip = request.headers.get('CF-Connecting-IP');
+  if (!ip) {
+    console.warn('Nincs CF-Connecting-IP fejléc — a sebességkorlát kimarad.');
+    return false;
+  }
+
+  const ablak = Math.floor(Date.now() / 1000 / KORLAT_ABLAK_MP);
+  const kulcs = `kapcsolat:${ip}:${ablak}`;
+
+  try {
+    const eddig = Number((await kv.get(kulcs)) ?? 0);
+    if (eddig >= KORLAT_DARAB) return true;
+    // Két ablaknyi élettartam: a kulcs magától eltűnik, nem kell takarítani.
+    await kv.put(kulcs, String(eddig + 1), { expirationTtl: KORLAT_ABLAK_MP * 2 });
+    return false;
+  } catch (e) {
+    console.error('A sebességkorlát olvasása/írása nem sikerült:', e);
     return false;
   }
 }
