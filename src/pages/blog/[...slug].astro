@@ -43,6 +43,28 @@ const perc = Math.max(1, Math.round(szavak / 200));
 
   .cikk {
     margin-top: 1.75rem;
+    /* A folyó szöveg mértéke. Range-dzsel mérve 38rem ~72 karakter soronként,
+       ami a 60-75-ös olvasási sávba esik; a konténer teljes 78rem-én egy
+       bekezdés 110 karakteres sorokat adott. A .wrap szélessége nem változik,
+       csak a szövegoszlopé. */
+    --w-szoveg: 38rem;
+    /* A széles elemek (ábra, táblázat) ennél tovább mehetnek, de nem a
+       konténer széléig — így a cikknek két mértéke van, nem három. */
+    --w-media: 55rem;
+  }
+
+  /* Csak a szövegtörzs korlátozott; a széles elemek balra igazodva túlnyúlnak.
+     A gyerekelemek a markdownból jönnek, ezért a scope a .cikk-en marad. */
+  .cikk > :global(p),
+  .cikk > :global(ul),
+  .cikk > :global(ol),
+  .cikk > :global(h2),
+  .cikk > :global(h3),
+  .cikk > :global(blockquote),
+  .cikk > :global(details),
+  .cikk > :global(.osszefoglalo),
+  .cikk > :global(.zaras) {
+    max-width: var(--w-szoveg);
   }
 
   .cikk :global(h2) {
@@ -133,8 +155,16 @@ const perc = Math.max(1, Math.round(szavak / 200));
     margin-bottom: 0;
   }
 
+  /* A globális .abra középre igazít; a keskenyebb szövegoszlop mellett ez
+     kibillenne, ezért itt a bal élhez zárjuk. */
+  .cikk > :global(.abra) {
+    max-width: var(--w-media);
+    margin-inline: 0;
+  }
+
   .cikk :global(table) {
     width: 100%;
+    max-width: var(--w-media);
     border-collapse: collapse;
     font-size: 0.93rem;
     margin-block: 1.5rem;
@@ -161,9 +191,40 @@ const perc = Math.max(1, Math.round(szavak / 200));
     background: var(--c-mist);
   }
 
+  /* Mono jelölés a szövegben — enélkül a böngésző alap monospace betűjét
+     kapná a JetBrains Mono helyett. */
+  .cikk :global(code) {
+    font-family: var(--f-util);
+    font-size: 0.88em;
+    background: var(--c-mist);
+    border: 1px solid var(--c-line);
+    border-radius: 3px;
+    padding: 0.1em 0.35em;
+  }
+
+  .cikk :global(pre) {
+    max-width: var(--w-media);
+    overflow-x: auto;
+    background: var(--c-mist);
+    border: 1px solid var(--c-line);
+    border-radius: var(--r);
+    padding: 1rem 1.25rem;
+    margin-block: 1.5rem;
+  }
+
+  /* Kódblokkban a keret és a háttér a <pre>-é, nem minden soré. */
+  .cikk :global(pre code) {
+    background: none;
+    border: 0;
+    padding: 0;
+    font-size: 0.86rem;
+  }
+
   .cikk :global(blockquote) {
     border-left: 4px solid var(--c-brand);
-    margin-block: 1.75rem;
+    /* A böngésző alap blockquote-margója 40px oldalt is — enélkül a kiemelés
+       jobbra csúszna a szövegoszlophoz képest. */
+    margin: 1.75rem 0;
     padding: 0.75rem 1.25rem;
     background: var(--c-brand-wash);
     border-radius: 0 var(--r) var(--r) 0;
