@@ -1,0 +1,72 @@
+---
+// Ez a konverziós oldal: a sikeres űrlapbeküldés ide irányít át. A Cloudflare
+// ennek az oldalletöltésnek a számából látja az ajánlatkéréseket, a GA4 pedig a
+// lenti `ajanlatkeres` eseményből. Nem indexeljük, és a sitemapból is ki van
+// zárva (astro.config.mjs): a keresőből ide érkező látogató hamis konverzió lenne.
+import Base from '../../layouts/Base.astro';
+---
+
+<Base
+  cim="Köszönjük, megkaptuk"
+  leiras="Megkaptuk az üzenetét. 2 munkanapon belül válaszolunk."
+  indexelheto={false}
+>
+  <section class="band koszonjuk">
+    <img class="vizjel vizjel--koszonjuk" src="/logo.svg" alt="" aria-hidden="true" />
+    <div class="wrap prose koszonjuk__in">
+      <p class="eyebrow">Kapcsolat</p>
+      <h1>Köszönjük, megkaptuk</h1>
+      <p class="lead">
+        Az üzenete megérkezett hozzánk, és e-mailben visszaigazolást is küldtünk róla.
+      </p>
+      <p>
+        2 munkanapon belül válaszolunk. Ha sürgős, írjon közvetlenül:{' '}
+        <a href="mailto:info@triox.hu">info@triox.hu</a>.
+      </p>
+      <p>Addig is:</p>
+      <ul>
+        <li><a href="/szolgaltatasok/">Szolgáltatások</a></li>
+        <li><a href="/esettanulmanyok/">Esettanulmányok</a></li>
+        <li><a href="/">Vissza a kezdőlapra</a></li>
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<script is:inline>
+  // Csak akkor számoljunk konverziót, ha tényleg az űrlapról érkezett a látogató.
+  // Az űrlap teszi ki ezt a jelzést közvetlenül az átirányítás előtt; e nélkül a
+  // közvetlen megnyitás és az oldalfrissítés is konverziónak látszana.
+  try {
+    if (sessionStorage.getItem('triox-ajanlatkeres')) {
+      sessionStorage.removeItem('triox-ajanlatkeres');
+      if (window.trioxEsemeny) window.trioxEsemeny('ajanlatkeres');
+    }
+  } catch (e) {
+    // privát mód: nincs jelzés, nincs esemény
+  }
+</script>
+
+<style>
+  .koszonjuk {
+    position: relative;
+    overflow: hidden;
+  }
+  .koszonjuk__in {
+    position: relative;
+    z-index: 1;
+  }
+  .vizjel--koszonjuk {
+    right: -5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 26rem;
+    opacity: 0.06;
+  }
+  @media (max-width: 52rem) {
+    .vizjel--koszonjuk {
+      right: -8rem;
+      width: 20rem;
+    }
+  }
+</style>

@@ -1,0 +1,165 @@
+---
+// A süti-tájékoztató a ténylegesen bekapcsolt mérésről szól: ha egy build nem
+// kap GA4 azonosítót, a GA4-fejezet sem jelenik meg, mert olyankor tényleg nem
+// megy ki süti. Így a lap nem állít olyat, ami az adott buildre nem igaz.
+import Base from '../layouts/Base.astro';
+
+const ga4Id = import.meta.env.PUBLIC_GA4_ID ?? '';
+const cfToken = import.meta.env.PUBLIC_CF_BEACON_TOKEN ?? '';
+---
+
+<Base
+  cim="Sütik és látogatottság-mérés"
+  leiras="Mit mérünk a triox.hu-n, mihez kérünk hozzájárulást, és hogyan vonhatja vissza."
+>
+  <section class="band">
+    <div class="wrap prose sutik">
+      <p class="eyebrow">Adatkezelés</p>
+      <h1>Sütik és látogatottság-mérés</h1>
+      <p class="lead">
+        Azt szeretnénk látni, hány látogató érkezik az oldalra és mit keres itt. Ehhez a lehető
+        legkevesebb adatot gyűjtjük, és amihez süti kell, ahhoz külön megkérdezzük Önt.
+      </p>
+
+      {
+        cfToken && (
+          <>
+            <h2>Alapmérés — süti nélkül</h2>
+            <p>
+              A látogatottságot a Cloudflare Web Analytics méri. Ez a mérés nem tesz ki sütit, nem
+              használ eszközujjlenyomatot, és nem köti az adatokat személyhez. Ezért fut az Ön
+              hozzájárulása nélkül is.
+            </p>
+            <p>Amit lát: melyik oldalt hányszor nyitották meg, melyik oldalról érkezett a látogató,
+              melyik országból, milyen böngészővel és eszköztípussal, és milyen gyorsan töltött be az
+              oldal.</p>
+          </>
+        )
+      }
+
+      {
+        ga4Id && (
+          <>
+            <h2>Google Analytics — csak az Ön hozzájárulásával</h2>
+            <p>
+              A részletesebb elemzéshez a Google Analytics 4-et használjuk. Ez sütit tesz ki, ezért
+              csak akkor indul el, ha Ön az oldal alján megjelenő sávon az Elfogadom gombra kattint.
+              Amíg nem kattint, a Google felé egyetlen kérés sem megy — a mérőkód be sem töltődik.
+            </p>
+            <table class="sutik__tabla">
+              <thead>
+                <tr>
+                  <th scope="col">Süti</th>
+                  <th scope="col">Mire való</th>
+                  <th scope="col">Meddig él</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>_ga</code></td>
+                  <td>Megkülönbözteti a látogatókat egymástól</td>
+                  <td>2 év</td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>_ga_{ga4Id.replace(/^G-/, '')}</code>
+                  </td>
+                  <td>A látogatás állapotát tartja nyilván</td>
+                  <td>2 év</td>
+                </tr>
+              </tbody>
+            </table>
+            <p>
+              A szolgáltatás üzemeltetője a Google Ireland Limited; az adatok feldolgozása során
+              azok az Európai Unión kívülre, jellemzően az Egyesült Államokba is továbbítódhatnak. A
+              Google adatkezeléséről a{' '}
+              <a href="https://policies.google.com/privacy" rel="noopener">Google adatvédelmi
+                irányelvei</a>{' '}
+              szólnak.
+            </p>
+
+            <h2>Meggondolta magát?</h2>
+            <p>
+              A döntését bármikor megváltoztathatja. Elutasításkor kikapcsoljuk a mérést, és a már
+              kitett <code>_ga</code> sütiket is töröljük.
+            </p>
+            <p>
+              <button class="btn btn--ghost" type="button" id="suti-beallitas" hidden>
+                Beállítás módosítása
+              </button>
+            </p>
+          </>
+        )
+      }
+
+      <h2>Amit nem mérünk</h2>
+      <p>
+        Nem használunk hirdetési vagy közösségimédia-követő kódot, és nem adunk el adatot. A
+        kapcsolati űrlap nem tesz ki sütit: az ott megadott adatokat kizárólag az Ön megkeresésének
+        megválaszolására használjuk.
+      </p>
+      {
+        ga4Id && (
+          <p>
+            A süti-kérdésre adott válaszát a böngészője saját tárolójában (localStorage,{' '}
+            <code>triox-meres</code> kulcs) őrizzük. Ez nem süti, nem kerül el a kiszolgálóhoz, és
+            nem azonosítja Önt — csak azt jegyzi meg, hogy ne kérdezzük meg újra.
+          </p>
+        )
+      }
+
+      <p>
+        Ez a lap csak a mérésről szól. A kapcsolati űrlap adatairól, a megőrzési időről és az Ön
+        jogairól a teljes{' '}
+        <a href="/adatvedelmi-nyilatkozat/">adatkezelési tájékoztató</a> szól.
+      </p>
+      <p>
+        Kérdése van az adatkezelésünkkel kapcsolatban? Írjon ide:{' '}
+        <a href="mailto:info@triox.hu">info@triox.hu</a>.
+      </p>
+    </div>
+  </section>
+</Base>
+
+<script is:inline>
+  // A gomb csak akkor működik, ha a süti-sáv is jelen van az oldalon (azaz van
+  // beállított GA4 azonosító). Ha nincs, ne mutassunk használhatatlan gombot.
+  var beallitasGomb = document.getElementById('suti-beallitas');
+  if (beallitasGomb && window.trioxSutiBeallitas) {
+    beallitasGomb.hidden = false;
+    beallitasGomb.addEventListener('click', function () {
+      window.trioxSutiBeallitas();
+    });
+  }
+</script>
+
+<style>
+  .sutik {
+    max-width: 46rem;
+  }
+  .sutik__tabla {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.4rem 0 1.6rem;
+    font-size: 0.94rem;
+  }
+  .sutik__tabla th,
+  .sutik__tabla td {
+    text-align: left;
+    padding: 0.6rem 0.9rem 0.6rem 0;
+    border-bottom: 1px solid var(--c-line);
+    vertical-align: top;
+  }
+  .sutik__tabla th {
+    font-family: var(--f-util);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--c-steel);
+    font-weight: 400;
+  }
+  .sutik__tabla code {
+    font-family: var(--f-util);
+    font-size: 0.88em;
+  }
+</style>

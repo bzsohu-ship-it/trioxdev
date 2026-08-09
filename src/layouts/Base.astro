@@ -5,13 +5,17 @@ import '@fontsource-variable/jetbrains-mono';
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import Meres from '../components/Meres.astro';
+import Sutisav from '../components/Sutisav.astro';
 
 interface Props {
   cim: string;
   leiras: string;
+  /** Hamisra állítva noindex kerül az oldalra (pl. a köszönőoldal). */
+  indexelheto?: boolean;
 }
 
-const { cim, leiras } = Astro.props;
+const { cim, leiras, indexelheto = true } = Astro.props;
 const kanonikus = new URL(Astro.url.pathname, Astro.site);
 // A megosztóképek abszolút URL-t igényelnek, különben a Facebook/LinkedIn nem tölti be.
 const ogKep = new URL('/og-image-1200x630-vilagos.png', Astro.site);
@@ -26,6 +30,7 @@ const twitterKep = new URL('/twitter-card-1200x675-vilagos.png', Astro.site);
     <title>{cim} — Triox Informatika Kft.</title>
     <meta name="description" content={leiras} />
     <link rel="canonical" href={kanonikus} />
+    {!indexelheto && <meta name="robots" content="noindex, nofollow" />}
 
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -59,6 +64,7 @@ const twitterKep = new URL('/twitter-card-1200x675-vilagos.png', Astro.site);
       slogan: 'Tudjuk hogyan segíthetünk önnek',
       serviceType: ['IT rendszerfelügyelet', 'Felhő szolgáltatások', 'Adatmentés', 'Hoszting'],
     })} />
+    <Meres />
   </head>
   <body>
     <Header />
@@ -66,5 +72,6 @@ const twitterKep = new URL('/twitter-card-1200x675-vilagos.png', Astro.site);
       <slot />
     </main>
     <Footer />
+    <Sutisav />
   </body>
 </html>

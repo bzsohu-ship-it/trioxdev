@@ -62,9 +62,19 @@
         // A végpont a felhasználónak szóló magyar hibaszöveget is visszaadja.
         const test = await valasz.json().catch(() => null);
         if (!valasz.ok || !test?.ok) throw new Error(test?.hiba ?? '');
+        // A reset a visszalépéskori újraküldés ellen véd.
         urlap.reset();
         jelzes.dataset.state = 'ok';
-        jelzes.textContent = 'Megkaptuk. 2 munkanapon belül válaszolunk.';
+        jelzes.textContent = 'Megkaptuk, átirányítjuk…';
+        // A köszönőoldal ebből tudja, hogy valódi beküldés történt, és csak
+        // ekkor számol konverziót. Lásd src/pages/kapcsolat/koszonjuk.astro
+        try {
+          sessionStorage.setItem('triox-ajanlatkeres', '1');
+        } catch (e) {
+          // privát mód: az oldalletöltés így is megmarad a statisztikában
+        }
+        window.location.assign('/kapcsolat/koszonjuk/');
+        return;
       } catch (err) {
         const reszlet = err instanceof Error && err.message ? err.message : '';
         jelzes.dataset.state = 'err';

@@ -15,7 +15,9 @@ const csomagGyoker = path.resolve(path.dirname(require.resolve('astro/package.js
 
 export default defineConfig({
   site: 'https://triox.hu',
-  integrations: [sitemap()],
+  // A köszönőoldal konverziót számol, ezért nem kerülhet a keresőbe: onnan
+  // érkező látogató hamis ajánlatkérésnek látszana. A noindex meta a lapon van.
+  integrations: [sitemap({ filter: (oldal) => !oldal.includes('/kapcsolat/koszonjuk/') })],
   build: { format: 'directory' },
   // A .claude/launch.json `autoPort` beállítása PORT környezeti változóban adja
   // át a ténylegesen kiosztott portot. E nélkül az Astro magától lépne tovább a
