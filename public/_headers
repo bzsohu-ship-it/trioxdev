@@ -1,4 +1,14 @@
+# A HSTS a régi GoDaddy-oldal fejlécét viszi tovább, változatlan értékekkel:
+# max-age=63072000 (2 év), includeSubDomains, preload. Enélkül a Cloudflare-re
+# állás biztonsági visszalépés lenne — a korábbi látogatók böngészője úgyis
+# emlékszik rá, az új látogatók viszont nem kapnák meg.
+#
+# Az `includeSubDomains` MINDEN aldomainre kötelezővé teszi az érvényes HTTPS-t.
+# Ha valaha kerül ide olyan aldomain, aminek nincs tanúsítványa, az elérhetetlen
+# lesz. A `preload` miatt ez böngészőkbe égetve is így marad — a visszavonás
+# hónapokig tart. Csak akkor módosítsd, ha érted a következményét.
 /*
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
   X-Content-Type-Options: nosniff
   X-Frame-Options: SAMEORIGIN
   Referrer-Policy: strict-origin-when-cross-origin
