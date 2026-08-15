@@ -29,15 +29,22 @@ A tartalom markdownban van, a design tokenek egy helyen: `src/styles/global.css`
 2. Új szín **nem** kerül közvetlenül komponensbe — előbb token a `:root`-ban.
 3. Minden oldal a `Base` layoutot használja, `cim` és `leiras` proppal (SEO).
 4. Piszkozat blogbejegyzés: `piszkozat: true` — nem kerül be a buildbe.
-5. Változtatás után mindig fusson le: `npm run build`. Ha hibázik, ne commitolj.
+5. **A frontmatterben a `: ` (kettőspont + szóköz) megtöri a YAML-t.** A `cim` és
+   a `leiras` mezőben kulcs-érték párnak olvasódik, a build pedig `bad indentation
+   of a mapping entry` hibával megáll — a hibaüzenet ráadásul nem arra a sorra
+   mutat, ahol a hiba van. Írj helyette gondolatjelet (` — `), vagy tedd az egész
+   értéket idézőjelbe. Kettőspont csak akkor maradhat, ha **se szóköz nem követi,
+   se a sor végén nem áll** — `arany 3:1` rendben van, `így szól:` viszont
+   ugyanúgy megtöri a buildet (js-yaml-lal ellenőrizve).
+6. Változtatás után mindig fusson le: `npm run build`. Ha hibázik, ne commitolj.
    A `functions/` mappát az Astro build nem fordítja, azt a `npm run check` nézi.
-6. Ne írj tényadatot (ár, reakcióidő, referencia) találomra. Ha hiányzik, hagyj
+7. Ne írj tényadatot (ár, reakcióidő, referencia) találomra. Ha hiányzik, hagyj
    `<!-- KITÖLTENDŐ: ... -->` jelölést, és szólj róla. **Figyelem:** az Astro 7
    markdown-feldolgozója (Sätteri) a HTML-megjegyzéseket változatlanul kiírja a
    publikus oldalba, és remark-plugin nem köthető be. Ha a jegyzet nem való
    nyilvánosságra — például az, hogy mit *nem* vállalunk —, akkor `docs/`-ba
    kerüljön, ami nincs a buildben (lásd `docs/helyi-uzemeltetes-megerositendo.md`).
-7. **Levelet csak a `functions/api/kapcsolat.ts` küld**, Microsoft Graph
+8. **Levelet csak a `functions/api/kapcsolat.ts` küld**, Microsoft Graph
    `sendMail` hívással az Office 365-ből. Új levélküldő funkció ne hívjon külső
    szolgáltatást (n8n, Resend, SendGrid) és ne próbáljon SMTP-t — a Workers
    futtatókörnyezet nem tud nyers TCP-t. A titkok szerveroldali környezeti
