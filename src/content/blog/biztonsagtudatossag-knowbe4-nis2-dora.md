@@ -1,8 +1,7 @@
 ---
 cim: Az auditor nem azt kérdezi, tartottak-e oktatást
 leiras: Hanem azt, hogy tudják-e bizonyítani. A NIS2 hazai törvénye és a DORA is elvárja a dolgozók biztonságtudatosságát — arról viszont kevés szó esik, hogy ezt mivel lehet igazolni. Közérthetően a képzésről és a mérésről.
-datum: 2026-08-20
-piszkozat: true
+datum: 2026-08-16
 ---
 
 <div class="osszefoglalo">
