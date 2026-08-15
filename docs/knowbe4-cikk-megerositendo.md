@@ -4,8 +4,9 @@
 
 Vonatkozik: [`src/content/blog/biztonsagtudatossag-knowbe4-nis2-dora.md`](../src/content/blog/biztonsagtudatossag-knowbe4-nis2-dora.md)
 
-A cikk `piszkozat: true` állapotban van, dátuma **2026-08-20 (csütörtök)**, a heti
-ritmus következő pontja. Élesítés: a `piszkozat` sor törlése vagy `false`-ra állítása.
+A cikk **élesben van**, dátuma **2026-08-16 (vasárnap)** — Zsolt kérésére került ki
+azonnal, a tervezett 2026-08-20 (csütörtök) helyett. A blog egyébként heti
+ritmuson, csütörtökön jelentkezik; a következő időpont **2026-08-27**.
 
 ## Amit a cikk szándékosan NEM állít
 
