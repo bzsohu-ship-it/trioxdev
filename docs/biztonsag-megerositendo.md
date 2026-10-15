@@ -13,7 +13,7 @@ megerősítés kellene, mielőtt bármelyik kikerül.
 
 | Tétel | Hova kerülne | Miért nincs kint |
 |---|---|---|
-| **ISO 27001 / ISAE / SOC 2 tanúsítvány** | „Megfelelés és bizonyíthatóság” blokk | Nincs megerősítve, hogy van érvényes auditlelet. Az oldal jelenleg azt írja: tanúsítványra csak akkor hivatkozunk, ha van mögötte auditlelet. |
+| **ISO 27001 / ISAE / SOC 2 tanúsítvány — a Triox saját jogán** | „Megfelelés és bizonyíthatóság” blokk | A Triox Informatika Kft.-nek saját ISO 27001 tanúsítványa nincs, ezt nem állítjuk. **Ami kint van (2026-10-15, Zsolt jóváhagyásával):** a két géptermet üzemeltető kolokációs partner ISO/IEC 27001:2022 tanúsítványa (érvényes 2028-04-10-ig, mindkét címet név szerint lefedi) — a „Fizikai réteg” részleteiben és „Az adat Magyarországon marad” kártyán, mindig az *adatközpontra* vonatkoztatva. A partner nevesítése még nyitott; Tier-minősítést és az ő 99,9 %-át nem vesszük át. |
 | **NIS2-megfelelés mint vállalás** | Ugyanoda | Az oldal csak annyit ír, hogy a felmérésen végigvesszük az audit-elvárásokat — ez a `menedzselt-it-uzemeltetes.md` felmérési listájából jön. Konkrét NIS2-megfelelési vállalás nincs. |
 | **EDR / XDR terméknév, SIEM, SOC-ügyelet** | „Végpont” rétegkártya | A platform-katalógus csak „végpontvédelem felügyelete, központi konzollal” szintig megy. TermékNÉV és 7×24 ügyelet nincs megerősítve. |
 | **Sérülékenységvizsgálat / pentest rendszeressége** | „Rétegről rétegre” vagy önálló blokk | A `menedzselt-it-uzemeltetes.md` említ „biztonsági auditok, sérülékenységek feltárása” tételt, de rendszerességet és módszertant nem. Ezért az oldalon sem szerepel. |
