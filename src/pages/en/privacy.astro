@@ -1,0 +1,244 @@
+---
+// Az adatkezelési tájékoztató angol változata — a magyar párja:
+// src/pages/adatvedelmi-nyilatkozat.astro. A két lap tartalma együtt
+// változik, a hatálydátummal együtt.
+import Base from '../../layouts/Base.astro';
+
+// A tájékoztató verziódátuma. Érdemi módosításkor át kell írni.
+const hatalyos = 'October 15, 2026';
+---
+
+<Base
+  cim="Privacy notice"
+  leiras="What data triox.hu processes, what happens to it, who receives it, and how you can have it deleted."
+>
+  <section class="band">
+    <div class="wrap prose jogi">
+      <p class="eyebrow">Privacy</p>
+      <h1>Privacy notice</h1>
+      <p class="lead">
+        This notice covers the processing of personal data related to your use of the triox.hu
+        website: what we ask you for, what happens to it, who receives it, and what you can do if you
+        change your mind.
+      </p>
+      <p class="jogi__datum">Effective: {hatalyos}</p>
+
+      <h2>Who processes your data</h2>
+      <p>
+        <strong>Triox Informatika Kft.</strong><br />
+        Registered office: 1106 Budapest, Kada utca 133., Hungary<br />
+        Company registration no.: 01-09-449388<br />
+        Tax ID: 13316460-2-42<br />
+        Email: <a href="mailto:info@triox.hu">info@triox.hu</a>
+      </p>
+      <p>
+        We have not appointed a data protection officer—the law does not require one for our
+        activities. Please send any data protection questions to{' '}
+        <a href="mailto:info@triox.hu">info@triox.hu</a>.
+      </p>
+      <p>
+        This notice applies to the triox.hu website, both the Hungarian and the English pages. The
+        client portal (support.triox.hu) and remote assistance (rd.triox.hu) linked from the website
+        are separate services that our existing clients use under their contracts.
+      </p>
+      <p>
+        This is an English translation of our Hungarian privacy notice. If the two versions differ,
+        the <a href="/adatvedelmi-nyilatkozat/" hreflang="hu" lang="hu">Hungarian version</a> prevails.
+      </p>
+
+      <h2>The contact form</h2>
+      <p>
+        There is only one place on the website where we ask for your data: the{' '}
+        <a href="/en/contact/">contact form</a>. Your <strong>name</strong>, <strong>email
+        address</strong> and <strong>message</strong> are required—without them we cannot reply.
+        Your <strong>company name</strong> and <strong>phone number</strong> are optional.
+      </p>
+      <p>
+        <strong>What happens after you submit it?</strong> Two emails are sent. One goes to us, with
+        the content of your inquiry; the other goes to you as a confirmation. The confirmation
+        deliberately does not include the text of your message, only your name—so the form cannot be
+        used to make us send text to other people’s addresses.
+      </p>
+      <p>
+        We <strong>do not store your data in a database</strong>. Your inquiry stays in our email,
+        just as if you had written to us directly.
+      </p>
+
+      <h3>Purpose and legal basis</h3>
+      <p>
+        We use your data only to answer your inquiry and—if that is what you are asking for—to
+        prepare a quote. We do not use it for marketing and we do not send newsletters.
+      </p>
+      <p>
+        Legal basis: taking steps at your request prior to entering into a contract
+        [GDPR Article 6(1)(b)]. If your inquiry is not aimed at a contract, the legal basis is our
+        legitimate interest in replying to you [GDPR Article 6(1)(f)].
+      </p>
+
+      <h3>How long we keep it</h3>
+      <p>
+        We keep your inquiry and the related correspondence <strong>until you ask us to delete
+        it</strong>. A single email to <a href="mailto:info@triox.hu">info@triox.hu</a> is enough,
+        and we will delete it within 30 days.
+      </p>
+      <p>
+        There is one exception: if your inquiry led to a contract, Hungarian accounting law
+        (Act C of 2000 on Accounting) requires us to keep data related to invoicing for 8 years. We
+        must keep that data until the end of this period, even if you ask us to delete it.
+      </p>
+
+      <h3>Preventing abuse</h3>
+      <p>
+        To keep the form from being used to send bulk email, we accept only a limited number of
+        submissions from one network (IP address) within a short period. To do this, we store the
+        sender’s <strong>IP address for no more than 20 minutes</strong> together with a counter,
+        after which it is deleted automatically. Legal basis: our legitimate interest in keeping
+        the service secure [GDPR Article 6(1)(f)].
+      </p>
+
+      <h2>Cookies, data stored in your browser and visitor statistics</h2>
+      <p>
+        The website <strong>does not use cookies</strong>.
+      </p>
+      <p>
+        <strong>Language setting.</strong> If you click the Hungarian or the US flag in the header,
+        we save your choice in your browser’s local storage (localStorage, key{' '}
+        <code>triox-nyelv</code>) so that you get the site in the same language next time. It stays
+        on your device, never reaches us, and you can remove it at any time by clearing your
+        browser data. If you have not made a choice, we go by your browser’s language
+        setting—and we do not store that either.
+      </p>
+      <p>
+        <strong>Visitor statistics.</strong> We measure traffic with Cloudflare Web Analytics,{' '}
+        <strong>without cookies</strong>: how many page views there were, on which pages, where
+        visitors came from, from which country and on which device, and how fast the page loaded.
+        The measurement does not identify visitors and does not track them on other websites.
+        Legal basis: our legitimate interest in improving the website [GDPR Article 6(1)(f)].
+      </p>
+      <p>
+        <strong>Delivering the site.</strong> As with any website, the server processes your
+        browser’s technical data (IP address, browser type, the page requested) to display the page
+        and to fend off attacks. This is done by our hosting provider, Cloudflare.
+      </p>
+
+      <h2>Who receives your data</h2>
+      <p>
+        We do not sell data, and we do not pass it on for marketing. To run the website, however,
+        we use external providers who act as data processors:
+      </p>
+      <table class="jogi__tabla">
+        <thead>
+          <tr>
+            <th scope="col">Provider</th>
+            <th scope="col">What it does</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Cloudflare, Inc.</td>
+            <td>Hosting the website, running the form endpoint and its rate limit, and the cookieless visitor statistics</td>
+          </tr>
+          <tr>
+            <td>Microsoft Ireland Operations Limited</td>
+            <td>Sending and storing the emails from the form (Microsoft 365 / Exchange Online)</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        These providers may also process data outside the European Union, typically in the United
+        States. The legal framework for such transfers is provided by the European Commission’s
+        adequacy decision and by its standard contractual clauses.
+      </p>
+      <p>
+        Beyond this, we disclose data only when the law requires us to—for example, at the request
+        of a public authority or a court.
+      </p>
+
+      <h2>Your rights</h2>
+      <p>You may ask us at any time to</p>
+      <ul>
+        <li>tell you what data of yours we process (access);</li>
+        <li>correct inaccurate data (rectification);</li>
+        <li>delete your data (erasure);</li>
+        <li>restrict processing while a disputed matter is being resolved;</li>
+        <li>provide your data in a machine-readable format (data portability);</li>
+        <li>and you may object to processing that is based on legitimate interest.</li>
+      </ul>
+      <p>
+        Write to <a href="mailto:info@triox.hu">info@triox.hu</a>, and{' '}
+        <strong>we will reply within 30 days</strong>. Fulfilling your request is free of charge.
+      </p>
+
+      <h2>How we protect your data</h2>
+      <p>
+        The website is available only over an encrypted connection (HTTPS), and the form data
+        reaches us the same way. We store inquiries in our Microsoft 365 mailbox, which only our
+        staff can access. The credentials used for sending email exist only on the server side and
+        are never exposed to the browser.
+      </p>
+
+      <h2>If you have a complaint</h2>
+      <p>
+        Please contact us first at <a href="mailto:info@triox.hu">info@triox.hu</a>—most questions
+        are resolved fastest this way. Regardless, you may turn to the supervisory authority at any
+        time:
+      </p>
+      <p>
+        <strong>Hungarian National Authority for Data Protection and Freedom of Information (NAIH)</strong><br />
+        Address: 1055 Budapest, Falk Miksa utca 9–11., Hungary<br />
+        Mailing address: 1363 Budapest, Pf. 9.<br />
+        Phone: +36 1 391 1400<br />
+        Email: <a href="mailto:ugyfelszolgalat@naih.hu">ugyfelszolgalat@naih.hu</a><br />
+        Website: <a href="https://naih.hu" rel="noopener">naih.hu</a>
+      </p>
+      <p>
+        If your rights are violated, you may also go to court. Under Hungarian law, you may bring
+        the case before the regional court of your place of residence or stay.
+      </p>
+
+      <h2>Changes to this notice</h2>
+      <p>
+        If the way the website works changes, we will update this notice as well. The top of the
+        page always shows the date from which the current text is effective.
+      </p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .jogi {
+    max-width: 46rem;
+  }
+  .jogi__datum {
+    font-family: var(--f-util);
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    color: var(--c-steel);
+    padding-bottom: 1.4rem;
+    border-bottom: 1px solid var(--c-line);
+  }
+  .jogi h3 {
+    margin-top: 1.8rem;
+  }
+  .jogi__tabla {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.4rem 0 1.6rem;
+    font-size: 0.94rem;
+  }
+  .jogi__tabla th,
+  .jogi__tabla td {
+    text-align: left;
+    padding: 0.6rem 0.9rem 0.6rem 0;
+    border-bottom: 1px solid var(--c-line);
+    vertical-align: top;
+  }
+  .jogi__tabla th {
+    font-family: var(--f-util);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--c-steel);
+    font-weight: 400;
+  }
+</style>
