@@ -28,6 +28,7 @@ const OLDALPAROK = {
   'tamogatas.astro': 'en/support.astro',
   'technologia.astro': 'en/technology.astro',
   'adatvedelmi-nyilatkozat.astro': 'en/privacy.astro',
+  'sox-megfeleles.astro': 'en/sox-compliance.astro',
   'szolgaltatasok/index.astro': 'en/services/index.astro',
   'szolgaltatasok/[...slug].astro': 'en/services/[...slug].astro',
   'blog/index.astro': 'en/blog/index.astro',

@@ -1,0 +1,319 @@
+---
+// SOX hatálya alá tartozó IT-üzemeltetés — tapasztalat és illeszkedés.
+//
+// FONTOS a szövegezésre: egy SOX-os ügyfél auditora ezt az oldalt is olvashatja.
+// A „Tapasztalat" kártyák a user által 2026-10-15-én megerősített négy területet
+// sorolják (jogosultság-, változáskezelés, mentés/visszaállítás, auditori
+// bizonyítékok); a korábbi ügyfél csak „nemzetközi, tőzsdén jegyzett
+// vállalatcsoport" lehet. Új állítás (SOC-jelentés, tanúsítás, auditcég neve)
+// csak Zsolt megerősítésével kerülhet ki. Angol pár: src/pages/en/sox-compliance.astro
+import Base from '../layouts/Base.astro';
+
+const teruletek = [
+  {
+    cimke: 'Hozzáférés',
+    cim: 'Jogosultságkezelés',
+    szoveg:
+      'Hozzáférések dokumentált kiosztása és visszavonása, időszakos jogosultság-felülvizsgálat (access review) — hogy bármikor megmutatható legyen, ki mihez fér hozzá, és ki hagyta jóvá.',
+    hiv: { szoveg: 'Az identitás-réteg a Biztonság oldalon', url: '/biztonsag/' },
+  },
+  {
+    cimke: 'Változás',
+    cim: 'Változáskezelés',
+    szoveg:
+      'Rendszermódosítások dokumentált igénylése, jóváhagyása és nyomon követése — minden változásnak van gazdája, jóváhagyója és visszakereshető nyoma.',
+    hiv: { szoveg: 'Változáskövetés és infrastruktúra-audit', url: '/biztonsag/' },
+  },
+  {
+    cimke: 'Üzemeltetés',
+    cim: 'Mentés és visszaállítás',
+    szoveg:
+      'A mentések napi ellenőrzése, visszaállítási tesztek bizonyítékkal, üzemeltetési naplók — nem az a kérdés, hogy van-e mentés, hanem hogy igazolhatóan visszaállítható-e.',
+    hiv: { szoveg: 'Audit Restore Validation', url: '/szolgaltatasok/audit-restore-validation/' },
+  },
+  {
+    cimke: 'Bizonyíték',
+    cim: 'Auditori bizonyítékok',
+    szoveg:
+      'Bizonyítékok, riportok és naplók előállítása a külső auditor ITGC-vizsgálatához, az auditor kérési listái (PBC-listák) szerint, határidőre.',
+    hiv: { szoveg: 'Beszéljük át az auditora elvárásait', url: '/kapcsolat/' },
+  },
+];
+
+const illeszkedes = [
+  'Ügyfelenként dedikált, izolált hálózati környezet és dedikált átjáró — a pénzügyi rendszerek hálózata nem osztozik másokkal.',
+  'Többfaktoros hitelesítés, központi jogosultságkezelés, dokumentált be- és kilépési folyamat.',
+  'Az internetről nem elérhető menedzsment-hálózat — a kezelőfelületekhez csak az arra felhatalmazott munkatársaink férnek hozzá.',
+  'Folyamatos felügyelet, rendszeres, automatizált infrastruktúra-audit és változáskövetés.',
+  'Dokumentált visszaállítási tesztek audit-kompatibilis jegyzőkönyvvel.',
+  'Előre kimondott felelősségi határok: melyik kontroll a miénk, melyik közös, és melyik marad az Ön oldalán.',
+];
+---
+
+<Base
+  cim="SOX hatálya alá tartozó IT-üzemeltetés"
+  leiras="IT-üzemeltetés amerikai tőzsdén jegyzett vállalatoknak és leányvállalataiknak: jogosultság- és változáskezelés, mentés és visszaállítás, auditori bizonyítékok a SOX ITGC-vizsgálathoz."
+>
+  <section class="band">
+    <div class="wrap">
+      <div class="hero">
+        <p class="eyebrow">Megfelelés · SOX</p>
+        <h1>SOX hatálya alá tartozó IT-üzemeltetés</h1>
+        <p class="lead">
+          Az amerikai tőzsdén jegyzett vállalatoknak bizonyítaniuk kell, hogy a pénzügyi
+          beszámolásukat kiszolgáló informatikai rendszerek kontrolláltan működnek. Ez a
+          magyarországi leányvállalatok rendszereire is kiterjedhet. Ebben nem újoncok vagyunk:
+          egy nemzetközi, tőzsdén jegyzett vállalatcsoport SOX hatálya alá tartozó környezetében
+          is dolgoztunk.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band band--mist">
+    <div class="wrap">
+      <h2 class="szekcio__cim">Mit vár el a SOX az IT-tól</h2>
+      <div class="ketoszlop">
+        <p>
+          A Sarbanes–Oxley törvény (SOX) 404. szakasza szerint a vezetésnek évente értékelnie kell
+          a pénzügyi beszámolást támogató belső kontrollokat, a nagyobb társaságoknál ezt külső
+          auditor is igazolja. Az informatikai oldalon ezek az általános IT-kontrollok (ITGC):
+          ki férhet hozzá a rendszerekhez és az adatokhoz, hogyan kerül élesbe egy módosítás, és
+          hogyan biztosított a rendszerek folyamatos, helyreállítható működése.
+        </p>
+        <p>
+          Az auditor nem szándéknyilatkozatot kér, hanem bizonyítékot: jóváhagyásokat,
+          naplókat, felülvizsgálati jegyzőkönyveket, tesztelt visszaállításokat — a vizsgált
+          időszak egészére. Egy üzemeltetőnél ezért nem az a kérdés, hogy jól dolgozik-e, hanem
+          hogy <strong>a munkája utólag is igazolható-e</strong>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <h2 class="szekcio__cim">Amiben tapasztalatunk van</h2>
+      <p class="szekcio__lead">
+        Egy nemzetközi, tőzsdén jegyzett vállalatcsoport SOX hatálya alá tartozó környezetében az
+        alábbi négy területen dolgoztunk — a mindennapi üzemeltetéstől a külső auditor
+        kéréseinek kiszolgálásáig.
+      </p>
+      <div class="kartyak">
+        {teruletek.map((t) => (
+          <article class="kartya">
+            <p class="kartya__cimke">{t.cimke}</p>
+            <h3>{t.cim}</h3>
+            <p>{t.szoveg}</p>
+            <p class="kartya__hiv"><a href={t.hiv.url}>{t.hiv.szoveg} →</a></p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="band band--mist">
+    <div class="wrap">
+      <h2 class="szekcio__cim">Ami a szolgáltatásainkban eleve benne van</h2>
+      <p class="szekcio__lead">
+        A SOX-os környezet nálunk nem külön termék. Ugyanazokra az alapokra épül, amelyeken minden
+        ügyfelünk környezete fut:
+      </p>
+      <ul class="pipak">
+        {illeszkedes.map((s) => <li>{s}</li>)}
+      </ul>
+      <p class="tovabb">
+        A részletek a <a href="/biztonsag/">Biztonság</a> oldalon, a felelősségi mátrixszal együtt.
+      </p>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <h2 class="szekcio__cim">Amit nem állítunk</h2>
+      <div class="tagadas">
+        <article>
+          <h3>Nem adunk ki saját SOC 1 / ISAE 3402 jelentést</h3>
+          <p>
+            Független szolgáltatói kontrolljelentéssel nem rendelkezünk. Helyette azt kínáljuk,
+            amit korábban is: a kontrollok működését igazoló bizonyítékokat közvetlenül az Ön belső
+            ellenőrzésének és külső auditorának adjuk át, az ő kérési listáik szerint.
+          </p>
+        </article>
+        <article>
+          <h3>A megfelelés az Öné, a bizonyíték a közös munka</h3>
+          <p>
+            A SOX-megfelelésért a vállalat vezetése felel. Mi azt vállaljuk, hogy az általunk
+            üzemeltetett kontrollok dokumentáltan működnek, és ezt az auditor felé hiánytalanul
+            igazolni tudjuk. Hogy melyik kontroll kié, azt a szerződésben előre rögzítjük.
+          </p>
+        </article>
+      </div>
+      <p class="zaro">Ügyfeleink nevét nem tesszük közzé.</p>
+    </div>
+  </section>
+
+  <section class="band band--sotet">
+    <img class="vizjel vizjel--cta" src="/logo-feher.svg" alt="" aria-hidden="true" />
+    <div class="wrap cta">
+      <h2>Beszéljük át, mit kér az auditora</h2>
+      <p class="lead">
+        Egy felmérésen végigvesszük, mely rendszerek esnek a SOX hatálya alá, mely kontrollokat
+        vállaljuk mi, és milyen bizonyítékot, milyen ütemben kell átadnunk.
+      </p>
+      <a class="btn" href="/kapcsolat/">Kérjen felmérést</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero .lead {
+    max-width: 60ch;
+  }
+  .szekcio__cim {
+    margin-bottom: 0.5rem;
+  }
+  .szekcio__lead {
+    max-width: 62ch;
+    color: var(--c-steel);
+    margin-bottom: 2rem;
+  }
+
+  .ketoszlop {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0 2.5rem;
+    margin-top: 1rem;
+  }
+  @media (min-width: 52rem) {
+    .ketoszlop {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .ketoszlop p {
+    color: var(--c-steel);
+  }
+
+  .kartyak {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  @media (min-width: 46rem) {
+    .kartyak {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .kartya {
+    min-width: 0;
+    background: var(--c-paper);
+    border: 1px solid var(--c-line);
+    border-top: 3px solid var(--c-brand);
+    border-radius: var(--r);
+    padding: 1.5rem;
+  }
+  .kartya__cimke {
+    font-family: var(--f-util);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--c-brand);
+    margin: 0 0 0.5rem;
+  }
+  .kartya h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+  .kartya p {
+    color: var(--c-steel);
+    font-size: 0.95rem;
+  }
+  .kartya__hiv {
+    margin: 0.9rem 0 0;
+    font-size: 0.9rem !important;
+  }
+  .kartya__hiv a {
+    text-decoration: none;
+  }
+  .kartya__hiv a:hover {
+    text-decoration: underline;
+  }
+
+  .pipak {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.6rem 2.5rem;
+  }
+  @media (min-width: 52rem) {
+    .pipak {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .pipak li {
+    position: relative;
+    padding-left: 1.6rem;
+    margin: 0;
+    color: var(--c-steel);
+    font-size: 0.95rem;
+  }
+  .pipak li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--c-brand);
+    font-weight: 700;
+  }
+  .tovabb {
+    margin-top: 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  .tagadas {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    margin-top: 1rem;
+  }
+  @media (min-width: 46rem) {
+    .tagadas {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .tagadas article {
+    background: var(--c-mist);
+    border: 1px solid var(--c-line);
+    border-radius: var(--r);
+    padding: 1.5rem;
+  }
+  .tagadas h3 {
+    font-size: 1.05rem;
+    margin-bottom: 0.5rem;
+  }
+  .tagadas p {
+    margin: 0;
+    color: var(--c-steel);
+    font-size: 0.94rem;
+  }
+  .zaro {
+    margin-top: 1.5rem;
+    color: var(--c-steel);
+    font-size: 0.9rem;
+  }
+
+  .vizjel--cta {
+    right: -4rem;
+    bottom: -6rem;
+    width: 22rem;
+    opacity: 0.07;
+  }
+  .cta {
+    text-align: center;
+  }
+  .cta .lead {
+    margin-inline: auto;
+  }
+</style>

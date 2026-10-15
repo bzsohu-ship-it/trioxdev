@@ -23,6 +23,7 @@ const OLDALAK: Record<string, string> = {
   '/gyik/': '/en/faq/',
   '/blog/': '/en/blog/',
   '/adatvedelmi-nyilatkozat/': '/en/privacy/',
+  '/sox-megfeleles/': '/en/sox-compliance/',
 };
 
 /** Szolgáltatások: magyar slug → angol slug. */
