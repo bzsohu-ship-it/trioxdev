@@ -80,7 +80,7 @@ meg tőle a munka.
 | Belső dokumentumtár, archívum | Napot | Egy napnyit |
 | Tesztkörnyezet, fejlesztői gépek | Napokat | Akár többet is |
 
-Ez a táblázat nem elírás helyett áll: **példa arra, hogyan néz ki a gondolkodás.**
+Ez a táblázat nem előírás helyett áll: **példa arra, hogyan néz ki a gondolkodás.**
 A konkrét sorokat minden cégnél saját magának kell kitöltenie — ez fél óra
 munka egy megbeszélésen, és utána sokkal könnyebb bármilyen informatikai
 költségről dönteni.

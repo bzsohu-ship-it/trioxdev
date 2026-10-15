@@ -39,7 +39,7 @@ Where a task always runs the same way and at the same time (every morning, for e
 
 **How it works today:** supplier invoices arrive by email, as PDFs, on paper. Someone downloads them, prints them, checks them against the purchase order, enters them, forwards them for approval and then to the accountant. If one gets lost, nobody notices until the payment reminder arrives.
 
-**How it could work:** in Hungary, the data of invoices between businesses is also held in the NAV Online Számla system, and it can be queried from there programmatically. Every morning the AI retrieves the new incoming invoices, matches them to the purchase order and the goods received, flags discrepancies (a different price, a different quantity, a duplicate invoice), and prepares the ones in order for approval. Only the exceptions need human attention.
+**How it could work:** in Hungary, the data of invoices between businesses is also held in the NAV Online Számla system (the online invoice registry of NAV, the Hungarian tax authority), and it can be queried from there programmatically. Every morning the AI retrieves the new incoming invoices, matches them to the purchase order and the goods received, flags discrepancies (a different price, a different quantity, a duplicate invoice), and prepares the ones in order for approval. Only the exceptions need human attention.
 
 ### 2. Managing receivables
 
