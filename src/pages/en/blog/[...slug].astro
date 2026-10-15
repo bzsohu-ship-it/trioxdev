@@ -1,0 +1,13 @@
+---
+import { getCollection } from 'astro:content';
+import BlogCikk from '../../../components/BlogCikk.astro';
+
+export async function getStaticPaths() {
+  const lista = await getCollection('blogEn', ({ data }) => !data.piszkozat);
+  return lista.map((b) => ({ params: { slug: b.id }, props: { b } }));
+}
+
+const { b } = Astro.props;
+---
+
+<BlogCikk b={b} />

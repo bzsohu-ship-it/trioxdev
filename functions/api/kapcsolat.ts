@@ -68,6 +68,19 @@ const EMAIL_MINTA = /^[^\s@,;<>]+@[^\s@,;<>]+\.[a-z]{2,}$/i;
 
 const GRAPH = 'https://graph.microsoft.com/v1.0';
 
+/** A látogatónak szóló hibaszövegek angolul — a kulcs a magyar szöveg. */
+const ANGOL: Record<string, string> = {
+  'Túl sok beküldés érkezett erről a hálózatról. Próbálja újra pár perc múlva.':
+    'Too many submissions from this network. Please try again in a few minutes.',
+  'A levélküldés jelenleg nem elérhető.': 'Sending email is currently unavailable.',
+  'A küldés nem sikerült.': 'Sending failed.',
+  'Adja meg a nevét.': 'Please enter your name.',
+  'Az e-mail cím nem érvényes.': 'The email address is not valid.',
+  'Írja le pár mondatban, miben segíthetünk.': 'Please describe in a few sentences how we can help.',
+  'A cégnév túl hosszú.': 'The company name is too long.',
+  'A telefonszám túl hosszú.': 'The phone number is too long.',
+};
+
 export const onRequestPost = async ({ request, env }: Kontextus): Promise<Response> => {
   if (!azonosOrigin(request)) return hiba(403, 'Ismeretlen forrás.');
 
@@ -83,17 +96,23 @@ export const onRequestPost = async ({ request, env }: Kontextus): Promise<Respon
   if (typeof nyers !== 'object' || nyers === null) return hiba(400, 'Hibás kérés.');
   const adat = nyers as Record<string, unknown>;
 
+  // Az angol (/en/) űrlap `nyelv: 'en'` mezőt küld. Ettől kezdve a látogatónak
+  // szóló hibaszöveg és a visszaigazoló levél angol; a belső értesítő magyar
+  // marad. A fenti, értelmezés előtti hibáknál még nem tudjuk a nyelvet.
+  const en = mezo(adat.nyelv) === 'en';
+  const hibaNyelven = (statusz: number, uzenet: string) => hiba(statusz, en ? (ANGOL[uzenet] ?? uzenet) : uzenet);
+
   // Mézesbödön: ember nem tölti ki. A botnak sikert jelzünk, hogy ne
   // próbálkozzon másik mezőkiosztással, de levél nem megy ki.
   if (mezo(adat.ceges_fax)) return json(200, { ok: true });
 
   const megkereses = ellenoriz(adat);
-  if (typeof megkereses === 'string') return hiba(422, megkereses);
+  if (typeof megkereses === 'string') return hibaNyelven(422, megkereses);
 
   // A korlátot csak érvényes beküldésre nézzük: az elgépelt e-mail miatt
   // visszadobott kísérlet ne fogyassza a látogató keretét.
   if (await tullepteAKorlatot(request, env)) {
-    return hiba(429, 'Túl sok beküldés érkezett erről a hálózatról. Próbálja újra pár perc múlva.');
+    return hibaNyelven(429, 'Túl sok beküldés érkezett erről a hálózatról. Próbálja újra pár perc múlva.');
   }
 
   const hianyzoBeallitas = (
@@ -101,7 +120,7 @@ export const onRequestPost = async ({ request, env }: Kontextus): Promise<Respon
   ).filter((kulcs) => !env[kulcs]);
   if (hianyzoBeallitas.length > 0) {
     console.error('Hiányzó Office 365 beállítás:', hianyzoBeallitas.join(', '));
-    return hiba(500, 'A levélküldés jelenleg nem elérhető.');
+    return hibaNyelven(500, 'A levélküldés jelenleg nem elérhető.');
   }
 
   let token: string;
@@ -109,20 +128,21 @@ export const onRequestPost = async ({ request, env }: Kontextus): Promise<Respon
     token = await tokentKer(env);
   } catch (e) {
     console.error('Token kérése nem sikerült:', e);
-    return hiba(502, 'A levélküldés jelenleg nem elérhető.');
+    return hibaNyelven(502, 'A levélküldés jelenleg nem elérhető.');
   }
 
   // Az értesítő a fontos levél: ha ez nem megy ki, hibát jelzünk a látogatónak.
   try {
-    await levelKuld(token, env.O365_FELADO, ertesitoLevel(megkereses, env.O365_CIMZETT));
+    await levelKuld(token, env.O365_FELADO, ertesitoLevel(megkereses, env.O365_CIMZETT, en));
   } catch (e) {
     console.error('Az értesítő nem ment ki:', e);
-    return hiba(502, 'A küldés nem sikerült.');
+    return hibaNyelven(502, 'A küldés nem sikerült.');
   }
 
   // A visszaigazoló másodlagos: ha elakad, a megkeresés akkor is nálunk van.
   try {
-    await levelKuld(token, env.O365_FELADO, visszaigazoloLevel(megkereses, env.O365_CIMZETT));
+    const visszaigazolo = en ? visszaigazoloLevelAngol : visszaigazoloLevel;
+    await levelKuld(token, env.O365_FELADO, visszaigazolo(megkereses, env.O365_CIMZETT));
   } catch (e) {
     console.error('A visszaigazoló nem ment ki:', e);
   }
@@ -263,7 +283,7 @@ async function levelKuld(token: string, felado: string, level: GraphLevel): Prom
 
 // ----------------------------------------------------------------- levelek
 
-function ertesitoLevel(m: Megkereses, cimzett: string): GraphLevel {
+function ertesitoLevel(m: Megkereses, cimzett: string, en = false): GraphLevel {
   const sorok = [
     ['Név', m.nev],
     ['Cég', m.ceg || '—'],
@@ -275,10 +295,11 @@ function ertesitoLevel(m: Megkereses, cimzett: string): GraphLevel {
 
   return {
     message: {
-      subject: `Megkeresés a triox.hu-ról — ${m.nev}`,
+      // Az angol oldalról érkezőt a tárgy is jelzi, hogy angolul válaszoljunk.
+      subject: `${en ? '[EN] ' : ''}Megkeresés a triox.hu-ról — ${m.nev}`,
       body: {
         contentType: 'HTML',
-        content: `<p>Új megkeresés érkezett a triox.hu kapcsolati űrlapjáról.</p>
+        content: `<p>Új megkeresés érkezett a triox.hu ${en ? 'angol nyelvű (/en/) ' : ''}kapcsolati űrlapjáról.</p>
 <table>${sorok}</table>
 <p><strong>Üzenet</strong></p>
 <p>${esc(m.uzenet).replace(/\n/g, '<br>')}</p>`,
@@ -319,6 +340,31 @@ volt, hagyja figyelmen kívül.</p>`,
       toRecipients: [{ emailAddress: { address: m.email } }],
       // Ugyanoda, ahova az értesítő megy: a beküldő válasza így ugyanabba a
       // postafiókba fut be, ahol maga a megkeresés van.
+      replyTo: [{ emailAddress: { address: valaszCim } }],
+    },
+    saveToSentItems: false,
+  };
+}
+
+/** A visszaigazoló angol változata az /en/ űrlaphoz — ugyanazokkal a szabályokkal. */
+function visszaigazoloLevelAngol(m: Megkereses, valaszCim: string): GraphLevel {
+  return {
+    message: {
+      subject: 'We have received your message — Triox Informatika',
+      body: {
+        contentType: 'HTML',
+        content: `<p>Dear ${esc(m.nev)},</p>
+<p>Thank you for contacting us. We have received the message you sent through
+the contact form on triox.hu and will reply within 2 business days.</p>
+<p>If you would like to add anything in the meantime, reply to this email or
+write to <a href="mailto:info@triox.hu">info@triox.hu</a>.</p>
+<p>Kind regards,<br>Triox Informatika Kft.<br>
+<a href="https://triox.hu/en/">triox.hu</a></p>
+<p style="color:#6b7280;font-size:12px">This email was sent automatically because
+someone submitted a message on triox.hu using this email address. If it was not
+you, please disregard it.</p>`,
+      },
+      toRecipients: [{ emailAddress: { address: m.email } }],
       replyTo: [{ emailAddress: { address: valaszCim } }],
     },
     saveToSentItems: false,

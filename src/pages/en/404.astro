@@ -1,0 +1,43 @@
+---
+import Base from '../../layouts/Base.astro';
+---
+
+<Base cim="Page not found" leiras="The page you are looking for cannot be found.">
+  <section class="band hibaoldal">
+    <img class="vizjel vizjel--404" src="/logo.svg" alt="" aria-hidden="true" />
+    <div class="wrap prose hibaoldal__in">
+      <p class="eyebrow">404</p>
+      <h1>This page does not exist</h1>
+      <p>It has either moved or never existed. You can continue from here:</p>
+      <ul>
+        <li><a href="/en/">Home</a></li>
+        <li><a href="/en/services/">Services</a></li>
+        <li><a href="/en/contact/">Contact</a></li>
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hibaoldal {
+    position: relative;
+    overflow: hidden;
+  }
+  .hibaoldal__in {
+    position: relative;
+    z-index: 1;
+  }
+  .vizjel--404 {
+    right: -5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 26rem;
+    opacity: 0.06;
+  }
+  @media (max-width: 52rem) {
+    .vizjel--404 {
+      right: -8rem;
+      width: 20rem;
+    }
+  }
+</style>

@@ -1,4 +1,6 @@
 ---
+import { nyelvAz, parja } from '../i18n/utak';
+
 /** Menüpont a lenyíló panelben. */
 interface Almenu {
   href: string;
@@ -77,7 +79,78 @@ const menu: Fomenu[] = [
   },
   { cim: 'GYIK', href: '/gyik/' },
 ];
+
+/** Az angol (/en/) menü: szerkezetre azonos a magyarral, angol útvonalakkal. */
+const menuEn: Fomenu[] = [
+  {
+    cim: 'Services',
+    al: [
+      { href: '/en/services/iaas/', cim: 'IaaS – Leased infrastructure' },
+      { href: '/en/services/dcaas/', cim: 'DCaaS – Leased data center' },
+      { href: '/en/services/saas/', cim: 'SaaS – Application hosting' },
+      { href: '/en/services/managed-it-operations/', cim: 'Managed IT operations' },
+      { href: '/en/services/on-premises-and-hybrid-it/', cim: 'On-premises and hybrid IT operations' },
+      { href: '/en/services/audit-restore-validation/', cim: 'Audit Restore Validation and Restore Testing' },
+    ],
+  },
+  {
+    cim: 'Technology',
+    al: [
+      { href: '/en/services/on-premises-and-hybrid-it/#platform-katalogus', cim: 'What we operate—platform catalog' },
+      { href: '/en/technology/', cim: 'Technology overview' },
+      { href: '/en/partners/', cim: 'Partners—vendor background' },
+    ],
+  },
+  {
+    cim: 'Security',
+    al: [
+      { href: '/en/security/', cim: 'Our security approach' },
+      { href: '/en/case-studies/', cim: 'Case studies' },
+    ],
+  },
+  {
+    cim: 'Blog',
+    al: [
+      { href: '/en/blog/', cim: 'All posts' },
+      { href: '/en/blog/mcp-the-usb-c-of-ai/', cim: 'MCP—the USB-C of AI' },
+      { href: '/en/blog/shadow-ai-free-tools/', cim: 'Shadow AI in the company' },
+      { href: '/en/blog/security-awareness-knowbe4-nis2-dora/', cim: 'What the auditor asks' },
+      { href: '/en/blog/how-long-without-your-systems/', cim: 'How long can you run without your systems?' },
+      { href: '/en/blog/ai-agents-that-act/', cim: 'AI now takes action' },
+      { href: '/en/blog/ai-in-the-office-permissions/', cim: 'AI in the office: what does it really see?' },
+      { href: '/en/blog/new-website/', cim: 'triox.hu has been relaunched' },
+      { href: '/en/blog/ai-voice-cloning-fraud/', cim: 'When the scammer calls in your boss’s voice' },
+      { href: '/en/blog/microsoft-365-backup-responsibility/', cim: 'What Microsoft doesn’t back up' },
+      { href: '/en/blog/passkeys-passwordless-sign-in/', cim: 'The password that can’t be stolen' },
+    ],
+  },
+  {
+    cim: 'Support',
+    al: [
+      { href: 'https://support.triox.hu', cim: 'Support for our clients', kulso: true },
+      { href: 'https://rd.triox.hu', cim: 'Remote assistance', kulso: true },
+    ],
+  },
+  {
+    cim: 'Contact',
+    al: [
+      { href: '/en/about/', cim: 'About us' },
+      { href: '/en/contact/', cim: 'Contact form' },
+      { href: 'mailto:info@triox.hu', cim: 'Send an email' },
+    ],
+  },
+  { cim: 'FAQ', href: '/en/faq/' },
+];
+
 const most = Astro.url.pathname;
+const nyelv = nyelvAz(most);
+const aktivMenu = nyelv === 'en' ? menuEn : menu;
+
+/** A fejléc nem menüs feliratai, nyelvenként. A burger-feliratokat a szkript a data-attribútumokból veszi. */
+const felirat = {
+  hu: { logo: 'Triox logó', fomenu: 'Fő menü', nyit: 'Menü megnyitása', zar: 'Menü bezárása', valto: 'EN', valtoCim: 'English version', valtoNyelv: 'en' },
+  en: { logo: 'Triox logo', fomenu: 'Main menu', nyit: 'Open menu', zar: 'Close menu', valto: 'HU', valtoCim: 'Magyar változat', valtoNyelv: 'hu' },
+}[nyelv];
 
 /**
  * Egy panelen belül a legpontosabban illeszkedő menüpont kap kiemelést, nem
@@ -99,13 +172,13 @@ function aktivHref(al: Almenu[]): string | undefined {
 
 <header class="fej" data-menu="zarva">
   <div class="wrap fej__in">
-    <a class="fej__brand" href="/">
-      <img class="fej__logo" src="/logo.svg" alt="Triox logó" width="32" height="32" />
+    <a class="fej__brand" href={nyelv === 'en' ? '/en/' : '/'}>
+      <img class="fej__logo" src="/logo.svg" alt={felirat.logo} width="32" height="32" />
       <span class="fej__nev">triox <em>informatika</em></span>
     </a>
 
-    <nav class="nav-fej" id="fomenu" aria-label="Fő menü">
-      {menu.map((m, i) => {
+    <nav class="nav-fej" id="fomenu" aria-label={felirat.fomenu}>
+      {aktivMenu.map((m, i) => {
         const aktiv = m.al !== undefined ? aktivHref(m.al) : undefined;
         return (
         <div class="nav-elem">
@@ -147,13 +220,24 @@ function aktivHref(al: Almenu[]): string | undefined {
       })}
     </nav>
 
+    <a
+      class="nyelvvalto"
+      href={parja(most)}
+      hreflang={felirat.valtoNyelv}
+      lang={felirat.valtoNyelv}
+      aria-label={felirat.valtoCim}
+      title={felirat.valtoCim}
+    >{felirat.valto}</a>
+
     <button
       class="burger"
       id="burger"
       type="button"
       aria-controls="fomenu"
       aria-expanded="false"
-      aria-label="Menü megnyitása"
+      aria-label={felirat.nyit}
+      data-nyit={felirat.nyit}
+      data-zar={felirat.zar}
     >
       <span class="burger__vonal" aria-hidden="true"></span>
       <span class="burger__vonal" aria-hidden="true"></span>
@@ -182,14 +266,14 @@ function aktivHref(al: Almenu[]): string | undefined {
   function menutZar() {
     fej.dataset.menu = 'zarva';
     burger.setAttribute('aria-expanded', 'false');
-    burger.setAttribute('aria-label', 'Menü megnyitása');
+    burger.setAttribute('aria-label', burger.dataset.nyit ?? '');
     zarOsszes();
   }
 
   function menutNyit() {
     fej.dataset.menu = 'nyitva';
     burger.setAttribute('aria-expanded', 'true');
-    burger.setAttribute('aria-label', 'Menü bezárása');
+    burger.setAttribute('aria-label', burger.dataset.zar ?? '');
   }
 
   burger.addEventListener('click', (e) => {
@@ -270,6 +354,29 @@ function aktivHref(al: Almenu[]): string | undefined {
     gap: 0.6rem;
     text-decoration: none;
     color: var(--c-ink);
+    /* A nyelvváltó harmadik elemként áll a sorban — az auto margó tartja a
+       menüt jobbra zárva, ahogy a váltó előtt volt. */
+    margin-right: auto;
+  }
+
+  /* --- nyelvváltó: HU ⇄ EN, a burger mellett mobilon is látszik --- */
+
+  .nyelvvalto {
+    flex-shrink: 0;
+    font-family: var(--f-util);
+    font-size: 0.74rem;
+    letter-spacing: 0.12em;
+    color: var(--c-ink);
+    text-decoration: none;
+    border: 1px solid var(--c-line);
+    border-radius: var(--r);
+    padding: 0.32rem 0.55rem;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+  }
+  .nyelvvalto:hover {
+    color: var(--c-brand);
+    border-color: var(--c-brand);
+    background: var(--c-brand-wash);
   }
   .fej__logo {
     width: 2rem;

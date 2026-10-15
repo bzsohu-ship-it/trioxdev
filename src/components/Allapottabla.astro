@@ -5,19 +5,39 @@
  * Ha valaha élő adatot kötsz rá (Zabbix/PRTG/Veeam API),
  * cseréld a tömböt fetch-re, és írd át a "jelmagyarázat" szöveget.
  */
-const sorok = [
-  { retegek: 'Szerverek', mit: 'Hyper-V hosztok, tárolók', ciklus: '60 mp' },
-  { retegek: 'Mentések', mit: 'Jobok, visszaállítási tesztek', ciklus: 'ütemezetten' },
-  { retegek: 'Hálózat', mit: 'Tűzfal, router, VPN alagutak', ciklus: '60 mp' },
-  { retegek: 'Végpontok', mit: 'Frissítések, védelem, lemezállapot', ciklus: 'óránként' },
-  { retegek: 'Microsoft 365', mit: 'Postafiókok, licencek, bejelentkezések', ciklus: 'óránként' },
-];
+import { nyelvAz } from '../i18n/utak';
+
+const t = {
+  hu: {
+    fej: 'felügyelet alatt',
+    lab: 'Amit mérünk, azt tudjuk megjavítani időben.',
+    sorok: [
+      { retegek: 'Szerverek', mit: 'Hyper-V hosztok, tárolók', ciklus: '60 mp' },
+      { retegek: 'Mentések', mit: 'Jobok, visszaállítási tesztek', ciklus: 'ütemezetten' },
+      { retegek: 'Hálózat', mit: 'Tűzfal, router, VPN alagutak', ciklus: '60 mp' },
+      { retegek: 'Végpontok', mit: 'Frissítések, védelem, lemezállapot', ciklus: 'óránként' },
+      { retegek: 'Microsoft 365', mit: 'Postafiókok, licencek, bejelentkezések', ciklus: 'óránként' },
+    ],
+  },
+  en: {
+    fej: 'monitored',
+    lab: 'What we measure, we can fix in time.',
+    sorok: [
+      { retegek: 'Servers', mit: 'Hyper-V hosts, storage', ciklus: '60 s' },
+      { retegek: 'Backups', mit: 'Jobs, restore tests', ciklus: 'scheduled' },
+      { retegek: 'Network', mit: 'Firewall, router, VPN tunnels', ciklus: '60 s' },
+      { retegek: 'Endpoints', mit: 'Updates, protection, disk health', ciklus: 'hourly' },
+      { retegek: 'Microsoft 365', mit: 'Mailboxes, licenses, sign-ins', ciklus: 'hourly' },
+    ],
+  },
+}[nyelvAz(Astro.url.pathname)];
+const sorok = t.sorok;
 ---
 
 <div class="tabla">
   <div class="tabla__fej">
     <span class="pip" aria-hidden="true"></span>
-    <span>felügyelet alatt</span>
+    <span>{t.fej}</span>
   </div>
   <ul>
     {sorok.map((s) => (
@@ -31,7 +51,7 @@ const sorok = [
       </li>
     ))}
   </ul>
-  <p class="tabla__lab">Amit mérünk, azt tudjuk megjavítani időben.</p>
+  <p class="tabla__lab">{t.lab}</p>
 </div>
 
 <style>
