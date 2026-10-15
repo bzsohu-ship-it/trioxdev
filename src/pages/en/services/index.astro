@@ -1,10 +1,9 @@
 ---
-import { getCollection } from 'astro:content';
+import { szolgaltatasSorok } from '../../../i18n/szolgaltatas-lista';
 import Base from '../../../layouts/Base.astro';
 
-const lista = (await getCollection('szolgaltatasokEn')).sort(
-  (a, b) => a.data.sorrend - b.data.sorrend
-);
+// A hat fő szolgáltatás + a kiegészítő oldalak (pl. SOX) — lásd src/i18n/szolgaltatas-lista.ts
+const lista = await szolgaltatasSorok('en');
 ---
 
 <Base cim="Services" leiras="IT systems management, cloud, data backup, audit, DRP and hosting—services from Triox Informatika.">
@@ -15,13 +14,13 @@ const lista = (await getCollection('szolgaltatasokEn')).sort(
       <p class="lead">Each service is available on its own, but for most of our clients they come together as one working operations setup.</p>
       <div class="rows">
         {lista.map((sz, i) => (
-          <a class="row" href={`/en/services/${sz.id}/`}>
+          <a class="row" href={sz.href}>
             <span class="row__idx">{String(i + 1).padStart(2, '0')}</span>
             <span>
-              <span class="row__title">{sz.data.cim}</span>
-              <span class="row__desc">{sz.data.osszefoglalo}</span>
+              <span class="row__title">{sz.cim}</span>
+              <span class="row__desc">{sz.osszefoglalo}</span>
             </span>
-            <span class="row__meta">{sz.data.cimke ?? 'details →'}</span>
+            <span class="row__meta">{sz.cimke ?? 'details →'}</span>
           </a>
         ))}
       </div>
