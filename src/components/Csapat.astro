@@ -1,0 +1,140 @@
+---
+/**
+ * A Rólunk / About oldal névjegykártyái — fotó, név, titulus, minősítések.
+ * Közös komponens, hogy a két nyelv megjelenése betűre azonos legyen.
+ * A nyelvet az URL dönti el.
+ *
+ * A fotók a src/assets/csapat/ alatt vannak metaadat (EXIF) nélkül; az Astro
+ * a buildben kis méretű WebP-t készít belőlük, az eredeti nem kerül ki.
+ * A képek szándékosan kicsik: az információ a lényeg, a fotó csak arcot ad.
+ */
+import { Image } from 'astro:assets';
+import { nyelvAz } from '../i18n/utak';
+import balazsZsolt from '../assets/csapat/balazs-zsolt.jpg';
+import kerteszIldiko from '../assets/csapat/kertesz-ildiko.jpg';
+
+const nyelv = nyelvAz(Astro.url.pathname);
+
+const emberek = [
+  {
+    foto: balazsZsolt,
+    nev: { hu: 'Balázs Zsolt', en: 'Zsolt Balázs' },
+    titulus: { hu: 'IT üzemeltetési és támogatási szakértő', en: 'IT operations and support expert' },
+    minositesek: [
+      { kod: 'MCP', nev: 'Microsoft Certified Professional' },
+      { kod: 'MCTS', nev: 'Microsoft Certified Technology Specialist' },
+      { kod: 'MCNPS', nev: 'Microsoft Certified Network Protocol Specialist' },
+    ],
+  },
+  {
+    foto: kerteszIldiko,
+    nev: { hu: 'Kertész Ildikó', en: 'Ildikó Kertész' },
+    titulus: { hu: 'Ügyvezető igazgató', en: 'Managing Director' },
+    minositesek: [],
+  },
+];
+---
+
+<ul class="csapat">
+  {emberek.map((e) => (
+    <li class="kartya">
+      <Image
+        class="kartya__foto"
+        src={e.foto}
+        alt={e.nev[nyelv]}
+        width={320}
+        widths={[160, 320]}
+        sizes="6.5rem"
+        loading="lazy"
+      />
+      <div class="kartya__szoveg">
+        <p class="kartya__nev">{e.nev[nyelv]}</p>
+        <p class="kartya__titulus">{e.titulus[nyelv]}</p>
+        {e.minositesek.length > 0 && (
+          <ul class="kartya__minositesek">
+            {e.minositesek.map((m) => (
+              <li><abbr title={m.nev}>{m.kod}</abbr></li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </li>
+  ))}
+</ul>
+
+<style>
+  .csapat {
+    list-style: none;
+    padding: 0;
+    margin: 1.75rem 0 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  @media (min-width: 46rem) {
+    .csapat {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .kartya {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    margin: 0;
+    padding: 1rem;
+    background: var(--c-paper);
+    border: 1px solid var(--c-line);
+    border-radius: var(--r);
+  }
+  /* Álló, 3:4-es kivágás a 2:3-as eredetiből — az arc a kép felső harmadában van. */
+  .kartya__foto {
+    flex: none;
+    width: 6.5rem;
+    height: 8.25rem;
+    object-fit: cover;
+    object-position: center 28%;
+    border-radius: var(--r);
+    background: var(--c-mist);
+  }
+  .kartya__szoveg {
+    min-width: 0;
+  }
+  .kartya__szoveg p {
+    margin: 0;
+  }
+  .kartya__nev {
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--c-ink);
+  }
+  .kartya__titulus {
+    color: var(--c-steel);
+    font-size: 0.92rem;
+    line-height: 1.4;
+    margin-top: 0.2rem !important;
+  }
+  .kartya__minositesek {
+    list-style: none;
+    padding: 0;
+    margin: 0.7rem 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+  .kartya__minositesek li {
+    margin: 0;
+  }
+  .kartya__minositesek abbr {
+    display: inline-block;
+    font-family: var(--f-util);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    color: var(--c-brand);
+    text-decoration: none;
+    border: 1px solid var(--c-line);
+    border-radius: 3px;
+    padding: 0.15rem 0.4rem;
+    cursor: help;
+  }
+</style>
