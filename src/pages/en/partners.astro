@@ -1,0 +1,747 @@
+---
+import Base from '../../layouts/Base.astro';
+
+/**
+ * Partnerek. Új partner hozzáadása:
+ *   1. a logót tedd a `public/partnerek/` mappába (SVG a legjobb, mert éles marad)
+ *   2. vedd fel a megfelelő csoport `tagok` tömbjébe, a `logo` a fájlnév a mappán belül
+ *
+ * A `logo` elhagyható: amíg nincs jóváhagyott logófájl, a csempe a nevet
+ * mutatja szedve. Így az oldal félkész logó nélkül sem néz befejezetlennek.
+ *
+ * Csak olyan partner kerüljön ide, akinek a megjelenítésére van engedélyünk —
+ * a gyártói logók használatát márkahasználati szabályzat köti.
+ *
+ * FONTOS a szövegezésre: a `szerep` mező azt írja le, hogy az adott gyártó
+ * terméke MIT CSINÁL a Triox által üzemeltetett környezetekben. Formális
+ * partnerfokozatot ("Gold Partner", "Premier Partner", tanúsítványszám) csak
+ * akkor írjunk ki, ha Zsolt megerősítette és van mögötte élő szerződés.
+ * A Microsoft CSP/SPLA státusz megerősített — az IaaS és a DCaaS oldal is
+ * hivatkozik rá. A többi gyártónál a viszonteladói/partnerfokozat egyelőre
+ * KITÖLTENDŐ: lásd `docs/partnerek-megerositendo.md` (nincs a buildben).
+ */
+interface Partner {
+  nev: string;
+  /** Teljes cégnév, ha a köznapi név rövidítés. A csempén kisebb betűvel. */
+  teljes?: string;
+  /** Egy mondat: mit ad a stackhez. */
+  szerep: string;
+  /** 2–3 konkrétum arról, mire használjuk. */
+  hasznalat: string[];
+  /** Fájlnév a `public/partnerek/` mappán belül. Ha hiányzik, a név látszik. */
+  logo?: string;
+}
+
+interface Csoport {
+  cim: string;
+  ikon: 'szerver' | 'halozat' | 'tarolas' | 'licenc';
+  leiras: string;
+  tagok: Partner[];
+}
+
+const csoportok: Csoport[] = [
+  {
+    cim: 'Server and compute',
+    ikon: 'szerver',
+    leiras:
+      "The hardware your virtual machines run on—in our data center and at your site alike. With every vendor, we work with out-of-band management: the server can be managed even if the operating system won't start.",
+    tagok: [
+      {
+        nev: 'Dell',
+        teljes: 'Dell Technologies',
+        szerep: 'PowerEdge server platform with iDRAC out-of-band management.',
+        hasznalat: [
+          'Enterprise server fleet underneath our data center virtualization',
+          'Taking over an existing PowerEdge fleet for operations, without replacing it',
+        ],
+      },
+      {
+        nev: 'HP / HPE',
+        teljes: 'Hewlett Packard Enterprise',
+        szerep: 'ProLiant server platform with iLO out-of-band management.',
+        hasznalat: [
+          'Operating on-site and data center servers',
+          "Firmware and lifecycle tracking across the hardware's entire life",
+        ],
+      },
+      {
+        nev: 'Lenovo',
+        szerep: 'x86 server platform—the continuation of the server line acquired from IBM.',
+        hasznalat: [
+          'Operating and expanding servers in an existing fleet',
+          'Procurement support: configurations sized to the actual workload',
+        ],
+      },
+      {
+        nev: 'IBM',
+        szerep: 'Operating legacy IBM servers and platforms.',
+        hasznalat: [
+          'Taking over and monitoring older IBM System x machines',
+          'The x86 line moved to Lenovo in 2014—we maintain the continuity',
+        ],
+      },
+    ],
+  },
+  {
+    cim: 'Network',
+    ikon: 'halozat',
+    leiras:
+      "The network is what keeps clients separate from one another. A dedicated gateway sits in front of each client's environment, with its own firewall rules, its own VPN endpoint and its own public IP.",
+    tagok: [
+      {
+        nev: 'Cisco',
+        szerep: 'Enterprise networking equipment in the core and access layers.',
+        hasznalat: [
+          'Switching and routing in the redundant 2×10 Gbps backbone',
+          'Operating and documenting on-site networks',
+        ],
+      },
+      {
+        nev: 'MikroTik',
+        szerep: 'RouterOS—routing, firewall, VPN and VLAN on one device.',
+        hasznalat: [
+          'A dedicated gateway per client: firewall, NAT and VPN endpoint',
+          'VLAN-based segmentation between the public and the internal layer',
+        ],
+      },
+    ],
+  },
+  {
+    cim: 'Storage, backup and replication',
+    ikon: 'tarolas',
+    leiras:
+      'For us, backup is not a by-product of the production system but separate infrastructure: on multiple, physically independent targets at multiple sites. Critical workloads also get an off-site VM replica.',
+    tagok: [
+      {
+        nev: 'Veeam',
+        szerep: 'Backup & Replication and Veeam Agent—the backbone of the backup chain.',
+        hasznalat: [
+          'Backup of virtualized and physical machines, VM replication to an off-site target',
+          'Restore tests: does the system actually start from the backup',
+        ],
+      },
+      {
+        nev: 'Synology',
+        szerep: 'NAS storage and a standalone backup target.',
+        hasznalat: [
+          'An independent backup target—not the same storage the production system runs on',
+          'File services and local backup at smaller sites',
+        ],
+      },
+    ],
+  },
+  {
+    cim: 'Platform and licensing',
+    ikon: 'licenc',
+    leiras:
+      'Software licensing becomes a risk where nobody keeps track of it. Licenses for Microsoft products running in the leased environment are held in our name and reported based on actual monthly usage.',
+    tagok: [
+      {
+        nev: 'Microsoft',
+        szerep: 'CSP reseller · SPLA contract partner.',
+        hasznalat: [
+          'SPLA: Windows Server, RDS and SQL Server based on monthly usage',
+          'CSP: Microsoft 365 and cloud add-ons on one invoice, with support in Hungarian',
+          'Operating Hyper-V, Windows Server, Entra ID and Exchange',
+        ],
+      },
+    ],
+  },
+];
+
+/**
+ * A partnerek száma a bevezetőben betűvel áll, mert magyarul a folyó szövegben
+ * a kis számok kiírva olvashatók. A számjegyes alak a tartalék, ha a lista
+ * egyszer tizenkettőnél hosszabbra nőne.
+ */
+const szamnevek = [
+  'zero', 'one', 'two', 'three', 'four', 'five', 'six',
+  'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve',
+];
+const osszesPartner = csoportok.reduce((n, cs) => n + cs.tagok.length, 0);
+const partnerSzam = szamnevek[osszesPartner] ?? String(osszesPartner);
+
+const elonyok = [
+  {
+    cim: 'One contract for everything',
+    szoveg:
+      "When something doesn't work, it isn't up to you to coordinate between the server vendor, the network vendor and the license reseller. You have one contractual partner, and it handles the vendor side.",
+  },
+  {
+    cim: 'The license audit risk is ours',
+    szoveg:
+      "Microsoft licenses running in the leased environment are held under an SPLA agreement, in the service provider's name. Reporting the correct license quantities is our job and our responsibility—every month.",
+    link: { szoveg: 'How SPLA and CSP work', url: '/en/services/iaas/' },
+  },
+  {
+    cim: "We don't tie you to one vendor",
+    szoveg:
+      "We are not committed to any single vendor. If your existing fleet is HPE, it stays HPE; if MikroTik is the right answer for the job, it won't become something else just because that would be more convenient for us.",
+  },
+  {
+    cim: "Manageable even when it's down",
+    szoveg:
+      "iDRAC and iLO out-of-band management means we can reach the server even if the operating system won't start. Nobody has to go on site just to see what's wrong.",
+  },
+];
+---
+
+<Base
+  cim="Partners"
+  leiras="Dell, HP, IBM, Lenovo, Cisco, MikroTik, Veeam, Synology and Microsoft—the vendor background behind the environments Triox operates. You have a single contract for all of it."
+>
+  <section class="band">
+    <div class="wrap prose">
+      <p class="eyebrow">Partners</p>
+      <h1>The vendor side is our job. You have one contract</h1>
+      <p class="lead">
+        In a working environment, products from {partnerSzam} vendors work together: servers, networking,
+        storage, backup and licensing. We hold this chain together—from procurement through monthly
+        license reporting to lifecycle planning.
+      </p>
+    </div>
+  </section>
+
+  <section class="band band--mist">
+    <div class="wrap">
+      <h2 class="szekcio__cim">Where each vendor fits</h2>
+      <p class="szekcio__lead">
+        A managed environment consists of six layers. Each layer has its own vendor, contract,
+        update cycle and path for reporting issues—and all six are the responsibility of the same team.
+      </p>
+
+      <figure class="abra">
+        <svg viewBox="0 0 880 372" role="img" aria-labelledby="abra-retegek">
+          <title id="abra-retegek">
+            The six layers of a managed environment and their vendors. From top to bottom:
+            licensing and platform—Microsoft, under SPLA and CSP contracts; virtualization—Microsoft
+            Hyper-V, VMware, Proxmox; server and compute—Dell, HP/HPE, Lenovo, IBM, with iDRAC and iLO
+            out-of-band management; network—Cisco and MikroTik, with a dedicated gateway per client;
+            storage—Synology NAS, plus SAN, iSCSI and RAID; backup and replication—Veeam and
+            Synology, on multiple independent targets. All six layers are operated by the same team.
+          </title>
+
+          <text class="abra__mono" x="0" y="14">LAYERS OF A MANAGED ENVIRONMENT</text>
+
+          <rect class="abra__sav" x="0" y="30" width="270" height="48" rx="3" />
+          <text class="abra__mono" x="16" y="59">LICENSE &amp; PLATFORM</text>
+          <rect class="abra__kiemelt" x="278" y="30" width="602" height="48" rx="3" />
+          <text class="abra__cimke" x="296" y="52">Microsoft</text>
+          <text class="abra__kicsi" x="296" y="69">Windows Server · SQL Server · Microsoft 365—on SPLA &amp; CSP contracts</text>
+
+          <rect class="abra__sav" x="0" y="82" width="270" height="48" rx="3" />
+          <text class="abra__mono" x="16" y="111">HYPERVISOR</text>
+          <rect class="abra__doboz" x="278" y="82" width="602" height="48" rx="3" />
+          <text class="abra__cimke" x="296" y="104">Microsoft Hyper-V · VMware · Proxmox</text>
+          <text class="abra__kicsi" x="296" y="121">all three platforms in operation—you don't have to switch</text>
+
+          <rect class="abra__sav" x="0" y="134" width="270" height="48" rx="3" />
+          <text class="abra__mono" x="16" y="163">SERVER AND COMPUTE</text>
+          <rect class="abra__doboz" x="278" y="134" width="602" height="48" rx="3" />
+          <text class="abra__cimke" x="296" y="156">Dell · HP / HPE · Lenovo · IBM</text>
+          <text class="abra__kicsi" x="296" y="173">PowerEdge and ProLiant—with iDRAC, iLO out-of-band management</text>
+
+          <rect class="abra__sav" x="0" y="186" width="270" height="48" rx="3" />
+          <text class="abra__mono" x="16" y="215">NETWORK</text>
+          <rect class="abra__doboz" x="278" y="186" width="602" height="48" rx="3" />
+          <text class="abra__cimke" x="296" y="208">Cisco · MikroTik</text>
+          <text class="abra__kicsi" x="296" y="225">routing, firewall, VLAN, VPN—dedicated gateway per client</text>
+
+          <rect class="abra__sav" x="0" y="238" width="270" height="48" rx="3" />
+          <text class="abra__mono" x="16" y="267">STORAGE</text>
+          <rect class="abra__doboz" x="278" y="238" width="602" height="48" rx="3" />
+          <text class="abra__cimke" x="296" y="260">Synology · SAN / iSCSI / RAID</text>
+          <text class="abra__kicsi" x="296" y="277">NAS and block-level storage, sized to the workload</text>
+
+          <rect class="abra__sav" x="0" y="290" width="270" height="48" rx="3" />
+          <text class="abra__mono" x="16" y="319">BACKUP &amp; REPLICATION</text>
+          <rect class="abra__kiemelt" x="278" y="290" width="602" height="48" rx="3" />
+          <text class="abra__cimke" x="296" y="312">Veeam · Synology</text>
+          <text class="abra__kicsi" x="296" y="329">Backup &amp; Replication and Agent—on multiple independent targets</text>
+
+          <text class="abra__mono" x="440" y="362" text-anchor="middle">ALL SIX LAYERS ARE THE SAME TEAM'S RESPONSIBILITY</text>
+        </svg>
+      </figure>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <h2 class="szekcio__cim">Who we work with</h2>
+      <p class="szekcio__lead">
+        Products from the vendors below run every day in the environments Triox operates.
+        This list is not a catalog: for each one, it states exactly what we use it for.
+      </p>
+
+      {csoportok.map((cs) => (
+        <section class="csoport">
+          <div class="csoport__fej">
+            <span class="csoport__ikon" aria-hidden="true">
+              {cs.ikon === 'szerver' && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="5" rx="1.5" />
+                  <rect x="3" y="14.5" width="18" height="5" rx="1.5" />
+                  <line x1="6.5" y1="6.5" x2="6.5" y2="6.5" />
+                  <line x1="6.5" y1="17" x2="6.5" y2="17" />
+                  <line x1="10" y1="6.5" x2="17" y2="6.5" />
+                  <line x1="10" y1="17" x2="17" y2="17" />
+                </svg>
+              )}
+              {cs.ikon === 'halozat' && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="4.5" r="2.5" />
+                  <circle cx="5" cy="19" r="2.5" />
+                  <circle cx="19" cy="19" r="2.5" />
+                  <path d="M12 7v4.5M5 16.5V12h14v4.5" />
+                </svg>
+              )}
+              {cs.ikon === 'tarolas' && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <ellipse cx="12" cy="6" rx="8" ry="3" />
+                  <path d="M4 6v6c0 1.66 3.58 3 8 3s8-1.34 8-3V6" />
+                  <path d="M4 12v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6" />
+                </svg>
+              )}
+              {cs.ikon === 'licenc' && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 3l7.5 3v5.5c0 4.4-3.1 8-7.5 9.5-4.4-1.5-7.5-5.1-7.5-9.5V6z" />
+                  <path d="M9 12l2.2 2.2L15.5 10" />
+                </svg>
+              )}
+            </span>
+            <div>
+              <h3>{cs.cim}</h3>
+              <p class="csoport__leiras">{cs.leiras}</p>
+            </div>
+          </div>
+
+          <ul class="partnerracs">
+            {cs.tagok.map((p) => (
+              <li class="partner">
+                <div class="partner__jel">
+                  {p.logo ? (
+                    <img src={`/partnerek/${p.logo}`} alt={p.nev} loading="lazy" />
+                  ) : (
+                    <span class="partner__nev">{p.nev}</span>
+                  )}
+                </div>
+                {p.teljes && <p class="partner__teljes">{p.teljes}</p>}
+                <p class="partner__szerep">{p.szerep}</p>
+                <ul class="partner__lista">
+                  {p.hasznalat.map((h) => <li>{h}</li>)}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
+  </section>
+
+  <section class="band band--mist">
+    <div class="wrap">
+      <h2 class="szekcio__cim">Why this matters to you</h2>
+      <p class="szekcio__lead">
+        Nobody cares about a vendor list on its own. What matters is how many contracts you have to
+        keep track of, and who you call when the system is down.
+      </p>
+
+      <figure class="abra">
+        <svg viewBox="0 0 880 306" role="img" aria-labelledby="abra-szerzodes">
+          <title id="abra-szerzodes">
+            A comparison of two arrangements. On the left: your company deals directly and separately
+            with six suppliers—server, network, storage, backup, virtualization and licensing—so
+            there are six contracts and six contacts, and none of them sees the whole picture.
+            On the right: your company connects to Triox through a single contract, and all six vendor
+            lines run through Triox—one contact, one party responsible for the entire chain.
+          </title>
+
+          <text class="abra__mono" x="200" y="14" text-anchor="middle">VENDOR BY VENDOR</text>
+          <rect class="abra__doboz" x="0" y="112" width="104" height="52" rx="4" />
+          <text class="abra__cimke" x="52" y="143" text-anchor="middle">Your firm</text>
+
+          <path class="abra__vonal abra__vonal--halvany" d="M104 138 L246 44" />
+          <path class="abra__vonal abra__vonal--halvany" d="M104 138 L246 82" />
+          <path class="abra__vonal abra__vonal--halvany" d="M104 138 L246 120" />
+          <path class="abra__vonal abra__vonal--halvany" d="M104 138 L246 158" />
+          <path class="abra__vonal abra__vonal--halvany" d="M104 138 L246 196" />
+          <path class="abra__vonal abra__vonal--halvany" d="M104 138 L246 234" />
+
+          <rect class="abra__doboz" x="246" y="30" width="154" height="28" rx="3" />
+          <text class="abra__kicsi" x="260" y="49">Server vendor</text>
+          <rect class="abra__doboz" x="246" y="68" width="154" height="28" rx="3" />
+          <text class="abra__kicsi" x="260" y="87">Network vendor</text>
+          <rect class="abra__doboz" x="246" y="106" width="154" height="28" rx="3" />
+          <text class="abra__kicsi" x="260" y="125">Storage vendor</text>
+          <rect class="abra__doboz" x="246" y="144" width="154" height="28" rx="3" />
+          <text class="abra__kicsi" x="260" y="163">Backup vendor</text>
+          <rect class="abra__doboz" x="246" y="182" width="154" height="28" rx="3" />
+          <text class="abra__kicsi" x="260" y="201">Hypervisor license</text>
+          <rect class="abra__doboz" x="246" y="220" width="154" height="28" rx="3" />
+          <text class="abra__kicsi" x="260" y="239">License reseller</text>
+
+          <text class="abra__mono" x="200" y="272" text-anchor="middle">SIX CONTRACTS · SIX CONTACTS</text>
+          <text class="abra__mono" x="200" y="290" text-anchor="middle">AND NONE SEES THE FULL PICTURE</text>
+
+          <path class="abra__valaszto" d="M424 24 V282" />
+
+          <text class="abra__mono" x="660" y="14" text-anchor="middle">WITH TRIOX</text>
+          <rect class="abra__doboz" x="448" y="112" width="104" height="52" rx="4" />
+          <text class="abra__cimke" x="500" y="143" text-anchor="middle">Your firm</text>
+
+          <path class="abra__vonal" d="M552 138 H592" />
+          <path class="abra__nyil" d="M598 138 L590 133 L590 143 Z" />
+
+          <rect class="abra__kiemelt" x="604" y="104" width="112" height="68" rx="4" />
+          <text class="abra__cimke" x="660" y="134" text-anchor="middle">Triox</text>
+          <text class="abra__mono" x="660" y="152" text-anchor="middle">ONE CONTRACT</text>
+
+          <path class="abra__vonal" d="M716 138 L760 44" />
+          <path class="abra__vonal" d="M716 138 L760 82" />
+          <path class="abra__vonal" d="M716 138 L760 120" />
+          <path class="abra__vonal" d="M716 138 L760 158" />
+          <path class="abra__vonal" d="M716 138 L760 196" />
+          <path class="abra__vonal" d="M716 138 L760 234" />
+
+          <rect class="abra__sav" x="760" y="30" width="120" height="28" rx="3" />
+          <text class="abra__kicsi" x="772" y="49">Server</text>
+          <rect class="abra__sav" x="760" y="68" width="120" height="28" rx="3" />
+          <text class="abra__kicsi" x="772" y="87">Network</text>
+          <rect class="abra__sav" x="760" y="106" width="120" height="28" rx="3" />
+          <text class="abra__kicsi" x="772" y="125">Storage</text>
+          <rect class="abra__sav" x="760" y="144" width="120" height="28" rx="3" />
+          <text class="abra__kicsi" x="772" y="163">Backup</text>
+          <rect class="abra__sav" x="760" y="182" width="120" height="28" rx="3" />
+          <text class="abra__kicsi" x="772" y="201">Hypervisor</text>
+          <rect class="abra__sav" x="760" y="220" width="120" height="28" rx="3" />
+          <text class="abra__kicsi" x="772" y="239">License</text>
+
+          <text class="abra__mono" x="660" y="272" text-anchor="middle">ONE CONTRACT · ONE CONTACT</text>
+          <text class="abra__mono" x="660" y="290" text-anchor="middle">ONE OWNER FOR THE FULL CHAIN</text>
+        </svg>
+      </figure>
+
+      <div class="elonyok">
+        {elonyok.map((e, i) => (
+          <article class="elony">
+            <span class="elony__idx">{String(i + 1).padStart(2, '0')}</span>
+            <h3>{e.cim}</h3>
+            <p>{e.szoveg}</p>
+            {e.link && (
+              <p class="elony__hiv"><a href={e.link.url}>{e.link.szoveg} →</a></p>
+            )}
+          </article>
+        ))}
+      </div>
+
+      <p class="kulcs">
+        The vendor should be a choice, not a constraint. We look at what solves the problem—not at
+        which logo looks better on a proposal.
+      </p>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap prose">
+      <h2>What this means in practice</h2>
+      <p>
+        If a server component fails today, you don't need to know which vendor's support to contact,
+        with what contract number and in what language. If a network device's firmware gets a security
+        update, you don't need to watch the vendor's notices. If Microsoft's licensing terms change,
+        you are not the one who has to keep up with it.
+      </p>
+      <p>
+        That's the difference between a supplier list and an operations contract. The list is still
+        there—just not on your desk.
+      </p>
+      <p class="zaro">
+        You can read about completed projects on the <a href="/en/case-studies/">Case studies</a> page,
+        and about the infrastructure behind them on the
+        <a href="/en/technology/">Technology</a> page. We do not publish our clients' names.
+      </p>
+      <p class="vedjegy">
+        The brand and product names listed are trademarks of their respective owners. They are shown
+        to identify the technologies we use.
+      </p>
+    </div>
+  </section>
+
+  <section class="band band--sotet">
+    <img class="vizjel vizjel--cta" src="/logo-feher.svg" alt="" aria-hidden="true" />
+    <div class="wrap cta">
+      <h2>Let's look at what's behind your system today</h2>
+      <p class="lead">
+        In a review, we map which vendor contracts, support periods and licenses you currently have
+        in place—and where the gaps between them are.
+      </p>
+      <a class="btn" href="/en/contact/">Request an infrastructure review</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* --- szekciófejek --- */
+
+  .szekcio__cim {
+    margin-bottom: 0.5rem;
+  }
+  .szekcio__lead {
+    max-width: 62ch;
+    color: var(--c-steel);
+    margin-bottom: 2rem;
+  }
+
+  /* --- gyártói csoportok --- */
+
+  .csoport + .csoport {
+    margin-top: 3rem;
+    padding-top: 3rem;
+    border-top: 1px solid var(--c-line);
+  }
+
+  .csoport__fej {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  /* Az ikon a márkaszínt viszi, de nem tartalom: a szöveg mellette áll. */
+  .csoport__ikon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--r);
+    background: var(--c-brand-wash);
+    color: var(--c-brand);
+  }
+  .csoport__ikon svg {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  .csoport__fej h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.35rem;
+  }
+  .csoport__leiras {
+    max-width: 68ch;
+    margin: 0;
+    color: var(--c-steel);
+    font-size: 0.96rem;
+  }
+
+  /* --- gyártói csempék --- */
+
+  /* auto-fill, nem auto-fit: a kétszereplős csoportokban is ugyanolyan széles
+     marad a csempe, mint a négyszereplősben — az üres sávok megmaradnak. */
+  .partnerracs {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 1.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .partner {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Egységes magasság, hogy az eltérő arányú logók egy vonalban álljanak.
+     Logó híján a név áll benne szedve — a csempe így sem néz félkésznek. */
+  .partner__jel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 5rem;
+    padding: 1rem;
+    border: 1px solid var(--c-line);
+    border-top: 3px solid var(--c-brand);
+    border-radius: var(--r);
+    background: var(--c-paper);
+  }
+
+  .partner__jel img {
+    max-width: 100%;
+    max-height: 2.75rem;
+    object-fit: contain;
+  }
+
+  .partner__nev {
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 1.2rem;
+    letter-spacing: 0.01em;
+    color: var(--c-ink);
+    text-align: center;
+  }
+
+  .partner__teljes {
+    margin: 0.7rem 0 0;
+    font-family: var(--f-util);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--c-steel);
+  }
+
+  .partner__szerep {
+    margin: 0.55rem 0 0;
+    color: var(--c-ink);
+    font-size: 0.92rem;
+    line-height: 1.45;
+  }
+  /* Ha nincs teljes cégnév, a szerep közvetlenül a csempe alá kerül. */
+  .partner__jel + .partner__szerep {
+    margin-top: 0.7rem;
+  }
+
+  .partner__lista {
+    margin: 0.65rem 0 0;
+    padding-left: 1rem;
+    list-style: none;
+  }
+  .partner__lista li {
+    position: relative;
+    margin-bottom: 0.35rem;
+    color: var(--c-steel);
+    font-size: 0.87rem;
+    line-height: 1.4;
+  }
+  .partner__lista li::before {
+    content: '';
+    position: absolute;
+    left: -1rem;
+    top: 0.55em;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--c-brand);
+  }
+
+  /* --- ábra-kiegészítők --- */
+
+  /* A bal panel "szétszórt" kapcsolatai szándékosan halványak: a rendezetlenség
+     maga az üzenet, nem szabad a jobb panel márkakék vonalaival versenyeznie. */
+  .abra__vonal--halvany {
+    stroke: var(--c-steel);
+    stroke-width: 1;
+    opacity: 0.5;
+  }
+  .abra__valaszto {
+    stroke: var(--c-line);
+    stroke-width: 1;
+    stroke-dasharray: 4 5;
+    fill: none;
+  }
+
+  /* --- előnyök --- */
+
+  /* Négy kártya: fix kéthasábos rács, nem auto-fit. Az auto-fit a szokásos
+     1280-as ablakban 3 + 1-re tördelte, ami félbehagyottnak látszott. */
+  .elonyok {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    margin-top: 2.5rem;
+  }
+  @media (min-width: 46rem) {
+    .elonyok {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .elony {
+    background: var(--c-paper);
+    border: 1px solid var(--c-line);
+    border-left: 4px solid var(--c-brand);
+    border-radius: var(--r);
+    padding: 1.5rem;
+  }
+  .elony__idx {
+    display: block;
+    font-family: var(--f-util);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    color: var(--c-brand);
+    margin-bottom: 0.5rem;
+  }
+  .elony h3 {
+    font-size: 1.08rem;
+    margin-bottom: 0.5rem;
+  }
+  .elony p {
+    margin: 0;
+    color: var(--c-steel);
+    font-size: 0.94rem;
+  }
+  .elony__hiv {
+    margin-top: 0.7rem !important;
+    font-size: 0.88rem;
+  }
+  .elony__hiv a {
+    text-decoration: none;
+  }
+  .elony__hiv a:hover {
+    text-decoration: underline;
+  }
+
+  .kulcs {
+    max-width: 60ch;
+    border-left: 2px solid var(--c-brand);
+    padding-left: 1rem;
+    margin: 2.5rem 0 0;
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 1.05rem;
+    line-height: 1.45;
+  }
+
+  /* --- záró blokk --- */
+
+  .zaro {
+    margin-top: 2rem;
+    color: var(--c-steel);
+    font-size: 0.95rem;
+  }
+  .vedjegy {
+    margin: 0.8rem 0 0;
+    color: var(--c-steel);
+    font-size: 0.82rem;
+  }
+
+  .vizjel--cta {
+    right: -4rem;
+    bottom: -6rem;
+    width: 22rem;
+    opacity: 0.07;
+  }
+  .cta {
+    text-align: center;
+  }
+  .cta .lead {
+    margin-inline: auto;
+    max-width: 54ch;
+  }
+
+  @media (max-width: 34rem) {
+    .partnerracs {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    .csoport__fej {
+      gap: 0.75rem;
+    }
+    .kulcs {
+      font-size: 1rem;
+      padding-left: 0.8rem;
+    }
+    .cta .btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>

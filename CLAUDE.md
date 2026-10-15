@@ -50,6 +50,26 @@ A tartalom markdownban van, a design tokenek egy helyen: `src/styles/global.css`
    futtatókörnyezet nem tud nyers TCP-t. A titkok szerveroldali környezeti
    változók, `PUBLIC_` előtagú változóba nem kerülhetnek.
 
+## Angol változat (`/en/`)
+
+Az oldal teljes amerikai angol tükre a `/en/` alatt él, saját angol URL-ekkel.
+**Minden tartalmi változtatás mindkét nyelvre kell** — a magyar oldal módosítása
+után az angol párját is frissíteni kell, ugyanabban a PR-ban.
+
+| Mi | Hol |
+|---|---|
+| Útvonalpárok (nyelvváltó, hreflang) | `src/i18n/utak.ts` — új oldalnál, szolgáltatásnál, blogbejegyzésnél ide is |
+| Angol statikus oldalak | `src/pages/en/` |
+| Angol szolgáltatások / blog | `src/content/en/services/`, `src/content/en/blog/` (fájlnév = angol slug) |
+| Fejléc, lábléc, űrlap, layout feliratai | a komponensben, `hu`/`en` szótárban; a nyelvet az URL dönti el (`nyelvAz`) |
+| Szójegyzék, stílus, fordítási szabályok | `docs/angol-forditasi-utmutato.md` |
+
+- Az angol oldal `<style>` blokkja **betűre azonos** a magyaréval. Stílusmódosítás
+  mindkét fájlba; a `npm run check:nyelv` (CI-ban is fut) eltérésnél elbukik.
+- Az angol menü a `Header.astro` `menuEn` tömbje — új blogbejegyzésnél oda is.
+- Az angol űrlap `nyelv: 'en'` mezőt küld; a `functions/api/kapcsolat.ts` ettől
+  angol hibaszöveget és angol visszaigazolót ad, a belső értesítő tárgyában `[EN]`.
+
 ## Arculat
 
 Forrás: `OneDrive/Triox/Logo/2026/triox-logo-kit/` (2026-os logókészlet, `OLVASSEL.md`-vel).
@@ -106,6 +126,7 @@ Inter (`--f-body`) a folyó szöveg. JetBrains Mono (`--f-util`) a mono jelölé
 npm run dev      # helyi szerver :4321
 npm run build    # statikus build a dist/ mappába
 npm run check    # típus- és sablonellenőrzés (ez fedi a functions/ mappát is)
+npm run check:nyelv  # magyar ⇄ angol oldalpárok: azonos <style>, teljes fordítás
 
 # A levélküldő végpont helyi próbája (az astro dev nem futtat Functiont):
 cp .dev.vars.example .dev.vars

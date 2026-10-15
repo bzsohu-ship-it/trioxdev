@@ -5,6 +5,7 @@ import '@fontsource-variable/jetbrains-mono';
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import { nyelvAz, parja, vanParja } from '../i18n/utak';
 
 interface Props {
   cim: string;
@@ -12,20 +13,52 @@ interface Props {
 }
 
 const { cim, leiras } = Astro.props;
-const kanonikus = new URL(Astro.url.pathname, Astro.site);
+const ut = Astro.url.pathname;
+const kanonikus = new URL(ut, Astro.site);
 // A megosztóképek abszolút URL-t igényelnek, különben a Facebook/LinkedIn nem tölti be.
 const ogKep = new URL('/og-image-1200x630-vilagos.png', Astro.site);
 const twitterKep = new URL('/twitter-card-1200x675-vilagos.png', Astro.site);
+
+const nyelv = nyelvAz(ut);
+// hreflang csak valódi párnál: a 404 vagy egy pár nélküli oldal ne hivatkozzon
+// a másik nyelv kezdőlapjára mint saját fordítására.
+const parUrl = vanParja(ut) ? new URL(parja(ut), Astro.site) : undefined;
+const huUrl = nyelv === 'hu' ? kanonikus : parUrl;
+const enUrl = nyelv === 'en' ? kanonikus : parUrl;
+
+const nyelvi = {
+  hu: {
+    locale: 'hu_HU',
+    masikLocale: 'en_US',
+    kepAlt: 'Triox Informatika — Tudjuk hogyan segíthetünk önnek',
+    szlogen: 'Tudjuk hogyan segíthetünk önnek',
+    szolgaltatasok: ['IT rendszerfelügyelet', 'Felhő szolgáltatások', 'Adatmentés', 'Hoszting'],
+  },
+  en: {
+    locale: 'en_US',
+    masikLocale: 'hu_HU',
+    kepAlt: 'Triox Informatika — We know how to help you',
+    szlogen: 'We know how to help you',
+    szolgaltatasok: ['IT systems management', 'Cloud services', 'Data backup', 'Hosting'],
+  },
+}[nyelv];
 ---
 
 <!doctype html>
-<html lang="hu">
+<html lang={nyelv}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{cim} — Triox Informatika Kft.</title>
     <meta name="description" content={leiras} />
     <link rel="canonical" href={kanonikus} />
+    {huUrl && enUrl && (
+      <>
+        <link rel="alternate" hreflang="hu" href={huUrl} />
+        <link rel="alternate" hreflang="en" href={enUrl} />
+        <link rel="alternate" hreflang="x-default" href={huUrl} />
+      </>
+    )}
 
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -37,7 +70,8 @@ const twitterKep = new URL('/twitter-card-1200x675-vilagos.png', Astro.site);
     <meta name="theme-color" content="#0007ff" />
 
     <meta property="og:type" content="website" />
-    <meta property="og:locale" content="hu_HU" />
+    <meta property="og:locale" content={nyelvi.locale} />
+    {parUrl && <meta property="og:locale:alternate" content={nyelvi.masikLocale} />}
     <meta property="og:site_name" content="Triox Informatika Kft." />
     <meta property="og:title" content={cim} />
     <meta property="og:description" content={leiras} />
@@ -45,7 +79,7 @@ const twitterKep = new URL('/twitter-card-1200x675-vilagos.png', Astro.site);
     <meta property="og:image" content={ogKep} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Triox Informatika — Tudjuk hogyan segíthetünk önnek" />
+    <meta property="og:image:alt" content={nyelvi.kepAlt} />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content={twitterKep} />
@@ -56,8 +90,8 @@ const twitterKep = new URL('/twitter-card-1200x675-vilagos.png', Astro.site);
       url: 'https://triox.hu',
       email: 'info@triox.hu',
       areaServed: 'HU',
-      slogan: 'Tudjuk hogyan segíthetünk önnek',
-      serviceType: ['IT rendszerfelügyelet', 'Felhő szolgáltatások', 'Adatmentés', 'Hoszting'],
+      slogan: nyelvi.szlogen,
+      serviceType: nyelvi.szolgaltatasok,
     })} />
   </head>
   <body>

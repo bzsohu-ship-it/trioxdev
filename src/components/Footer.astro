@@ -1,5 +1,37 @@
 ---
+import { nyelvAz } from '../i18n/utak';
+
 const ev = new Date().getFullYear();
+
+const szoveg = {
+  hu: {
+    szlogen: 'Tudjuk hogyan segíthetünk önnek',
+    nav: 'Lábléc',
+    linkek: [
+      { href: '/szolgaltatasok/', cim: 'Szolgáltatások' },
+      { href: '/blog/', cim: 'Blog' },
+      { href: '/tamogatas/', cim: 'Támogatás' },
+      { href: '/partnerek/', cim: 'Partnerek' },
+      { href: '/adatvedelmi-nyilatkozat/', cim: 'Adatvédelem' },
+      { href: 'https://rd.triox.hu', cim: 'Távsegítség' },
+    ],
+    jog: 'Minden jog fenntartva.',
+  },
+  en: {
+    szlogen: 'We know how to help you',
+    nav: 'Footer',
+    linkek: [
+      { href: '/en/services/', cim: 'Services' },
+      { href: '/en/blog/', cim: 'Blog' },
+      { href: '/en/support/', cim: 'Support' },
+      { href: '/en/partners/', cim: 'Partners' },
+      // Angol adatvédelmi nyilatkozat nincs — a magyarra mutat, mint a magyar lábléc.
+      { href: '/adatvedelmi-nyilatkozat/', cim: 'Privacy' },
+      { href: 'https://rd.triox.hu', cim: 'Remote assistance' },
+    ],
+    jog: 'All rights reserved.',
+  },
+}[nyelvAz(Astro.url.pathname)];
 ---
 
 <footer class="lab">
@@ -9,21 +41,16 @@ const ev = new Date().getFullYear();
         <img class="lab__jel" src="/logo.svg" alt="" aria-hidden="true" width="44" height="44" />
         <p class="lab__szoveg">
           <span class="lab__nev">triox <em>informatika</em></span>
-          <span class="lab__szlogen">Tudjuk hogyan segíthetünk önnek</span>
+          <span class="lab__szlogen">{szoveg.szlogen}</span>
         </p>
       </div>
     </div>
-    <nav aria-label="Lábléc">
-      <a href="/szolgaltatasok/">Szolgáltatások</a>
-      <a href="/blog/">Blog</a>
-      <a href="/tamogatas/">Támogatás</a>
-      <a href="/partnerek/">Partnerek</a>
-      <a href="/adatvedelmi-nyilatkozat/">Adatvédelem</a>
-      <a href="https://rd.triox.hu">Távsegítség</a>
+    <nav aria-label={szoveg.nav}>
+      {szoveg.linkek.map((l) => <a href={l.href}>{l.cim}</a>)}
     </nav>
   </div>
   <div class="wrap lab__jog">
-    <p>© {ev} Triox Informatika Kft. Minden jog fenntartva. · <a href="mailto:info@triox.hu">info@triox.hu</a></p>
+    <p>© {ev} Triox Informatika Kft. {szoveg.jog} · <a href="mailto:info@triox.hu">info@triox.hu</a></p>
   </div>
 </footer>
 

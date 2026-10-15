@@ -1,0 +1,94 @@
+---
+import Base from '../../layouts/Base.astro';
+import Kapcsolatform from '../../components/Kapcsolatform.astro';
+---
+
+<Base cim="Contact" leiras="Write to us for a quote or an infrastructure assessment—we reply within 2 business days.">
+  <section class="band">
+    <div class="wrap kap">
+      <div>
+        <p class="eyebrow">Contact</p>
+        <h1>Tell us what you need</h1>
+        <p class="lead">
+          Describe your situation in a few sentences. We will get back to you within 2 business days and, if needed, start with a short assessment.
+        </p>
+
+        <div class="elerhetoseg">
+          <div>
+            <p class="elerh__cim">E-mail</p>
+            <p><a href="mailto:info@triox.hu">info@triox.hu</a></p>
+          </div>
+          <div>
+            <p class="elerh__cim">Phone</p>
+            <p><!-- TO BE COMPLETED: phone number --></p>
+          </div>
+          <div>
+            <p class="elerh__cim">Registered office</p>
+            <p>1106 Budapest, Kada utca 133.</p>
+          </div>
+          <div>
+            <p class="elerh__cim">Data center locations</p>
+            <p>
+              1138 Budapest, Váci út 188.<br />
+              1132 Budapest, Victor Hugo utca 18–22.
+            </p>
+          </div>
+          <div>
+            <p class="elerh__cim">Company registration no.</p>
+            <p>01-09-449388</p>
+          </div>
+          <div>
+            <p class="elerh__cim">Tax ID</p>
+            <p>13316460-2-42</p>
+          </div>
+        </div>
+
+        <p class="tamogatas-link">
+          Existing client? <a href="/en/support/">Issue reporting and remote assistance →</a>
+        </p>
+      </div>
+      <Kapcsolatform />
+    </div>
+  </section>
+</Base>
+
+<style>
+  .kap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(2rem, 5vw, 4rem);
+    align-items: start;
+  }
+  .elerhetoseg {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem 2rem;
+    margin-top: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  .elerh__cim {
+    font-family: var(--f-display);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--c-steel);
+    margin: 0 0 0.2rem;
+  }
+  .elerhetoseg p:not(.elerh__cim) {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+  .tamogatas-link {
+    font-size: 0.9rem;
+    color: var(--c-steel);
+  }
+  @media (max-width: 52rem) {
+    .kap {
+      grid-template-columns: 1fr;
+    }
+    .elerhetoseg {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

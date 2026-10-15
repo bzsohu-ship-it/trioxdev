@@ -1,0 +1,1254 @@
+---
+import Base from '../../layouts/Base.astro';
+
+/**
+ * Biztonsági megközelítés.
+ *
+ * FONTOS a szövegezésre: ezen az oldalon minden állítás mögött állnia kell egy
+ * másik oldalon már kiadott, megerősített tételnek — a szolgáltatásoldalak
+ * platform-katalógusának, a /technologia/ kártyáinak vagy a /rolunk/ számainak.
+ * Új biztonsági állítás (tanúsítvány, SIEM, EDR-termék, pentest, DDoS-védelem,
+ * titkosítási eljárás, rendelkezésre állási vagy reakcióidő-szám) csak akkor
+ * kerülhet ki, ha Zsolt megerősítette. A nyitott kérdések:
+ * `docs/biztonsag-megerositendo.md` (nincs a buildben).
+ *
+ * A rétegkártyák sorrendje szándékosan azonos a „védelem rétegei" ábráéval:
+ * az olvasó kívülről befelé halad, és a kártya ugyanazt a réteget bontja ki,
+ * amit az ábrán az imént látott.
+ */
+
+interface Reteg {
+  /** Rövid réteg-név. Ugyanaz, mint az ábra bal oldali sávjában. */
+  cimke: string;
+  cim: string;
+  /** Első bekezdés a kockázat, második a válasz. */
+  allitas: string[];
+  kulcs: string;
+  reszletek: { cimke?: string; szoveg: string }[];
+  hivatkozas?: { szoveg: string; url: string };
+}
+
+const retegek: Reteg[] = [
+  {
+    cimke: 'Physical layer',
+    cim: 'The server is not sitting in an office closet',
+    allitas: [
+      'A large share of the most expensive data losses do not come from an attack but from a server room that flooded, overheated or was broken into. An office server cabinet is protected by luck, not by security: everything is fine with it until something goes wrong.',
+      'The environments we run are housed at two independent data center sites in Budapest, in physically protected data halls with redundant power and data center cooling. The hardware is enterprise-grade: redundant power supplies, ECC memory, RAID-protected storage.',
+    ],
+    kulcs: 'Fire, water damage and power outages do not start out as security issues. They end up as one.',
+    reszletek: [
+      { cimke: 'Sites', szoveg: 'two data center sites in Budapest, independent of each other' },
+      { cimke: 'Data hall', szoveg: 'physically protected environment, redundant power, data center cooling and temperature monitoring' },
+      { cimke: 'Certification', szoveg: 'both sites are in ISO/IEC 27001:2022 certified data centers, in dedicated, locked racks' },
+      { cimke: 'Hardware', szoveg: 'enterprise server fleet with redundant power supplies, ECC memory and RAID-protected storage' },
+      { cimke: 'Backbone', szoveg: 'redundant 2×10 Gbps—losing one uplink or one switch does not mean a service outage' },
+      { cimke: 'For on-site systems', szoveg: 'monitoring of the uninterruptible power supply (UPS), with orderly shutdown during a power outage' },
+    ],
+    hivatkozas: { szoveg: 'Infrastructure details on the Technology page', url: '/en/technology/' },
+  },
+  {
+    cimke: 'Network edge',
+    cim: 'A dedicated gateway per client, not a shared template',
+    allitas: [
+      'On a shared firewall, other people’s rules sit right next to yours. A port opened for another client, a misconfigured forward or a mail server IP with a damaged reputation becomes your risk too—even if you did everything right.',
+      'With us, every client gets its own gateway: the firewall, NAT and port rules belong only to your environment, the VPN endpoint is dedicated, and the public IPv4 address comes from our own address range and is assigned to you by name.',
+    ],
+    kulcs: 'Having your own public IP also means your email reputation does not depend on what another client does.',
+    reszletek: [
+      { cimke: 'Gateway', szoveg: 'dedicated firewall, NAT and VPN endpoint per client, with its own rule set' },
+      { cimke: 'Public IP', szoveg: 'dedicated public IPv4 address from our own address range' },
+      { cimke: 'VPN', szoveg: 'site-to-site and client access—IPsec, WireGuard, OpenVPN, SSTP' },
+      { cimke: 'Devices', szoveg: 'MikroTik RouterOS, Cisco, plus Fortinet, pfSense and OPNsense firewalls' },
+      { cimke: 'Certificates', szoveg: 'management of public and internal TLS certificates, with expiry monitoring' },
+      { szoveg: 'On site: Wi-Fi infrastructure with guest network separation' },
+    ],
+    hivatkozas: { szoveg: 'Which vendors stand behind the network', url: '/en/partners/' },
+  },
+  {
+    cimke: 'Segmentation',
+    cim: 'A breach of the public layer should not reach the database',
+    allitas: [
+      'In most serious incidents, what matters is not that the attacker got into the first machine but how far they got from there. On a flat network, a compromised web server has a direct line of sight to the file server and the database.',
+      'With us, the internal layer (database, application) and the public layer (web, mail) are strictly separated, and client segments are isolated from each other with VLAN-based or physical segmentation. Where the nature of the data requires it, the environment cannot be reached from the internet at all—for our clients who handle sensitive data, this is already working practice, not a plan.',
+    ],
+    kulcs: 'In an audit, “logically separated” is often not enough. That is why we offer physical segmentation too.',
+    reszletek: [
+      { cimke: 'Two-tier design', szoveg: 'separate internal (database, application) and public (web, mail) network layers' },
+      { cimke: 'Client isolation', szoveg: 'a dedicated segment per client, with VLAN-based or physical segmentation' },
+      { cimke: 'Full isolation', szoveg: 'on request, a dedicated virtual or physical switch, a private subnet, and an environment not reachable from the internet' },
+      { szoveg: 'There is no crossover between segments—one client’s environment cannot see another’s' },
+    ],
+    hivatkozas: { szoveg: 'The isolation diagram and real-world examples', url: '/en/case-studies/' },
+  },
+  {
+    cimke: 'Identity',
+    cim: 'A stolen password alone should not be enough',
+    allitas: [
+      'Signing in is exactly as easy for an attacker as for a colleague—if only a password stands in the way. The second common mistake is not at sign-in but after it: in most companies, nobody can say exactly what a given account actually has access to.',
+      'That is why we ask for two things at once: multi-factor authentication for sign-in, and a documented, maintained permission structure behind it. The accounts and devices of joining and departing employees are added and removed by a defined process—not from memory.',
+    ],
+    kulcs: 'Permissions become a risk when nobody knows anymore who has access to what.',
+    reszletek: [
+      { cimke: 'Authentication', szoveg: 'multi-factor authentication, centralized permission management' },
+      { cimke: 'Directory', szoveg: 'Active Directory domain, Group Policy, redundant domain controllers' },
+      { cimke: 'Lifecycle', szoveg: 'account and device management for joining and departing employees, with a documented permission structure' },
+      { cimke: 'Cloud', szoveg: 'Microsoft 365 and Entra ID administration, email and phishing protection' },
+      { szoveg: 'Only authorized Triox staff have access to the infrastructure, to the extent required for operations' },
+    ],
+    hivatkozas: {
+      szoveg: 'What an office AI assistant actually sees—and why it is about permissions',
+      url: '/en/blog/ai-in-the-office-permissions/',
+    },
+  },
+  {
+    cimke: 'Endpoint',
+    cim: 'The attack does not start on the server',
+    allitas: [
+      'In the vast majority of cases, the entry point is a workstation: an opened attachment, an outdated browser extension, an application that has not been updated in two years. The server is only the second stop.',
+      'Endpoints run protection that is monitored from a central console, and patch management is a scheduled, tested and traceable process—tied to a maintenance window, not ad hoc clicking. Devices are inventoried, and their lifecycle is tracked.',
+    ],
+    kulcs: 'What nobody watches keeps working—until it doesn’t.',
+    reszletek: [
+      { cimke: 'Endpoint protection', szoveg: 'deployment and monitoring from a central console, on workstations and servers' },
+      { cimke: 'Patch management', szoveg: 'scheduled installation of Windows and Linux patches, tied to a maintenance window (WSUS- or RMM-based)' },
+      { cimke: 'Remote management', szoveg: 'RMM: endpoint and server monitoring, remote intervention, device inventory' },
+      { cimke: 'Device lifecycle', szoveg: 'inventory, warranty and support tracking, replacement planning' },
+    ],
+    hivatkozas: {
+      szoveg: 'Endpoint monitoring is part of managed IT operations',
+      url: '/en/services/managed-it-operations/',
+    },
+  },
+  {
+    cimke: 'Data',
+    cim: 'Ransomware goes after the backup too',
+    allitas: [
+      'The first target of an encryption attack is not the data but the backup. If the backup sits on the same network, in the same rack or in the same building as the production system, a single event takes out both.',
+      'That is why, with us, backup is not a by-product of the production system but separate infrastructure: multiple, physically independent targets at two sites. Critical workloads also have an off-site VM replica—it does not need to be restored, only started.',
+    ],
+    kulcs: 'The question is not whether there is a backup. It is where it is, and how long it takes to be up and running.',
+    reszletek: [
+      { cimke: 'Backup platform', szoveg: 'Veeam Backup & Replication and Veeam Agent; alternatively Synology, Iperius and BackupChain solutions' },
+      { cimke: 'Targets', szoveg: 'primary repository and separate physical secondary backup targets, on independent devices, at two sites' },
+      { cimke: '3-2-1 rule', szoveg: '3 copies, on 2 different media, 1 off-site' },
+      { cimke: 'Replication', szoveg: 'off-site, ready-to-run VM replica for critical workloads' },
+      { cimke: 'Application-aware backup', szoveg: 'database- and mail-system-consistent backups, not just file-level copies' },
+      { cimke: 'Verification', szoveg: 'daily verification of backup jobs—not just that they started, but that they also completed' },
+    ],
+    hivatkozas: {
+      szoveg: 'A test proves that the backup can actually be restored',
+      url: '/en/services/audit-restore-validation/',
+    },
+  },
+  {
+    cimke: 'Management plane',
+    cim: 'What cannot be reached from the internet cannot be hacked from there',
+    allitas: [
+      'The security of an infrastructure is often decided not at the application but by where the management interfaces of the servers, the hypervisor and the network devices can be reached from. This is the shortest path to the entire environment—and an exposed management interface can be probed by the whole internet.',
+      'Triox’s management network is dedicated and not reachable from the internet. No management interface is exposed that a password would have to protect. Client access goes through VPN, via a dedicated endpoint per client.',
+    ],
+    kulcs: 'The best-protected management interface is the one that is not exposed.',
+    reszletek: [
+      { cimke: 'Out-of-band management', szoveg: 'dedicated management network, not reachable from the internet' },
+      { cimke: 'Hardware level', szoveg: 'iDRAC and iLO—the server can be managed and monitored even if the operating system does not start' },
+      { cimke: 'Early warning', szoveg: 'power supply, fan, memory and disk faults are in many cases detected before an actual failure' },
+      { cimke: 'Client access', szoveg: 'through VPN, via a dedicated endpoint per client' },
+      { szoveg: 'Up-to-date, transferable and auditable system documentation—not in the operator’s head' },
+    ],
+    hivatkozas: { szoveg: 'Who has access to my data?—FAQ', url: '/en/faq/' },
+  },
+];
+
+/** Hero alatti gyorsnézet. Minden szám máshol is szerepel az oldalon. */
+const gyorsnezet = [
+  { ertek: '1 client = 1 network', szoveg: 'client-level isolation with a dedicated gateway' },
+  { ertek: '2 sites', szoveg: 'Budapest data centers, independent of each other' },
+  { ertek: '3 · 2 · 1', szoveg: 'copies, media, off-site copy' },
+  { ertek: '0 exposed management interfaces', szoveg: 'the management network is not reachable from the internet' },
+];
+
+const kockazatok = [
+  {
+    kockazat: 'Ransomware',
+    nelkule: 'A backup reachable over the network gets encrypted along with the production data.',
+    valasz: 'Multiple physically independent backup targets at two sites, plus an off-site VM replica.',
+    link: { szoveg: 'Backup and replication', url: '/en/services/on-premises-and-hybrid-it/' },
+  },
+  {
+    kockazat: 'Phishing, AI-based impersonation',
+    nelkule: 'One email or call that is indistinguishable from the real thing is enough to trigger a payment.',
+    valasz: 'Multi-factor authentication, email and phishing protection, and a written internal procedure before payments.',
+    link: { szoveg: 'When the scammer calls in your boss’s voice', url: '/en/blog/ai-voice-cloning-fraud/' },
+  },
+  {
+    kockazat: 'Stolen password',
+    nelkule: 'Signing in is just as easy for the attacker as for a colleague.',
+    valasz: 'Multi-factor authentication, and support for rolling out passwordless sign-in, starting with critical accounts.',
+    link: { szoveg: 'The password that cannot be stolen', url: '/en/blog/passkeys-passwordless-sign-in/' },
+  },
+  {
+    kockazat: 'Overly broad permissions',
+    nelkule: 'Compromising a single account exposes the entire file server.',
+    valasz: 'Centralized permission management, a documented structure, an onboarding and offboarding process.',
+    link: { szoveg: 'AI in the office: what does it actually see?', url: '/en/blog/ai-in-the-office-permissions/' },
+  },
+  {
+    kockazat: 'Compromise of a public-facing service',
+    nelkule: 'The attacker reaches the database directly from the web server.',
+    valasz: 'Two-tier segmentation and a dedicated gateway per client—the public layer has no line of sight to the internal one.',
+    link: { szoveg: 'Client isolation', url: '/en/technology/' },
+  },
+  {
+    kockazat: 'Exposed management interface',
+    nelkule: 'The whole internet can probe the management interface.',
+    valasz: 'Dedicated out-of-band management network, not reachable from the internet.',
+    link: { szoveg: 'Management access', url: '/en/technology/' },
+  },
+  {
+    kockazat: 'Backup that does not work',
+    nelkule: 'The problem surfaces during the restore—when it is already too late.',
+    valasz: 'Daily backup verification, plus documented restore testing as a separate service, with a written report.',
+    link: { szoveg: 'Audit Restore Validation', url: '/en/services/audit-restore-validation/' },
+  },
+  {
+    kockazat: 'Key-person dependency',
+    nelkule: 'The knowledge lives in a single head—and that head goes on vacation or quits.',
+    valasz: 'A documented, transferable environment with a team behind it, not a single colleague.',
+    link: { szoveg: 'Managed IT operations', url: '/en/services/managed-it-operations/' },
+  },
+  {
+    kockazat: 'Fire, water damage, extended power outage',
+    nelkule: 'The production system and the backup next to it go down at the same time.',
+    valasz: 'Two data center sites in Budapest, an off-site copy and a ready-to-run replica.',
+    link: { szoveg: 'About us—in numbers', url: '/en/about/' },
+  },
+  {
+    kockazat: 'License audit',
+    nelkule: 'Proving the correct license count is your risk, and the fine is yours.',
+    valasz: 'Under an SPLA agreement, the service provider reports monthly and is responsible for it.',
+    link: { szoveg: 'SPLA and CSP', url: '/en/services/iaas/' },
+  },
+];
+
+/**
+ * Felelősségi mátrix. A jelölés: T = Triox, K = közös, O = az ügyfélé.
+ * A táblázat tájékoztató — a végleges határt mindig a szerződés rögzíti,
+ * ezt a láblécjegyzet ki is mondja.
+ */
+type Felelos = 'T' | 'K' | 'O';
+
+const jeloles: Record<Felelos, { jel: string; sz: string }> = {
+  T: { jel: '●', sz: 'Triox’s responsibility' },
+  K: { jel: '◐', sz: 'Shared, per the contract' },
+  O: { jel: '○', sz: 'Stays on your side' },
+};
+
+const modellek = ['IaaS', 'DCaaS', 'SaaS', 'On-premises and hybrid'];
+
+const matrix: { terulet: string; ertekek: Felelos[] }[] = [
+  { terulet: 'Physical environment: data hall, power, cooling', ertekek: ['T', 'T', 'T', 'O'] },
+  { terulet: 'Network edge: gateway, firewall, VPN', ertekek: ['T', 'T', 'T', 'T'] },
+  { terulet: 'Network segmentation', ertekek: ['T', 'T', 'T', 'T'] },
+  { terulet: 'Server hardware and hypervisor', ertekek: ['T', 'T', 'T', 'K'] },
+  { terulet: 'Operating system installation and updates', ertekek: ['O', 'T', 'T', 'T'] },
+  { terulet: 'Business application and its configuration', ertekek: ['O', 'O', 'T', 'K'] },
+  { terulet: 'Running the backups', ertekek: ['T', 'T', 'T', 'T'] },
+  { terulet: 'Restore test and report', ertekek: ['K', 'K', 'K', 'K'] },
+  { terulet: 'User accounts and permissions', ertekek: ['O', 'K', 'K', 'K'] },
+  { terulet: 'Workstations and endpoint protection', ertekek: ['O', 'O', 'O', 'K'] },
+  { terulet: 'Content of the data and its lawful use', ertekek: ['O', 'O', 'O', 'O'] },
+];
+
+const nemAllitjuk = [
+  {
+    cim: 'We do not claim that an incident cannot happen with us',
+    szoveg:
+      'Anyone who promises that has either not run enough systems or is not telling the truth. What we do claim is that we are prepared for it, that an event stays within a single client’s segment, and that there is something to fall back on.',
+  },
+  {
+    cim: 'We do not publish an availability percentage on our website',
+    szoveg:
+      'The committed availability and response time depend on the service you choose, and we set them in the service level agreement (SLA)—that is where they can be measured and enforced. A marketing number on the home page cannot.',
+  },
+  {
+    cim: 'We cite a certification only when there is an audit finding behind it',
+    szoveg:
+      'What you read on this page is working practice, not a statement of intent. If a compliance requirement has to be met with a specific certification, tell us during the assessment—we will look at what we can add and what we cannot.',
+  },
+  {
+    cim: 'A purchased tool is not protection on its own',
+    szoveg:
+      'We do not sell security products that nobody has the capacity to monitor day to day. What is not monitored and updated does not protect—at most, it reassures.',
+  },
+];
+---
+
+<Base
+  cim="Security"
+  leiras="Seven layers: a physically protected data center, a dedicated gateway per client, two-tier segmentation, multi-factor authentication, endpoint protection, independent backups and out-of-band management. Triox’s approach to security, with a responsibility matrix."
+>
+  <section class="band">
+    <div class="wrap">
+      <div class="hero">
+        <p class="eyebrow">Security</p>
+        <h1>Protection is not a product. It is seven layers, and each one has its own job</h1>
+        <p class="lead">
+          Every client of ours runs on its own network segment, behind a dedicated gateway. That is
+          the foundation. The other layers build on it: identity, endpoint, data, and the management
+          plane, which cannot be reached from the internet at all.
+        </p>
+      </div>
+
+      <ul class="gyorsnezet">
+        {gyorsnezet.map((g) => (
+          <li>
+            <span class="gyorsnezet__ertek">{g.ertek}</span>
+            <span class="gyorsnezet__szoveg">{g.szoveg}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="band band--mist">
+    <div class="wrap">
+      <h2 class="szekcio__cim">The layers of protection</h2>
+      <p class="szekcio__lead">
+        The layers are independent of each other: there is not one strong wall in front of the
+        environment but seven, one after another, and any one of them can stop an event on its own.
+        The diagram below goes from the outside in—and we break the layers down in the same order
+        further below.
+      </p>
+
+      <figure class="abra">
+        <svg viewBox="0 0 880 420" role="img" aria-labelledby="abra-retegek">
+          <title id="abra-retegek">
+            The seven layers of protection, from the outside in. Physical layer: two data center
+            sites in Budapest, with physically protected data halls, redundant power and cooling.
+            Network edge: a dedicated gateway per client with its own firewall, NAT and VPN rules
+            and its own public IP. Segmentation: a two-tier network separated per client, so a
+            compromised public layer does not open a path to the databases. Identity: multi-factor
+            authentication and centralized permission management, so a stolen password alone is not
+            enough. Endpoint: endpoint protection and scheduled patch management, because attacks
+            typically start on a workstation. Data: multiple independent backup targets and an
+            off-site replica, because ransomware goes after the backup too. Management plane:
+            out-of-band management, not reachable from the internet. Breaching one layer does not
+            mean losing the environment.
+          </title>
+
+          <text class="abra__mono" x="0" y="14">SEVEN LAYERS OF PROTECTION—OUTSIDE IN</text>
+
+          <rect class="abra__sav" x="0" y="30" width="250" height="48" rx="3" />
+          <text class="abra__mono" x="16" y="59">01 · PHYSICAL</text>
+          <rect class="abra__doboz" x="258" y="30" width="622" height="48" rx="3" />
+          <text class="abra__cimke" x="276" y="52">Two data center sites in Budapest</text>
+          <text class="abra__kicsi" x="276" y="69">physically protected data hall, redundant power and cooling—not an office closet</text>
+
+          <rect class="abra__sav" x="0" y="82" width="250" height="48" rx="3" />
+          <text class="abra__mono" x="16" y="111">02 · NETWORK EDGE</text>
+          <rect class="abra__doboz" x="258" y="82" width="622" height="48" rx="3" />
+          <text class="abra__cimke" x="276" y="104">Dedicated gateway per client</text>
+          <text class="abra__kicsi" x="276" y="121">own firewall, NAT and VPN rules, own public IP—not a shared template</text>
+
+          <rect class="abra__sav" x="0" y="134" width="250" height="48" rx="3" />
+          <text class="abra__mono" x="16" y="163">03 · SEGMENTATION</text>
+          <rect class="abra__kiemelt" x="258" y="134" width="622" height="48" rx="3" />
+          <text class="abra__cimke" x="276" y="156">Two-tier network, separated per client</text>
+          <text class="abra__kicsi" x="276" y="173">a compromised public layer does not open a path to the databases</text>
+
+          <rect class="abra__sav" x="0" y="186" width="250" height="48" rx="3" />
+          <text class="abra__mono" x="16" y="215">04 · IDENTITY</text>
+          <rect class="abra__doboz" x="258" y="186" width="622" height="48" rx="3" />
+          <text class="abra__cimke" x="276" y="208">Multi-factor authentication, central access control</text>
+          <text class="abra__kicsi" x="276" y="225">a stolen password alone is not enough to get in</text>
+
+          <rect class="abra__sav" x="0" y="238" width="250" height="48" rx="3" />
+          <text class="abra__mono" x="16" y="267">05 · DEVICES</text>
+          <rect class="abra__doboz" x="258" y="238" width="622" height="48" rx="3" />
+          <text class="abra__cimke" x="276" y="260">Endpoint protection and scheduled patching</text>
+          <text class="abra__kicsi" x="276" y="277">attacks typically start on a workstation, not on the server</text>
+
+          <rect class="abra__sav" x="0" y="290" width="250" height="48" rx="3" />
+          <text class="abra__mono" x="16" y="319">06 · DATA</text>
+          <rect class="abra__doboz" x="258" y="290" width="622" height="48" rx="3" />
+          <text class="abra__cimke" x="276" y="312">Independent backup targets, off-site replica</text>
+          <text class="abra__kicsi" x="276" y="329">ransomware targets backups too—so they are not in one place</text>
+
+          <rect class="abra__sav" x="0" y="342" width="250" height="48" rx="3" />
+          <text class="abra__mono" x="16" y="371">07 · MGMT PLANE</text>
+          <rect class="abra__kiemelt" x="258" y="342" width="622" height="48" rx="3" />
+          <text class="abra__cimke" x="276" y="364">Out-of-band management, not exposed to the internet</text>
+          <text class="abra__kicsi" x="276" y="381">no one outside can probe the interface, because it is not exposed</text>
+
+          <text class="abra__mono" x="440" y="412" text-anchor="middle">A BREACHED LAYER IS NOT A LOST ENVIRONMENT</text>
+        </svg>
+      </figure>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <h2 class="szekcio__cim">Layer by layer</h2>
+      <p class="szekcio__lead">
+        Each layer follows the same structure: what the specific risk is, what we do about it, and
+        what technical solution stands behind it. The technical details can be expanded.
+      </p>
+
+      <div class="rkartyak">
+        {retegek.map((r, i) => (
+          <article class="rkartya">
+            <div class="rkartya__fej">
+              <span class="rkartya__idx">{String(i + 1).padStart(2, '0')}</span>
+              <span class="rkartya__cimke">{r.cimke}</span>
+            </div>
+
+            <h3>{r.cim}</h3>
+
+            {r.allitas.map((bek) => <p>{bek}</p>)}
+
+            <p class="rkartya__kulcs">{r.kulcs}</p>
+
+            {r.hivatkozas && (
+              <p class="rkartya__hiv"><a href={r.hivatkozas.url}>{r.hivatkozas.szoveg} →</a></p>
+            )}
+
+            <details class="reszletek">
+              <summary>Technical details</summary>
+              <ul>
+                {r.reszletek.map((d) => (
+                  <li>
+                    {d.cimke && <strong>{d.cimke}:</strong>}
+                    {' '}{d.szoveg}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="band band--mist">
+    <div class="wrap">
+      <h2 class="szekcio__cim">Where an attack stops</h2>
+      <p class="szekcio__lead">
+        An attack is not a single event but a series of steps. The point of defense is not to have
+        to step in for the first time at the last step: every step has a control that can break the
+        chain on its own.
+      </p>
+
+      <figure class="abra">
+        <svg viewBox="0 0 880 272" role="img" aria-labelledby="abra-lanc">
+          <title id="abra-lanc">
+            The five steps of a typical attack chain, with the control below each one that stops
+            that step. Step one is phishing, with an email or call that is indistinguishable from
+            the real thing—stopped by a written internal procedure before payments. Step two is
+            signing in with a stolen password—stopped by multi-factor authentication. Step three is
+            malware running on the workstation—stopped by endpoint protection and scheduled patch
+            management. Step four is spreading toward the servers and the database—stopped by
+            two-tier segmentation and a dedicated gateway per client. Step five is encryption of the
+            data and the backup—stopped by an independent backup at another site and a ready-to-run
+            replica.
+          </title>
+
+          <text class="abra__mono" x="78" y="14" text-anchor="middle">01</text>
+          <text class="abra__mono" x="259" y="14" text-anchor="middle">02</text>
+          <text class="abra__mono" x="440" y="14" text-anchor="middle">03</text>
+          <text class="abra__mono" x="621" y="14" text-anchor="middle">04</text>
+          <text class="abra__mono" x="802" y="14" text-anchor="middle">05</text>
+
+          <rect class="abra__doboz" x="0" y="24" width="156" height="72" rx="4" />
+          <text class="abra__cimke" x="78" y="50" text-anchor="middle">Phishing</text>
+          <text class="abra__kicsi" x="78" y="68" text-anchor="middle">email or call,</text>
+          <text class="abra__kicsi" x="78" y="84" text-anchor="middle">perfectly convincing</text>
+          <path class="abra__nyil" d="M164 54 L176 60 L164 66 Z" />
+
+          <rect class="abra__doboz" x="181" y="24" width="156" height="72" rx="4" />
+          <text class="abra__cimke" x="259" y="50" text-anchor="middle">Sign-in</text>
+          <text class="abra__kicsi" x="259" y="68" text-anchor="middle">with stolen</text>
+          <text class="abra__kicsi" x="259" y="84" text-anchor="middle">password</text>
+          <path class="abra__nyil" d="M345 54 L357 60 L345 66 Z" />
+
+          <rect class="abra__doboz" x="362" y="24" width="156" height="72" rx="4" />
+          <text class="abra__cimke" x="440" y="50" text-anchor="middle">Malware</text>
+          <text class="abra__kicsi" x="440" y="68" text-anchor="middle">runs on a</text>
+          <text class="abra__kicsi" x="440" y="84" text-anchor="middle">PC</text>
+          <path class="abra__nyil" d="M526 54 L538 60 L526 66 Z" />
+
+          <rect class="abra__doboz" x="543" y="24" width="156" height="72" rx="4" />
+          <text class="abra__cimke" x="621" y="50" text-anchor="middle">Spread</text>
+          <text class="abra__kicsi" x="621" y="68" text-anchor="middle">to servers and</text>
+          <text class="abra__kicsi" x="621" y="84" text-anchor="middle">the database</text>
+          <path class="abra__nyil" d="M707 54 L719 60 L707 66 Z" />
+
+          <rect class="abra__doboz" x="724" y="24" width="156" height="72" rx="4" />
+          <text class="abra__cimke" x="802" y="50" text-anchor="middle">Ransom</text>
+          <text class="abra__kicsi" x="802" y="68" text-anchor="middle">encrypting the</text>
+          <text class="abra__kicsi" x="802" y="84" text-anchor="middle">data and backup</text>
+
+          <path class="abra__vonal" d="M78 150 V110" />
+          <path class="abra__nyil" d="M73 110 L83 110 L78 100 Z" />
+          <path class="abra__vonal" d="M259 150 V110" />
+          <path class="abra__nyil" d="M254 110 L264 110 L259 100 Z" />
+          <path class="abra__vonal" d="M440 150 V110" />
+          <path class="abra__nyil" d="M435 110 L445 110 L440 100 Z" />
+          <path class="abra__vonal" d="M621 150 V110" />
+          <path class="abra__nyil" d="M616 110 L626 110 L621 100 Z" />
+          <path class="abra__vonal" d="M802 150 V110" />
+          <path class="abra__nyil" d="M797 110 L807 110 L802 100 Z" />
+
+          <rect class="abra__kiemelt" x="0" y="150" width="156" height="76" rx="4" />
+          <text class="abra__kontroll" x="78" y="176" text-anchor="middle">Procedure</text>
+          <text class="abra__kicsi" x="78" y="194" text-anchor="middle">a written rule</text>
+          <text class="abra__kicsi" x="78" y="210" text-anchor="middle">before payments</text>
+
+          <rect class="abra__kiemelt" x="181" y="150" width="156" height="76" rx="4" />
+          <text class="abra__kontroll" x="259" y="176" text-anchor="middle">Multi-factor sign-in</text>
+          <text class="abra__kicsi" x="259" y="194" text-anchor="middle">a password alone</text>
+          <text class="abra__kicsi" x="259" y="210" text-anchor="middle">won’t do</text>
+
+          <rect class="abra__kiemelt" x="362" y="150" width="156" height="76" rx="4" />
+          <text class="abra__kontroll" x="440" y="176" text-anchor="middle">PC protection</text>
+          <text class="abra__kicsi" x="440" y="194" text-anchor="middle">&amp; scheduled</text>
+          <text class="abra__kicsi" x="440" y="210" text-anchor="middle">patch management</text>
+
+          <rect class="abra__kiemelt" x="543" y="150" width="156" height="76" rx="4" />
+          <text class="abra__kontroll" x="621" y="176" text-anchor="middle">Segmentation</text>
+          <text class="abra__kicsi" x="621" y="194" text-anchor="middle">two-tier network,</text>
+          <text class="abra__kicsi" x="621" y="210" text-anchor="middle">own gateway</text>
+
+          <rect class="abra__kiemelt" x="724" y="150" width="156" height="76" rx="4" />
+          <text class="abra__kontroll" x="802" y="176" text-anchor="middle">Separate backup</text>
+          <text class="abra__kicsi" x="802" y="194" text-anchor="middle">at another site</text>
+          <text class="abra__kicsi" x="802" y="210" text-anchor="middle">plus replica</text>
+
+          <text class="abra__mono" x="440" y="256" text-anchor="middle">EVERY STEP HAS A CONTROL—BREAKING THE CHAIN AT ONE POINT IS ENOUGH</text>
+        </svg>
+      </figure>
+
+      <p class="kulcs">
+        The first two links in the chain are not technical. There, a written rule and a second of
+        thought are worth more than any filter.
+      </p>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <h2 class="szekcio__cim">Ten risks, and what we do about them</h2>
+      <p class="szekcio__lead">
+        These are not theoretical threats but the cases a Hungarian small or mid-sized business
+        actually runs into. In every row, the link on the right takes you to where the answer is
+        explained in detail.
+      </p>
+
+      <div class="tabla-doboz">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th scope="col">Risk</th>
+              <th scope="col">What happens without a response</th>
+              <th scope="col">Our response</th>
+              <th scope="col">Learn more</th>
+            </tr>
+          </thead>
+          <tbody>
+            {kockazatok.map((k) => (
+              <tr>
+                <th scope="row">{k.kockazat}</th>
+                <td>{k.nelkule}</td>
+                <td>{k.valasz}</td>
+                <td><a href={k.link.url}>{k.link.szoveg} →</a></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="band band--mist">
+    <div class="wrap">
+      <h2 class="szekcio__cim">Who is responsible for what</h2>
+      <p class="szekcio__lead">
+        Most incidents do not start where someone did poor work, but where each side assumed the
+        other was taking care of it. That is why we state up front where the line runs in each
+        service model.
+      </p>
+
+      <div class="tabla-doboz">
+        <table class="tabla tabla--matrix">
+          <thead>
+            <tr>
+              <th scope="col">Area</th>
+              {modellek.map((m) => <th scope="col">{m}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {matrix.map((sor) => (
+              <tr>
+                <th scope="row">{sor.terulet}</th>
+                {sor.ertekek.map((e) => (
+                  <td class="jel">
+                    <span class="jel__ikon" aria-hidden="true">{jeloles[e].jel}</span>
+                    <span class="jel__szo">{jeloles[e].sz}</span>
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <ul class="jelmagyarazat">
+        <li><span aria-hidden="true">●</span> Triox’s responsibility</li>
+        <li><span aria-hidden="true">◐</span> Shared, per the contract</li>
+        <li><span aria-hidden="true">○</span> Stays on your side</li>
+      </ul>
+
+      <p class="labjegyzet">
+        The table shows the default case.
+        <a href="/en/services/managed-it-operations/">Managed IT operations</a> is the
+        service that lets items move from the “your side” column over to us—in every case, the final
+        boundary is set by the service agreement, not by this table. In every model, the restore
+        test is a separate service:
+        <a href="/en/services/audit-restore-validation/">Audit Restore Validation</a>.
+      </p>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <h2 class="szekcio__cim">When something does happen</h2>
+      <p class="szekcio__lead">
+        The real test of a security approach is not what has been built but what happens in the
+        first hour. With us, this is not improvisation: every system we operate is under
+        continuous, automated monitoring, and an alert follows a defined escalation path.
+      </p>
+
+      <figure class="abra">
+        <svg viewBox="0 0 880 392" role="img" aria-labelledby="abra-incidens">
+          <title id="abra-incidens">
+            The six steps of incident handling. Detect: monitoring raises the alert, not the user,
+            with threshold- and event-based alerting. Escalate: following a defined procedure, to a
+            named person in charge, not to a shared mailbox. Scope: which segment, which machine,
+            since when—with a documented environment, this is not detective work. Isolate: the
+            affected system is cut off at the dedicated gateway, with no impact on any other client.
+            Recover: from backup or from the ready-to-run off-site replica, depending on how
+            critical the system is. Document: what happened, what caused it, and what changes so it
+            cannot happen again. The specific response time is set in the service agreement.
+          </title>
+
+          <text class="abra__mono" x="0" y="14">WHEN AN ALERT COMES IN</text>
+
+          <path class="abra__vonal" d="M64 44 V324" />
+
+          <rect class="abra__sav" x="88" y="24" width="792" height="44" rx="3" />
+          <circle class="abra__pont" cx="64" cy="44" r="7" />
+          <text class="abra__mono" x="0" y="48">01</text>
+          <text class="abra__cimke" x="104" y="43">Detect</text>
+          <text class="abra__kicsi" x="104" y="61">monitoring raises the alert, not the user—with threshold- and event-based alerts</text>
+
+          <rect class="abra__sav" x="88" y="80" width="792" height="44" rx="3" />
+          <circle class="abra__pont" cx="64" cy="100" r="7" />
+          <text class="abra__mono" x="0" y="104">02</text>
+          <text class="abra__cimke" x="104" y="99">Escalate</text>
+          <text class="abra__kicsi" x="104" y="117">per a defined procedure, to a named person in charge—not to a shared mailbox</text>
+
+          <rect class="abra__sav" x="88" y="136" width="792" height="44" rx="3" />
+          <circle class="abra__pont" cx="64" cy="156" r="7" />
+          <text class="abra__mono" x="0" y="160">03</text>
+          <text class="abra__cimke" x="104" y="155">Scope</text>
+          <text class="abra__kicsi" x="104" y="173">which segment, which machine, since when—in a documented environment, no guesswork</text>
+
+          <rect class="abra__kiemelt" x="88" y="192" width="792" height="44" rx="3" />
+          <circle class="abra__pont" cx="64" cy="212" r="7" />
+          <text class="abra__mono" x="0" y="216">04</text>
+          <text class="abra__cimke" x="104" y="211">Isolate</text>
+          <text class="abra__kicsi" x="104" y="229">the affected system is cut off at the dedicated gateway—other clients unaffected</text>
+
+          <rect class="abra__sav" x="88" y="248" width="792" height="44" rx="3" />
+          <circle class="abra__pont" cx="64" cy="268" r="7" />
+          <text class="abra__mono" x="0" y="272">05</text>
+          <text class="abra__cimke" x="104" y="267">Recover</text>
+          <text class="abra__kicsi" x="104" y="285">from backup or the ready-to-run off-site replica, based on system criticality</text>
+
+          <rect class="abra__kiemelt" x="88" y="304" width="792" height="44" rx="3" />
+          <circle class="abra__pont" cx="64" cy="324" r="7" />
+          <text class="abra__mono" x="0" y="328">06</text>
+          <text class="abra__cimke" x="104" y="323">Document</text>
+          <text class="abra__kicsi" x="104" y="341">what happened, why, and what changes—so it cannot happen again</text>
+
+          <text class="abra__mono" x="0" y="378">THE SPECIFIC RESPONSE TIME AND SUPPORT WINDOW ARE SET IN THE SERVICE AGREEMENT</text>
+        </svg>
+      </figure>
+
+      <div class="paros">
+        <div>
+          <h3>What happens before the alert</h3>
+          <p>
+            Good operations are not defined by fast fixes. They are defined by most faults never
+            turning into an outage. A full disk, a backup that has been failing for months, an
+            expired certificate or a server not updated in two years are all problems that automated
+            monitoring can catch days or weeks before the consequences hit.
+          </p>
+          <ul>
+            <li>infrastructure monitoring: network devices, servers, services, capacity and trend tracking</li>
+            <li>daily backup verification—not just that the job started, but that it also completed</li>
+            <li>regular, automated infrastructure audits and change tracking</li>
+            <li>a status and resource report filtered to your own environment</li>
+          </ul>
+        </div>
+        <div>
+          <h3>What remains after recovery</h3>
+          <p>
+            An incident is over when it is documented. The report is needed not only because an
+            auditor or an insurer may ask for it, but because without it, the same fault will happen
+            again the same way six months later.
+          </p>
+          <ul>
+            <li>what happened, when, on which system, and what the root cause was</li>
+            <li>what steps were taken, and what their results were</li>
+            <li>what changes in the environment or in the procedures</li>
+            <li>up-to-date, transferable system documentation—not in the operator’s head</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="kulcs">
+        Existing clients can report an issue <a href="/en/support/">on the Support page</a>.
+        In urgent cases, by phone.
+      </p>
+    </div>
+  </section>
+
+  <section class="band band--mist">
+    <div class="wrap">
+      <h2 class="szekcio__cim">Compliance and proof</h2>
+      <p class="szekcio__lead">
+        In an audit, a client due diligence review or an insurance claim, what counts is not what
+        we think of our own security but what we can prove on paper.
+      </p>
+
+      <div class="megfeleles">
+        <article>
+          <h3>Your data stays in Hungary</h3>
+          <p>
+            Data is stored in Hungary, on infrastructure we operate ourselves, at two Budapest
+            sites, in ISO/IEC 27001:2022 certified data centers.
+            Only authorized Triox staff have access to the infrastructure, to the
+            extent required for operations. The exact terms are set out in the contract.
+          </p>
+        </article>
+        <article>
+          <h3>GDPR-compliant data handling</h3>
+          <p>
+            Documented processes, a documented permission structure and up-to-date environment
+            documentation. You are responsible for the content of the data and its lawful use—we
+            are responsible for the technical and organizational conditions the data sits under.
+          </p>
+        </article>
+        <article>
+          <h3>Verified restores</h3>
+          <p>
+            A growing number of audits and regulatory reviews require proof that backups have been
+            restore-tested. We do this in an isolated test environment, with an audit-ready
+            report and a “passed / passed with recommendations for improvement / failed”
+            rating.
+          </p>
+          <p class="megfeleles__hiv">
+            <a href="/en/services/audit-restore-validation/">Audit Restore Validation →</a>
+          </p>
+        </article>
+        <article>
+          <h3>Transparent reporting</h3>
+          <p>
+            Regular, automated infrastructure audits, change tracking and a resource report filtered
+            to your own environment. If you are preparing for an audit—GDPR, NIS2 or a client due
+            diligence review—we go through it separately during the assessment, so the documentation
+            is produced in the right form.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <h2 class="szekcio__cim">What we do not claim</h2>
+      <p class="szekcio__lead">
+        On a security page, overpromising is the easiest thing to do. That is why we also state
+        what we do not commit to—that is information just like the rest.
+      </p>
+
+      <div class="tagadas">
+        {nemAllitjuk.map((n) => (
+          <article>
+            <h3>{n.cim}</h3>
+            <p>{n.szoveg}</p>
+          </article>
+        ))}
+      </div>
+
+      <p class="zaro">
+        You can read about the underlying infrastructure on the <a href="/en/technology/">Technology</a>
+        page, about our vendor background on the <a href="/en/partners/">Partners</a> page, and about
+        environments we have delivered under <a href="/en/case-studies/">Case studies</a>. We do not
+        publish the names of our clients.
+      </p>
+    </div>
+  </section>
+
+  <section class="band band--sotet">
+    <img class="vizjel vizjel--cta" src="/logo-feher.svg" alt="" aria-hidden="true" />
+    <div class="wrap cta">
+      <h2>Let’s see which layer you are missing today</h2>
+      <p class="lead">
+        In a review, we go through all seven layers: where your backup is, where the management
+        interface can be reached from, who has access to what, and what would happen tomorrow
+        morning if a machine did not start.
+      </p>
+      <a class="btn" href="/en/contact/">Request a security review</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* --- szekciófejek: azonos a Partnerek oldaléval --- */
+
+  .szekcio__cim {
+    margin-bottom: 0.5rem;
+  }
+  .szekcio__lead {
+    max-width: 62ch;
+    color: var(--c-steel);
+    margin-bottom: 2rem;
+  }
+
+  /* --- hero és gyorsnézet --- */
+
+  .hero .lead {
+    max-width: 58ch;
+  }
+
+  /* A négy szám a hero alatt: nem díszítés, mindegyik visszakereshető
+     állítás — ugyanezek a számok szerepelnek a Rólunk oldal táblázatában. */
+  .gyorsnezet {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 1.25rem;
+    margin: 2.5rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .gyorsnezet li {
+    border-top: 3px solid var(--c-brand);
+    padding-top: 0.9rem;
+  }
+  .gyorsnezet__ertek {
+    display: block;
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 1.15rem;
+    line-height: 1.2;
+    margin-bottom: 0.35rem;
+  }
+  .gyorsnezet__szoveg {
+    display: block;
+    color: var(--c-steel);
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  /* --- rétegkártyák --- */
+
+  .rkartyak {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .rkartya {
+    /* Grid-elem alapból min-width: auto — nullázva a hosszú sorok nem
+       feszítik szét a rácsot. */
+    min-width: 0;
+    background: var(--c-paper);
+    border: 1px solid var(--c-line);
+    border-left: 4px solid var(--c-brand);
+    border-radius: var(--r);
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+  }
+  .rkartya__fej {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.9rem;
+  }
+  .rkartya__idx,
+  .rkartya__cimke {
+    font-family: var(--f-util);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .rkartya__idx {
+    color: var(--c-brand);
+  }
+  .rkartya__cimke {
+    color: var(--c-steel);
+  }
+  /* A rétegkártya címe h3, mert a szekció h2-je fölötte áll — a méret
+     viszont a /technologia/ kártyacímeivel egyezik. */
+  .rkartya h3 {
+    font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+    margin-bottom: 0.7rem;
+  }
+  .rkartya p {
+    color: var(--c-steel);
+    font-size: 0.98rem;
+  }
+  /* Sorkizárt törzsszöveg, elválasztással — enélkül a hosszú magyar szavak
+     folyókat nyitnának a széles hasábban. */
+  .rkartya p:not(.rkartya__kulcs):not(.rkartya__hiv) {
+    text-align: justify;
+    hyphens: auto;
+  }
+  .rkartya__kulcs {
+    border-left: 2px solid var(--c-brand);
+    padding-left: 1rem;
+    margin: 1.4rem 0;
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 1.02rem;
+    line-height: 1.45;
+  }
+  .rkartya__hiv {
+    font-size: 0.9rem;
+  }
+  .rkartya__hiv a,
+  .megfeleles__hiv a {
+    text-decoration: none;
+  }
+  .rkartya__hiv a:hover,
+  .megfeleles__hiv a:hover {
+    text-decoration: underline;
+  }
+
+  /* --- lenyitható technikai részletek (a /technologia/ accordionjával egyező) --- */
+
+  .reszletek {
+    border-top: 1px solid var(--c-line);
+    padding-top: 1rem;
+    margin-top: 1.4rem;
+  }
+  .reszletek summary {
+    font-family: var(--f-util);
+    font-size: 0.74rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-brand);
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .reszletek summary::-webkit-details-marker {
+    display: none;
+  }
+  .reszletek summary::before {
+    content: '+';
+    font-size: 1rem;
+    line-height: 1;
+    width: 1rem;
+    text-align: center;
+  }
+  .reszletek[open] summary::before {
+    content: '–';
+  }
+  .reszletek summary:hover {
+    color: var(--c-brand-deep);
+  }
+  .reszletek ul {
+    margin: 1rem 0 0;
+    padding-left: 1.1rem;
+  }
+  .reszletek li {
+    color: var(--c-steel);
+    font-size: 0.94rem;
+    margin-bottom: 0.45rem;
+  }
+  .reszletek li strong {
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-weight: 600;
+    margin-right: 0.3rem;
+  }
+
+  /* --- ábra-kiegészítők --- */
+
+  /* A .abra__cimke 15px-es Montserratja a lánc-ábra 156 px-es hasábjában
+     kilógna, ezért a kontrollnevek egy fokkal kisebbek. */
+  .abra__kontroll {
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 12.5px;
+    fill: var(--c-ink);
+  }
+  .abra__pont {
+    fill: var(--c-brand);
+  }
+
+  /* --- táblázatok: a szolgáltatásoldalak megjelenésével egyezően --- */
+
+  /* A tábla saját konténerben görget, hogy a szélessége ne feszítse szét
+     az oldalt keskeny nézetben. */
+  .tabla-doboz {
+    overflow-x: auto;
+  }
+  .tabla {
+    width: 100%;
+    min-width: 44rem;
+    border-collapse: collapse;
+    font-size: 0.93rem;
+  }
+  .tabla th,
+  .tabla td {
+    text-align: left;
+    padding: 0.6rem 0.9rem;
+    border: 1px solid var(--c-line);
+    vertical-align: top;
+  }
+  .tabla thead th {
+    background: var(--c-ink);
+    color: #e9ecf2;
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+  }
+  .tabla tbody th {
+    background: var(--c-paper);
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: var(--c-ink);
+    width: 15rem;
+  }
+  .tabla td {
+    background: var(--c-paper);
+    color: var(--c-steel);
+  }
+  .tabla tbody tr:nth-child(even) th,
+  .tabla tbody tr:nth-child(even) td {
+    background: var(--c-mist);
+  }
+  .tabla a {
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .tabla a:hover {
+    text-decoration: underline;
+  }
+
+  /* --- felelősségi mátrix --- */
+
+  .tabla--matrix tbody th {
+    width: 22rem;
+  }
+  .tabla--matrix thead th:not(:first-child) {
+    text-align: center;
+  }
+  .jel {
+    text-align: center;
+    white-space: nowrap;
+  }
+  /* A jel önmagában nem hordoz jelentést, ezért a szó is ott áll mellette:
+     nagy nézetben kiírva, keskenyben a jel marad. Színnel nem kódolunk. */
+  .jel__ikon {
+    font-size: 1.05rem;
+    line-height: 1;
+    color: var(--c-brand);
+  }
+  .jel__szo {
+    display: block;
+    margin-top: 0.25rem;
+    font-family: var(--f-util);
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--c-steel);
+    white-space: normal;
+  }
+
+  .jelmagyarazat {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.75rem;
+    margin: 1.25rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.88rem;
+    color: var(--c-steel);
+  }
+  .jelmagyarazat span {
+    color: var(--c-brand);
+    margin-right: 0.4rem;
+  }
+
+  .labjegyzet {
+    max-width: 68ch;
+    margin: 1.25rem 0 0;
+    color: var(--c-steel);
+    font-size: 0.88rem;
+  }
+
+  /* --- kétoszlopos szövegblokk az incidens-ábra alatt --- */
+
+  .paros {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+  @media (min-width: 46rem) {
+    .paros {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .paros h3 {
+    font-size: 1.08rem;
+    margin-bottom: 0.6rem;
+  }
+  .paros p {
+    color: var(--c-steel);
+    font-size: 0.96rem;
+  }
+  .paros ul {
+    margin: 0;
+    padding-left: 1rem;
+    list-style: none;
+  }
+  .paros li {
+    position: relative;
+    margin-bottom: 0.4rem;
+    color: var(--c-steel);
+    font-size: 0.92rem;
+    line-height: 1.45;
+  }
+  .paros li::before {
+    content: '';
+    position: absolute;
+    left: -1rem;
+    top: 0.58em;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--c-brand);
+  }
+
+  /* --- megfelelés és „amit nem állítunk" --- */
+
+  .megfeleles,
+  .tagadas {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  @media (min-width: 46rem) {
+    .megfeleles,
+    .tagadas {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .megfeleles article,
+  .tagadas article {
+    background: var(--c-paper);
+    border: 1px solid var(--c-line);
+    border-radius: var(--r);
+    padding: 1.5rem;
+  }
+  .megfeleles article {
+    border-top: 3px solid var(--c-brand);
+  }
+  /* A tagadás-kártyák szándékosan visszafogottabbak: nem hirdetés, hanem
+     kiegészítés — ezért csak vékony keret, márkakék hangsúly nélkül. */
+  .tagadas article {
+    background: var(--c-mist);
+  }
+  .megfeleles h3,
+  .tagadas h3 {
+    font-size: 1.05rem;
+    margin-bottom: 0.5rem;
+  }
+  .megfeleles p,
+  .tagadas p {
+    margin: 0;
+    color: var(--c-steel);
+    font-size: 0.94rem;
+  }
+  .megfeleles__hiv {
+    margin-top: 0.7rem !important;
+    font-size: 0.9rem;
+  }
+
+  /* --- kiemelt mondat és záró blokk --- */
+
+  .kulcs {
+    max-width: 62ch;
+    border-left: 2px solid var(--c-brand);
+    padding-left: 1rem;
+    margin: 2.5rem 0 0;
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 1.05rem;
+    line-height: 1.45;
+  }
+
+  .zaro {
+    max-width: 68ch;
+    margin-top: 2.5rem;
+    color: var(--c-steel);
+    font-size: 0.95rem;
+  }
+
+  .vizjel--cta {
+    right: -4rem;
+    bottom: -6rem;
+    width: 22rem;
+    opacity: 0.07;
+  }
+  .cta {
+    text-align: center;
+  }
+  .cta .lead {
+    margin-inline: auto;
+    max-width: 58ch;
+  }
+
+  /* Keskeny hasábon a sorkizárás tátongó szóközöket nyit. */
+  @media (max-width: 40rem) {
+    .rkartya p:not(.rkartya__kulcs):not(.rkartya__hiv) {
+      text-align: left;
+    }
+  }
+  @media (max-width: 34rem) {
+    .rkartya__kulcs,
+    .kulcs {
+      font-size: 0.98rem;
+      padding-left: 0.8rem;
+    }
+    .gyorsnezet {
+      gap: 1rem;
+    }
+    .jel__szo {
+      display: none;
+    }
+    .cta .btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>

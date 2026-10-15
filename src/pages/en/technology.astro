@@ -1,0 +1,358 @@
+---
+import Base from '../../layouts/Base.astro';
+
+const kartyak = [
+  {
+    cimke: 'Data loss and restore',
+    cim: "For us, restore is not a plan—it's separate infrastructure",
+    allitas: [
+      "Most serious data loss isn't serious because it happened, but because the backup was in the same rack, on the same storage or in the same building as the production system.",
+      "Our backups sit on multiple, physically independent targets at multiple sites—and critical workloads also get an off-site VM replica, which you don't restore from but simply start.",
+    ],
+    kulcs: "The question isn't whether there is a backup. It's where it is, and how long it takes to be back up.",
+    reszletek: [
+      { cimke: 'Backup', szoveg: 'enterprise-grade data backup solutions' },
+      { cimke: 'Backup targets', szoveg: 'multiple independent physical backup targets at multiple sites' },
+      { cimke: 'Replication', szoveg: 'off-site VM replica target for critical workloads' },
+      { cimke: 'Data center', szoveg: 'two independent sites in Budapest' },
+    ],
+  },
+  {
+    cimke: 'Client isolation',
+    cim: 'Your environment is not shared with anyone',
+    allitas: [
+      "In a shared environment, another client's compromise, misconfiguration or sudden load spike is your risk too—even if you did everything right.",
+      'With us, every client gets its own network segment, with VLAN-based or physical segmentation, behind a dedicated gateway. On request, the environment can be made completely unreachable from the internet—for clients handling sensitive data, this is already established practice.',
+    ],
+    kulcs: "In an audit, “logically separated” is often not enough. That's why we also offer physical segmentation.",
+    abra: 'izolacio',
+    reszletek: [
+      { cimke: 'Client isolation', szoveg: 'VLAN-based or physical segmentation, a dedicated segment per client' },
+      { cimke: 'Gateway', szoveg: 'a dedicated firewall, NAT and VPN endpoint per client—with its own rule set' },
+      { cimke: 'Public IP', szoveg: 'a dedicated public IPv4 address per client, from our own address range' },
+      { cimke: 'Two-tier segmentation', szoveg: 'separate internal (database, application) and public (web, mail) network layers' },
+    ],
+    megjegyzes:
+      'A dedicated IP from our own address range also means that the IP reputation of your email and services does not depend on what another client does.',
+  },
+  {
+    cimke: 'Management access',
+    cim: 'The attack surface starts where the management interface is',
+    allitas: [
+      'The security of an infrastructure is often decided not at the application, but by where the management interfaces of servers and network devices can be reached from.',
+      "Triox's management network is dedicated and not reachable from the internet—there is no exposed management interface that someone would have to protect with a password.",
+    ],
+    kulcs: "What can't be reached from the internet can't be hacked from the internet.",
+    reszletek: [
+      { cimke: 'Out-of-band management', szoveg: 'a dedicated management network, not reachable from the internet' },
+      { szoveg: 'Client access via VPN, on a dedicated endpoint per client' },
+    ],
+  },
+  {
+    cimke: 'Performance and availability',
+    cim: 'The bottleneck is rarely the server',
+    allitas: [
+      'When a virtualized environment is slow, it is usually not a CPU issue but a network or storage one. Our backbone is 2×10 Gbps in a redundant design—losing an uplink or a switch does not mean a service outage.',
+      'Resource allocation follows your workload, not a prepackaged plan: we also handle enterprise-scale workloads with heavy compute and storage requirements.',
+    ],
+    kulcs: 'Without redundancy, “high speed” lasts only as long as everything works.',
+    reszletek: [
+      { cimke: 'Network', szoveg: 'high-speed, redundant 2×10 Gbps backbone' },
+      { cimke: 'Hardware', szoveg: 'enterprise server fleet' },
+      { cimke: 'Scalable resource allocation', szoveg: 'CPU, memory and storage allocation tailored to your needs' },
+      { cimke: 'No rigid package constraints', szoveg: 'custom configuration, not prepackaged templates' },
+    ],
+    hivatkozas: {
+      szoveg: 'An example of this kind of workload: the environment of a media provider with nationwide coverage',
+      url: '/en/case-studies/',
+    },
+  },
+  {
+    cimke: 'Virtualization platform',
+    cim: "You don't have to switch platforms to move to us",
+    allitas: [
+      'Switching platforms is a project in itself: migration risk, new licenses, retraining, rewritten operational processes.',
+      'We run all three widely used platforms—Microsoft Hyper-V, VMware and Proxmox—so your existing environment can stay on whatever it runs on now. But if you are considering a switch precisely because of licensing costs, we can do that too, through a managed migration.',
+    ],
+    kulcs: 'The platform should be a choice, not a constraint.',
+    reszletek: [
+      { cimke: 'Virtualization', szoveg: 'Microsoft Hyper-V (Windows Server platform), VMware, Proxmox' },
+      { szoveg: 'Migration support from an existing environment' },
+      { cimke: 'Service models', szoveg: 'IaaS (VMs, storage, networking), DCaaS (a complete client data center), SaaS (application hosting)' },
+    ],
+  },
+];
+---
+
+<Base
+  cim="Technology"
+  leiras="Enterprise virtualization, redundant networking, client isolation and backup—five points on the specific risks Triox's infrastructure addresses."
+>
+  <section class="band">
+    <div class="wrap prose">
+      <p class="eyebrow">Technology</p>
+      <h1>A system isn't stable because of what's inside it—it's stable because of what happens when things go wrong</h1>
+      <p class="lead">
+        The five points below describe the specific risks that Triox's infrastructure addresses.
+        Every component runs in a configuration dedicated to each client—there are no prepackaged
+        plans and no shared environment.
+      </p>
+    </div>
+  </section>
+
+  <section class="band band--mist">
+    <div class="wrap">
+      <div class="tkartyak">
+        {kartyak.map((k, i) => (
+          <article class="tkartya">
+            <div class="tkartya__fej">
+              <span class="tkartya__idx">{String(i + 1).padStart(2, '0')}</span>
+              <span class="tkartya__cimke">{k.cimke}</span>
+            </div>
+
+            <h2>{k.cim}</h2>
+
+            {k.allitas.map((bek) => <p>{bek}</p>)}
+
+            <p class="tkartya__kulcs">{k.kulcs}</p>
+
+            {k.abra === 'izolacio' && (
+              <figure class="abra">
+                <svg viewBox="0 0 880 306" role="img" aria-labelledby="abra-izolacio">
+                  <title id="abra-izolacio">Traffic from the internet passes through a separate, dedicated gateway for each client. Every client gets its own network segment, with a separate public layer (web, mail) and internal layer (database, application) inside it. There is no crossover between the two clients' segments.</title>
+                  <rect class="abra__doboz" x="0" y="125" width="96" height="50" rx="4" />
+                  <text class="abra__cimke" x="48" y="155" text-anchor="middle">Internet</text>
+                  <path class="abra__vonal" d="M96 150 H116 V87 H134" />
+                  <path class="abra__nyil" d="M140 87 L132 82 L132 92 Z" />
+                  <path class="abra__vonal" d="M116 150 V222 H134" />
+                  <path class="abra__nyil" d="M140 222 L132 217 L132 227 Z" />
+                  <rect class="abra__doboz" x="140" y="60" width="180" height="54" rx="4" />
+                  <text class="abra__cimke" x="230" y="84" text-anchor="middle">Client gateway</text>
+                  <text class="abra__mono" x="230" y="102" text-anchor="middle">FW · NAT · VPN</text>
+                  <rect class="abra__doboz" x="140" y="195" width="180" height="54" rx="4" />
+                  <text class="abra__cimke" x="230" y="219" text-anchor="middle">Client gateway</text>
+                  <text class="abra__mono" x="230" y="237" text-anchor="middle">FW · NAT · VPN</text>
+                  <path class="abra__vonal" d="M320 87 H354" />
+                  <path class="abra__nyil" d="M360 87 L352 82 L352 92 Z" />
+                  <path class="abra__vonal" d="M320 222 H354" />
+                  <path class="abra__nyil" d="M360 222 L352 217 L352 227 Z" />
+                  <rect class="abra__kiemelt" x="360" y="30" width="510" height="115" rx="4" />
+                  <text class="abra__mono" x="376" y="50">CLIENT A—DEDICATED SEGMENT</text>
+                  <rect class="abra__sav" x="376" y="60" width="478" height="36" rx="2" />
+                  <text class="abra__cimke" x="392" y="83">Public layer</text>
+                  <text class="abra__kicsi" x="838" y="83" text-anchor="end">web, mail</text>
+                  <rect class="abra__sav" x="376" y="102" width="478" height="36" rx="2" />
+                  <text class="abra__cimke" x="392" y="125">Inner layer</text>
+                  <text class="abra__kicsi" x="838" y="125" text-anchor="end">database, application</text>
+                  <rect class="abra__doboz" x="360" y="165" width="510" height="115" rx="4" />
+                  <text class="abra__mono" x="376" y="185">CLIENT B—DEDICATED SEGMENT</text>
+                  <rect class="abra__sav" x="376" y="195" width="478" height="36" rx="2" />
+                  <text class="abra__cimke" x="392" y="218">Public layer</text>
+                  <text class="abra__kicsi" x="838" y="218" text-anchor="end">web, mail</text>
+                  <rect class="abra__sav" x="376" y="237" width="478" height="36" rx="2" />
+                  <text class="abra__cimke" x="392" y="260">Inner layer</text>
+                  <text class="abra__kicsi" x="838" y="260" text-anchor="end">database, application</text>
+                  <text class="abra__mono" x="615" y="300" text-anchor="middle">NO PATH BETWEEN THE TWO SEGMENTS</text>
+                </svg>
+              </figure>
+            )}
+
+            {k.hivatkozas && (
+              <p class="tkartya__hiv">
+                <a href={k.hivatkozas.url}>{k.hivatkozas.szoveg} →</a>
+              </p>
+            )}
+
+            <details class="reszletek">
+              <summary>Technical details</summary>
+              <ul>
+                {k.reszletek.map((r) => (
+                  <li>
+                    {r.cimke && <strong>{r.cimke}:</strong>}
+                    {' '}{r.szoveg}
+                  </li>
+                ))}
+              </ul>
+              {k.megjegyzes && <p class="reszletek__jegyzet">{k.megjegyzes}</p>}
+            </details>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="band band--sotet">
+    <img class="vizjel vizjel--cta" src="/logo-feher.svg" alt="" aria-hidden="true" />
+    <div class="wrap cta">
+      <h2>Let's look at what this means in your environment</h2>
+      <p class="lead">
+        These are not options on a price list but part of the base configuration. What exactly they
+        mean in your environment depends on your current system—let's look at it together.
+      </p>
+      <a class="btn" href="/en/contact/">Request an infrastructure review</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* A kártyablokk a fejléc tartalomsávjával azonos szélességű: mindkettő a
+     .wrap-ből örökli, tehát a logó bal élétől a GYIK jobb éléig tart. */
+  .tkartyak {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .tkartya {
+    /* Grid-elem alapból min-width: auto, ezért az ábra min-width-je szétfeszítené
+       a rácsot. Nullázva az ábra a saját konténerében görgethető. */
+    min-width: 0;
+    background: var(--c-paper);
+    border: 1px solid var(--c-line);
+    border-left: 4px solid var(--c-brand);
+    border-radius: var(--r);
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+  }
+  .tkartya__fej {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.9rem;
+  }
+  .tkartya__idx,
+  .tkartya__cimke {
+    font-family: var(--f-util);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .tkartya__idx {
+    color: var(--c-brand);
+  }
+  .tkartya__cimke {
+    color: var(--c-steel);
+  }
+  .tkartya h2 {
+    font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+    margin-bottom: 0.7rem;
+  }
+  /* Nincs max-width: a korábbi 68ch a széles kártyában 407 px-t hagyott
+     üresen jobbra, amitől az egész blokk balra dőlt. */
+  .tkartya p {
+    color: var(--c-steel);
+    font-size: 0.98rem;
+  }
+  /* Sorkizárt törzsszöveg. Elválasztás nélkül a hosszú magyar szavak
+     folyókat nyitnának a hasábban, ezért a hyphens is kell hozzá. */
+  .tkartya p:not(.tkartya__kulcs):not(.tkartya__hiv) {
+    text-align: justify;
+    hyphens: auto;
+  }
+  .tkartya__kulcs {
+    border-left: 2px solid var(--c-brand);
+    padding-left: 1rem;
+    margin: 1.4rem 0;
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 1.02rem;
+    line-height: 1.45;
+  }
+  .tkartya__hiv {
+    font-size: 0.9rem;
+  }
+  .tkartya__hiv a {
+    text-decoration: none;
+  }
+  .tkartya__hiv a:hover {
+    text-decoration: underline;
+  }
+
+  /* --- lenyitható technikai részletek --- */
+
+  .reszletek {
+    border-top: 1px solid var(--c-line);
+    padding-top: 1rem;
+    margin-top: 1.4rem;
+  }
+  .reszletek summary {
+    font-family: var(--f-util);
+    font-size: 0.74rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-brand);
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .reszletek summary::-webkit-details-marker {
+    display: none;
+  }
+  .reszletek summary::before {
+    content: '+';
+    font-size: 1rem;
+    line-height: 1;
+    width: 1rem;
+    text-align: center;
+  }
+  .reszletek[open] summary::before {
+    content: '–';
+  }
+  .reszletek summary:hover {
+    color: var(--c-brand-deep);
+  }
+  .reszletek ul {
+    margin: 1rem 0 0;
+    padding-left: 1.1rem;
+  }
+  .reszletek li {
+    color: var(--c-steel);
+    font-size: 0.94rem;
+    margin-bottom: 0.45rem;
+  }
+  .reszletek li strong {
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-weight: 600;
+    margin-right: 0.3rem;
+  }
+  .reszletek__jegyzet {
+    margin: 1rem 0 0;
+    padding: 0.85rem 1rem;
+    background: var(--c-brand-wash);
+    border-radius: var(--r);
+    font-size: 0.9rem;
+  }
+
+  .vizjel--cta {
+    right: -4rem;
+    bottom: -6rem;
+    width: 22rem;
+    opacity: 0.07;
+  }
+  .cta {
+    text-align: center;
+  }
+  .cta .lead {
+    margin-inline: auto;
+    max-width: 54ch;
+  }
+
+  /* Keskeny nézetben a sor ~36 karakter. Ilyen rövid soron a sorkizárás
+     tátongó szóközöket nyit, ezért ott balra zárt marad. */
+  @media (max-width: 40rem) {
+    .tkartya p:not(.tkartya__kulcs):not(.tkartya__hiv) {
+      text-align: left;
+    }
+  }
+  @media (max-width: 34rem) {
+    .tkartya__kulcs {
+      font-size: 0.98rem;
+      padding-left: 0.8rem;
+    }
+    .cta .btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>

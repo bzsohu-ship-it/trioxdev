@@ -8,6 +8,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
+    "check:nyelv": "node scripts/nyelvparok.mjs",
     "functions": "wrangler pages dev dist --compatibility-date=2026-07-29 --kv SEBESSEGKORLAT"
   },
   "dependencies": {

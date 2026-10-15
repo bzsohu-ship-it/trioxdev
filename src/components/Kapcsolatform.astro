@@ -1,34 +1,91 @@
+---
+import { nyelvAz } from '../i18n/utak';
+
+const nyelv = nyelvAz(Astro.url.pathname);
+
+/**
+ * A látható feliratok és a szkript üzenetei nyelvenként. A szkript az
+ * üzeneteket a form data-attribútumaiból olvassa, így egy kódváltozat szolgál
+ * ki mindkét nyelvet.
+ */
+const t = {
+  hu: {
+    nev: 'Név',
+    ceg: 'Cég',
+    email: 'E-mail',
+    telefon: 'Telefon',
+    uzenet: 'Miben segíthetünk?',
+    hp: 'Ne töltsd ki:',
+    gomb: 'Üzenet küldése',
+    nezzeAt: 'Nézze át a megjelölt mezőket.',
+    kuldes: 'Küldés…',
+    siker: 'Megkaptuk. 2 munkanapon belül válaszolunk.',
+    sikertelen: 'A küldés nem sikerült.',
+    irjonIde: 'Ha nem oldódik meg, írjon ide: info@triox.hu',
+    irjonKozvetlenul: 'A küldés nem sikerült. Írjon közvetlenül: info@triox.hu',
+  },
+  en: {
+    nev: 'Name',
+    ceg: 'Company',
+    email: 'Email',
+    telefon: 'Phone',
+    uzenet: 'How can we help?',
+    hp: 'Leave this empty:',
+    gomb: 'Send message',
+    nezzeAt: 'Please check the highlighted fields.',
+    kuldes: 'Sending…',
+    siker: 'Received. We will reply within 2 business days.',
+    sikertelen: 'Sending failed.',
+    irjonIde: 'If the problem persists, email us at info@triox.hu',
+    irjonKozvetlenul: 'Sending failed. Email us directly at info@triox.hu',
+  },
+}[nyelv];
+---
 {/* A hosszkorlátok szándékosan egyeznek a functions/api/kapcsolat.ts
     ellenőrzésével: így a böngésző már a küldés előtt szól, és nem a szerver
     422-es válaszából derül ki a hiba. */}
-<form class="urlap" id="kapcsolat-urlap" novalidate>
+<form
+  class="urlap"
+  id="kapcsolat-urlap"
+  novalidate
+  data-nezze-at={t.nezzeAt}
+  data-kuldes={t.kuldes}
+  data-siker={t.siker}
+  data-sikertelen={t.sikertelen}
+  data-irjon-ide={t.irjonIde}
+  data-irjon-kozvetlenul={t.irjonKozvetlenul}
+>
   <label class="field">
-    <span>Név</span>
+    <span>{t.nev}</span>
     <input name="nev" type="text" required minlength="2" maxlength="80" autocomplete="name" />
   </label>
   <label class="field">
-    <span>Cég</span>
+    <span>{t.ceg}</span>
     <input name="ceg" type="text" maxlength="120" autocomplete="organization" />
   </label>
   <label class="field">
-    <span>E-mail</span>
+    <span>{t.email}</span>
     <input name="email" type="email" required maxlength="200" autocomplete="email" />
   </label>
   <label class="field">
-    <span>Telefon</span>
+    <span>{t.telefon}</span>
     <input name="telefon" type="tel" maxlength="40" autocomplete="tel" />
   </label>
   <label class="field">
-    <span>Miben segíthetünk?</span>
+    <span>{t.uzenet}</span>
     <textarea name="uzenet" rows="5" required minlength="10" maxlength="4000"></textarea>
   </label>
 
+  {/* Az angol űrlap jelzi a nyelvet: a végpont ettől küld angol visszaigazolást
+      és angol hibaszöveget. A magyar űrlap kérése változatlan marad. */}
+  {nyelv === 'en' && <input type="hidden" name="nyelv" value="en" />}
+
   <!-- mézesbödön: ember nem tölti ki -->
   <label class="hp" aria-hidden="true">
-    Ne töltsd ki: <input name="ceges_fax" tabindex="-1" autocomplete="off" />
+    {t.hp} <input name="ceges_fax" tabindex="-1" autocomplete="off" />
   </label>
 
-  <button class="btn" type="submit">Üzenet küldése</button>
+  <button class="btn" type="submit">{t.gomb}</button>
   <p class="formnote" role="status" aria-live="polite"></p>
 </form>
 
@@ -37,6 +94,7 @@
   if (urlap) {
     const jelzes = urlap.querySelector('.formnote') as HTMLParagraphElement;
     const gomb = urlap.querySelector('button[type="submit"]') as HTMLButtonElement;
+    const sz = urlap.dataset;
 
     urlap.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -46,14 +104,14 @@
       if (!urlap.checkValidity()) {
         jelzes.dataset.state = 'err';
         // A konkrét okot a böngésző mondja meg a hibás mezőnél.
-        jelzes.textContent = 'Nézze át a megjelölt mezőket.';
+        jelzes.textContent = sz.nezzeAt ?? '';
         urlap.reportValidity();
         return;
       }
 
       gomb.disabled = true;
       jelzes.dataset.state = '';
-      jelzes.textContent = 'Küldés…';
+      jelzes.textContent = sz.kuldes ?? '';
 
       try {
         // A saját domainünkön futó Pages Function, onnan megy ki a levél az
@@ -63,13 +121,14 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(adat),
         });
-        // A végpont a felhasználónak szóló magyar hibaszöveget is visszaadja.
+        // A végpont a felhasználónak szóló hibaszöveget is visszaadja, az
+        // űrlap nyelvén (magyar alapértelmezéssel).
         const test = await valasz.json().catch(() => null);
 
         if (valasz.ok && test?.ok) {
           urlap.reset();
           jelzes.dataset.state = 'ok';
-          jelzes.textContent = 'Megkaptuk. 2 munkanapon belül válaszolunk.';
+          jelzes.textContent = sz.siker ?? '';
           return;
         }
 
@@ -80,10 +139,10 @@
         jelzes.textContent =
           valasz.status === 422 && test?.hiba
             ? test.hiba
-            : `${test?.hiba ?? 'A küldés nem sikerült.'} Ha nem oldódik meg, írjon ide: info@triox.hu`;
+            : `${test?.hiba ?? sz.sikertelen} ${sz.irjonIde}`;
       } catch {
         jelzes.dataset.state = 'err';
-        jelzes.textContent = 'A küldés nem sikerült. Írjon közvetlenül: info@triox.hu';
+        jelzes.textContent = sz.irjonKozvetlenul ?? '';
       } finally {
         gomb.disabled = false;
       }

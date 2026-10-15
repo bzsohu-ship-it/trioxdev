@@ -1,0 +1,1238 @@
+---
+import Base from '../../layouts/Base.astro';
+
+/**
+ * Esettanulmányok.
+ *
+ * FONTOS a szövegezésre: a négy környezet ténye a Rólunk oldalról származik
+ * (`src/pages/rolunk.astro`, „Akikkel dolgozunk"). Minden technikai állítás,
+ * amivel itt kibontjuk őket, egy máshol már kiadott, megerősített tételre
+ * megy vissza — a szolgáltatásoldalak platform-katalógusára, a /technologia/
+ * kártyáira, a /biztonsag/ rétegeire vagy a /rolunk/ számaira.
+ *
+ * Amit ezen az oldalon SOHA nem írunk le, amíg Zsolt meg nem erősíti:
+ * ügyfélnév, ágazati alszegmens, iparági utalás, ami beazonosíthatóvá tesz,
+ * továbbá bármilyen mért szám (adatmennyiség, VM-darabszám, felhasználószám,
+ * migrációs időtartam, állásidő, megtakarítás, elért rendelkezésre állás).
+ * A nyitott kérdések: `docs/esettanulmanyok-megerositendo.md` (nincs a buildben).
+ *
+ * A csillag (*) mind a négy környezetnév mellett ott áll, és a lap alján lévő
+ * `#nevekrol` lábjegyzetre mutat. Szándékosan apró: a diszkréció tény, nem
+ * üzenet — nem ez az oldal mondanivalója.
+ */
+
+interface Eset {
+  /** Rövid kategória-név. Ugyanaz, mint az áttekintő táblázat sorában. */
+  cimke: string;
+  /** A környezet megnevezése — ez kap csillagot. */
+  nev: string;
+  cim: string;
+  /** Első bekezdés a kiinduló helyzet, a többi a megoldás. */
+  allitas: string[];
+  kulcs: string;
+  /** Melyik beágyazott ábra tartozik hozzá. */
+  abra?: 'migracio' | 'izolacio' | 'ketszintu';
+  reszletek: { cimke?: string; szoveg: string }[];
+  hivatkozasok: { szoveg: string; url: string }[];
+}
+
+const esetek: Eset[] = [
+  {
+    cimke: 'Full infrastructure and migration',
+    nev: 'Media service provider with nationwide coverage',
+    cim: 'We replaced the infrastructure under a live nationwide service',
+    allitas: [
+      'The job was to build and operate the entire internal network, web and data infrastructure—but not from a blank slate. The system was running, with nationwide coverage, and it had to keep running during the move. For a provider like this, downtime is not an operational inconvenience: it is a service outage.',
+      'So the new environment was not built in place of the old one, but alongside it. It was fully up and running before anything was moved onto it; the live cutover came only after a test migration, in an agreed time window, with a rollback plan. The workload is resource- and storage-intensive, so the backbone here, too, is the redundant 2×10 Gbps build—losing one uplink or one switch does not mean losing the service.',
+      'The project did not end with the cutover: we have operated the environment ever since, including monitoring, backup and documentation.',
+    ],
+    kulcs: 'The migration succeeded if viewers never even noticed it happened.',
+    abra: 'migracio',
+    reszletek: [
+      { cimke: 'Network', szoveg: 'internal network infrastructure build-out, VLAN-based segmentation, dedicated gateway per client' },
+      { cimke: 'Backbone', szoveg: 'redundant 2×10 Gbps—the bottleneck is rarely the CPU, far more often the network or the storage' },
+      { cimke: 'Resources', szoveg: 'CPU, memory and storage allocation sized to the workload, not a prepackaged bundle' },
+      { cimke: 'Web and data layer', szoveg: 'the public (web) and the internal (database, application) layers on separate network levels' },
+      { cimke: 'Migration', szoveg: 'parallel build, test migration, live cutover in an agreed time window, with a rollback plan' },
+      { cimke: 'Operations', szoveg: 'continuous monitoring, backup to multiple independent targets, off-site replica for critical workloads' },
+    ],
+    hivatkozasok: [
+      { szoveg: 'Why the server is not the bottleneck', url: '/en/technology/' },
+      { szoveg: 'DCaaS—the entire environment, outsourced', url: '/en/services/dcaas/' },
+    ],
+  },
+  {
+    cimke: 'Isolated environment',
+    nev: 'Biotechnology research lab',
+    cim: 'An environment with no route leading to it from the internet',
+    allitas: [
+      'Research workloads handling large volumes of data, on data whose nature does not allow internet access. In this case the question is not whether the firewall rule is strong enough, but whether there is any rule at all that could be misconfigured.',
+      'The solution is a fully isolated infrastructure: a private subnet on its own virtual or physical switch, with no published services. There is no route into the environment from the internet—not because it is blocked, but because there is nothing to block. Access goes through a dedicated VPN endpoint, and the management interface sits on the out-of-band management network, which is not reachable from outside either.',
+      'Today this is not a plan for us but working practice: this is how the environments of our clients who handle sensitive data run.',
+    ],
+    kulcs: 'Here isolation is not a setting but topology. A setting can be misconfigured; topology cannot.',
+    abra: 'izolacio',
+    reszletek: [
+      { cimke: 'Isolation', szoveg: 'own virtual or physical switch, private subnet, an environment not reachable from the internet' },
+      { cimke: 'Access', szoveg: 'dedicated VPN endpoint per client—IPsec, WireGuard, OpenVPN or SSTP' },
+      { cimke: 'Resources', szoveg: 'allocation sized for workloads with large data volumes and high resource demands' },
+      { cimke: 'Backup', szoveg: 'the backup targets are also part of the closed environment, independent of each other' },
+      { cimke: 'Management', szoveg: 'dedicated out-of-band management network—no exposed management interface' },
+      { cimke: 'Hardware level', szoveg: 'iDRAC and iLO: the server can be managed even if the operating system does not boot' },
+    ],
+    hivatkozasok: [
+      { szoveg: 'The segmentation and isolation layer', url: '/en/security/' },
+      { szoveg: 'Client isolation in practice', url: '/en/technology/' },
+    ],
+  },
+  {
+    cimke: 'Segmented application stack',
+    nev: 'Financial services provider with a nationwide branch network',
+    cim: 'Two tiers, so there is no path from the public side to the data',
+    allitas: [
+      'At a financial services provider, the most exposed point and the most sensitive point are the same system: the public interface has to be reachable from outside, while the data has to be as protected as possible. On a flat network, the two are one hop apart.',
+      'That is why the stack has two tiers: the database and application layer is sharply separated from the public services. In front of the environment stands a dedicated gateway per client, with its own firewall, NAT and VPN rules, and its own public IPv4 address from our address range—so the IP reputation of the service and of its email does not depend on what another client does.',
+      'The practical consequence is simple: if a component of the public layer falls, the loss stays limited to that one component. It does not open up the database.',
+    ],
+    kulcs: 'The question is not whether an attacker ever gets onto the first machine. It is how far they get from there.',
+    abra: 'ketszintu',
+    reszletek: [
+      { cimke: 'Two-tier split', szoveg: 'separate internal (database, application) and public (web, mail) network layers' },
+      { cimke: 'Gateway', szoveg: 'dedicated firewall, NAT and VPN endpoint per client, with its own rule set' },
+      { cimke: 'Public IP', szoveg: "dedicated public IPv4 address from our own address range, assigned in the client's name" },
+      { cimke: 'Segment isolation', szoveg: "no crossover between segments—none of this is visible from another client's environment" },
+      { cimke: 'Certificates', szoveg: 'management of public and internal TLS certificates, with expiry monitoring' },
+      { cimke: 'Backup', szoveg: 'application-aware, database-consistent backup—not just a file-level copy' },
+    ],
+    hivatkozasok: [
+      { szoveg: 'The seven layers of protection—and where an attack stops', url: '/en/security/' },
+      { szoveg: 'SaaS—application hosting in a managed environment', url: '/en/services/saas/' },
+    ],
+  },
+  {
+    cimke: 'Outsourced operations',
+    nev: 'Commercial and service companies',
+    cim: 'The system worked. It was just that only one person knew how',
+    allitas: [
+      "This fourth case is not a single large project but several companies in the same situation: a web, file and directory environment that has been running for years, but undocumented. The knowledge is in one person's head, nobody knows for sure whether the backup can be restored, and nobody has known for a long time who has access to what.",
+      'In these cases a takeover does not start with a move but with an assessment: what is running, what it runs on, what is missing. Then comes documentation, the rollout of monitoring, and then stabilization—fixing the gaps uncovered: missing updates, backup gaps, outdated permissions. Only after that does the system become a continuously operated environment, with regular reporting.',
+      'Where the hardware has to stay on-site—because a production control system, a measuring instrument or a data-handling rule ties it there—we do not move it. We bring the same procedures to the site.',
+    ],
+    kulcs: 'A key-person dependency does not come to light while the colleague is at work. It comes to light when they are not.',
+    reszletek: [
+      { cimke: 'Directory', szoveg: 'Active Directory domain, Group Policy, redundant domain controllers' },
+      { cimke: 'File services', szoveg: 'file server environment, with the permission structure put in order' },
+      { cimke: 'Web environment', szoveg: 'web and mail servers on the public layer, TLS certificates with expiry monitoring' },
+      { cimke: 'Takeover', szoveg: 'status assessment and risk list, then a documented handover—coordinated with the departing colleague if needed' },
+      { cimke: 'Stabilization', szoveg: 'in the first weeks, fixing the gaps uncovered: updates, backup gaps, permissions' },
+      { cimke: 'Operations', szoveg: 'monitoring, helpdesk, patch management, daily backup checks, regular reporting' },
+    ],
+    hivatkozasok: [
+      { szoveg: 'Managed IT operations—the operator is included', url: '/en/services/managed-it-operations/' },
+      { szoveg: 'If the server has to stay on-site', url: '/en/services/on-premises-and-hybrid-it/' },
+    ],
+  },
+];
+
+/**
+ * Hero alatti gyorsnézet. Egyik szám sem új: mind a Rólunk oldal
+ * „Számokban" táblázatából jön.
+ */
+const gyorsnezet = [
+  { ertek: '4 environments', szoveg: 'from the media provider to the isolated research lab' },
+  { ertek: '20+ years', szoveg: 'of enterprise IT operations experience behind them' },
+  { ertek: '1 client = 1 network', szoveg: 'all four environments run on a dedicated segment' },
+  { ertek: '2 sites', szoveg: 'data centers in Budapest, independent of each other' },
+];
+
+/** Áttekintő táblázat. A sorrend azonos az esetkártyákéval. */
+const attekintes = [
+  {
+    kornyezet: 'Media service provider with nationwide coverage',
+    kiindulas: 'A live nationwide service in an existing environment that had to be taken over and migrated.',
+    feladat: 'Building the entire internal network, web and data infrastructure, with migration and ongoing operations.',
+    kulcselem: 'Parallel build and test migration, on a redundant 2×10 Gbps backbone.',
+  },
+  {
+    kornyezet: 'Biotechnology research lab',
+    kiindulas: 'Research workloads with large data volumes, on data that must not be exposed to the internet.',
+    feladat: 'Fully isolated IT infrastructure, not reachable from the internet.',
+    kulcselem: 'Private subnet on its own switch, dedicated VPN endpoint, out-of-band management.',
+  },
+  {
+    kornyezet: 'Financial services provider with a nationwide branch network',
+    kiindulas: 'An outward-facing public interface and the most sensitive data in the same system.',
+    feladat: 'A two-tier, segmented application stack.',
+    kulcselem: 'The database and application layer sharply separated from the public services.',
+  },
+  {
+    kornyezet: 'Commercial and service companies',
+    kiindulas: "A system running for years, but undocumented, resting on a single colleague's knowledge.",
+    feladat: 'Outsourced operation of web, file and directory environments.',
+    kulcselem: 'Takeover with documentation, monitoring, stabilization, daily backup checks.',
+  },
+];
+
+/**
+ * Mit kap papíron. Mindegyik tétel egy máshol már leírt szolgáltatási
+ * lépéshez tartozik — a forrás a `dcaas.md` 8. pontja, a
+ * `menedzselt-it-uzemeltetes.md` „Hogyan kezdünk neki?" fejezete és az
+ * `audit-restore-validation.md`.
+ */
+const dokumentumok = [
+  {
+    dokumentum: 'Status assessment and risk list',
+    tartalom: 'Servers, network, workstations, licenses, backup and the risks uncovered—specific, not estimated.',
+    mikor: 'Before the decision. The assessment is not a commitment.',
+  },
+  {
+    dokumentum: 'Target architecture, RPO and RTO',
+    tartalom: 'Defined per system: how much downtime and how much data loss is acceptable.',
+    mikor: 'Before the quote.',
+  },
+  {
+    dokumentum: 'Migration plan and rollback plan',
+    tartalom: 'Schedule, sequence, test migration—and also what happens if we have to roll back.',
+    mikor: 'Before the cutover. A critical system is never moved live without preparation.',
+  },
+  {
+    dokumentum: 'Service level agreement (SLA)',
+    tartalom: 'Availability, response time, maintenance windows, backup and retention rules—in writing.',
+    mikor: 'When the service starts.',
+  },
+  {
+    dokumentum: 'System documentation',
+    tartalom: "A transferable description of the running environment. This is the point where the knowledge leaves a single person's head.",
+    mikor: 'At takeover, then continuously, with change tracking.',
+  },
+  {
+    dokumentum: 'Restore report',
+    tartalom: 'Whether the system really starts from the backup—in an isolated test environment, with a rating.',
+    mikor: 'After the restore test, as a standalone service.',
+  },
+  {
+    dokumentum: 'Operations report',
+    tartalom: 'What happened in your environment, and what to prepare for in the coming period.',
+    mikor: 'During operations, on a schedule.',
+  },
+];
+
+/** „Ismerős a helyzet?" — a mondat, amit a felmérésen hallunk, és hova vezet. */
+const helyzetek = [
+  {
+    tapasztalat: '“It works, but only one colleague knows how.”',
+    jelentes: 'Key-person dependency. The knowledge is not documented, so it cannot be handed over either.',
+    hova: { szoveg: 'Case 04 · Managed operations', url: '/en/services/managed-it-operations/' },
+  },
+  {
+    tapasztalat: "“We'd like to move, but the service can't stop.”",
+    jelentes: 'Migration risk. The destination is not the hard part—the way there is.',
+    hova: { szoveg: 'Case 01 · DCaaS', url: '/en/services/dcaas/' },
+  },
+  {
+    tapasztalat: "“This data can't be on the internet.”",
+    jelentes: 'Isolation requirement. A rule is not enough here—it takes topology.',
+    hova: { szoveg: 'Case 02 · Security', url: '/en/security/' },
+  },
+  {
+    tapasztalat: '“Our web interface faces outward, and the database sits right behind it.”',
+    jelentes: 'Missing segmentation. A compromised web server can see the data.',
+    hova: { szoveg: 'Case 03 · Security', url: '/en/security/' },
+  },
+  {
+    tapasztalat: "“We have backups, but we've never tried restoring them.”",
+    jelentes: 'Unproven recoverability. The problem comes to light at restore time.',
+    hova: { szoveg: 'Audit Restore Validation', url: '/en/services/audit-restore-validation/' },
+  },
+  {
+    tapasztalat: "“We don't know exactly who has access to what.”",
+    jelentes: 'An unmaintained permission structure. Losing one account costs a lot.',
+    hova: { szoveg: 'AI in the office: what does it actually see?', url: '/en/blog/ai-in-the-office-permissions/' },
+  },
+  {
+    tapasztalat: '“The server sits in a cabinet in the office.”',
+    jelentes: 'Physical risk: fire, water damage, heat, power outage—and each of them takes out production and backup at the same time.',
+    hova: { szoveg: 'On-premises and hybrid operations', url: '/en/services/on-premises-and-hybrid-it/' },
+  },
+];
+
+const tartozkodas = [
+  {
+    cim: "We don't publish client names",
+    szoveg:
+      "For an IT operations provider, who its clients are is information in itself—about where a given company's infrastructure is, and who holds the keys to it. We don't put that on a website. If you need a reference for your decision, ask during the assessment: we will see what we can share with the consent of the client concerned.",
+  },
+  {
+    cim: "We don't publish numbers we haven't measured",
+    szoveg:
+      'There are no hours saved, percentage speedups or achieved availability figures on this page. Every number that does appear here—20+ years, two data center sites, 2×10 Gbps—can also be found on the other pages of this website. Committed availability and response times belong in the service agreement, not in a case study.',
+  },
+  {
+    cim: 'A case study is not a price list',
+    szoveg:
+      "The solution described was built for that specific environment. We don't sell templates: we tailor both the infrastructure and the operations service to the specific needs, so what worked at a similar company does not, by itself, determine your quote.",
+  },
+  {
+    cim: "We don't claim every project went smoothly",
+    szoveg:
+      'In a migration, something always turns out differently than planned. That is exactly why it comes with a rollback plan, and why we never try anything in production first. The difference is not that there are no surprises, but that there is an answer to them.',
+  },
+];
+---
+
+<Base
+  cim="Case studies"
+  leiras="Four completed environments: full infrastructure with migration for a nationwide media service provider, an isolated research lab, a two-tier segmented financial stack, and outsourced web, file and directory operations."
+>
+  <section class="band">
+    <div class="wrap">
+      <div class="hero">
+        <p class="eyebrow">Case studies</p>
+        <h1>Four environments, four very different tasks—on the same foundation</h1>
+        <p class="lead">
+          The four environments below are real, completed projects. For each one, we describe the
+          starting situation, what had to be solved, and which technical decision determined the
+          outcome. We
+          <a class="csillag-hiv" href="#nevekrol">do not publish</a> client names—the task we solved is
+          the main subject.
+        </p>
+      </div>
+
+      <ul class="gyorsnezet">
+        {gyorsnezet.map((g) => (
+          <li>
+            <span class="gyorsnezet__ertek">{g.ertek}</span>
+            <span class="gyorsnezet__szoveg">{g.szoveg}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="band band--mist">
+    <div class="wrap">
+      <h2 class="szekcio__cim">The four environments at a glance</h2>
+      <p class="szekcio__lead">
+        A media service provider, a research lab, a financial services provider and several commercial
+        companies do not ask for the same thing. The table below shows where the tasks differ—the
+        detailed description of each follows further down.
+      </p>
+
+      <div class="tabla-doboz">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th scope="col">
+                Environment<sup class="csillag"><a href="#nevekrol" aria-label="Note on client names">*</a></sup>
+              </th>
+              <th scope="col">Starting situation</th>
+              <th scope="col">The task solved</th>
+              <th scope="col">The decisive technical element</th>
+            </tr>
+          </thead>
+          <tbody>
+            {attekintes.map((a, i) => (
+              <tr>
+                <th scope="row">
+                  <span class="tabla__idx">{String(i + 1).padStart(2, '0')}</span>
+                  {a.kornyezet}
+                </th>
+                <td>{a.kiindulas}</td>
+                <td>{a.feladat}</td>
+                <td>{a.kulcselem}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <h2 class="szekcio__cim">The four environments in detail</h2>
+      <p class="szekcio__lead">
+        Each case follows the same structure: what the situation was, what we did, and what the key
+        point is. The technical details can be expanded, and the links lead to where each solution is
+        also described in general terms.
+      </p>
+
+      <div class="ekartyak">
+        {esetek.map((e, i) => (
+          <article class="ekartya">
+            <div class="ekartya__fej">
+              <span class="ekartya__idx">{String(i + 1).padStart(2, '0')}</span>
+              <span class="ekartya__cimke">{e.cimke}</span>
+            </div>
+
+            <p class="ekartya__nev">
+              {e.nev}
+              <sup class="csillag"><a href="#nevekrol" aria-label="Note on client names">*</a></sup>
+            </p>
+
+            <h3>{e.cim}</h3>
+
+            {e.allitas.map((bek) => <p>{bek}</p>)}
+
+            <p class="ekartya__kulcs">{e.kulcs}</p>
+
+            {e.abra === 'migracio' && (
+              <figure class="abra">
+                <svg viewBox="0 0 880 350" role="img" aria-labelledby="abra-migracio">
+                  <title id="abra-migracio">
+                    The phases of the cutover on a timeline. The existing environment stays live
+                    from the assessment all the way to the live cutover, while the new environment
+                    is built in parallel alongside it. Five phases follow one another, with
+                    overlapping stages: an assessment of servers, applications, data and network;
+                    target architecture and plan, with RPO and RTO values, scheduling and a rollback
+                    plan; a parallel build, during which the new environment is built first; a test
+                    migration, because we never try anything in production first; and finally the
+                    live cutover in an agreed time window, followed by ongoing operations. The bars
+                    show the sequence and the overlap, not the duration of each phase.
+                  </title>
+
+                  <text class="abra__mono" x="0" y="14">CUTOVER PHASES—THE OLD SYSTEM KEEPS RUNNING</text>
+                  <text class="abra__mono" x="880" y="14" text-anchor="end">TIME→</text>
+
+                  <text class="abra__mono" x="0" y="45">OLD SYSTEM</text>
+                  <text class="abra__kicsi" x="0" y="59">stays live, the service does not stop</text>
+                  <rect class="abra__sin" x="270" y="34" width="610" height="26" rx="3" />
+                  <rect class="abra__mult" x="270" y="34" width="530" height="26" rx="3" />
+
+                  <text class="abra__mono" x="0" y="81">NEW SYSTEM</text>
+                  <text class="abra__kicsi" x="0" y="95">built in parallel, not on top of the old</text>
+                  <rect class="abra__sin" x="270" y="70" width="610" height="26" rx="3" />
+                  <rect class="abra__fazis" x="450" y="70" width="430" height="26" rx="3" />
+
+                  <text class="abra__mono" x="0" y="131">01 · SURVEY</text>
+                  <text class="abra__kicsi" x="0" y="145">servers, applications, data, network</text>
+                  <rect class="abra__sin" x="270" y="120" width="610" height="26" rx="3" />
+                  <rect class="abra__fazis" x="270" y="120" width="120" height="26" rx="3" />
+
+                  <text class="abra__mono" x="0" y="167">02 · TARGET DESIGN</text>
+                  <text class="abra__kicsi" x="0" y="181">RPO/RTO, schedule, rollback plan</text>
+                  <rect class="abra__sin" x="270" y="156" width="610" height="26" rx="3" />
+                  <rect class="abra__fazis" x="360" y="156" width="120" height="26" rx="3" />
+
+                  <text class="abra__mono" x="0" y="203">03 · PARALLEL BUILD</text>
+                  <text class="abra__kicsi" x="0" y="217">the new system is built first</text>
+                  <rect class="abra__sin" x="270" y="192" width="610" height="26" rx="3" />
+                  <rect class="abra__fazis" x="450" y="192" width="210" height="26" rx="3" />
+
+                  <text class="abra__mono" x="0" y="239">04 · TEST MIGRATION</text>
+                  <text class="abra__kicsi" x="0" y="253">nothing is tried in production first</text>
+                  <rect class="abra__sin" x="270" y="228" width="610" height="26" rx="3" />
+                  <rect class="abra__fazis" x="630" y="228" width="140" height="26" rx="3" />
+
+                  <text class="abra__mono" x="0" y="275">05 · LIVE CUTOVER</text>
+                  <text class="abra__kicsi" x="0" y="289">in an agreed window, then operations</text>
+                  <rect class="abra__sin" x="270" y="264" width="610" height="26" rx="3" />
+                  <rect class="abra__zaro" x="740" y="264" width="140" height="26" rx="3" />
+
+                  <text class="abra__mono" x="440" y="320" text-anchor="middle">LIVE CUTOVER IN AN AGREED TIME WINDOW, WITH A ROLLBACK PLAN</text>
+                  <text class="abra__mono" x="440" y="340" text-anchor="middle">BARS SHOW ORDER AND OVERLAP, NOT DURATION</text>
+                </svg>
+              </figure>
+            )}
+
+            {e.abra === 'izolacio' && (
+              <figure class="abra">
+                <svg viewBox="0 0 880 322" role="img" aria-labelledby="abra-izolalt">
+                  <title id="abra-izolalt">
+                    The five layers of the isolated research environment. No services are published
+                    toward the internet: no route leads to the segment, so there is no rule that
+                    could be misconfigured. Researcher access goes through a dedicated VPN endpoint
+                    per client, using IPsec, WireGuard, OpenVPN or SSTP. The compute and storage
+                    layer sits on a private subnet, on its own virtual or physical switch. The backup
+                    targets are also part of the closed environment, independent of each other.
+                    Management runs on an out-of-band network that is not reachable from the
+                    internet.
+                  </title>
+
+                  <text class="abra__mono" x="0" y="14">ISOLATED RESEARCH SETUP—WHAT GETS IN, WHAT DOESN'T</text>
+
+                  <rect class="abra__sav" x="0" y="30" width="250" height="48" rx="3" />
+                  <text class="abra__mono" x="16" y="59">FROM INTERNET</text>
+                  <rect class="abra__doboz" x="258" y="30" width="622" height="48" rx="3" />
+                  <text class="abra__cimke" x="276" y="52">No published services</text>
+                  <text class="abra__kicsi" x="276" y="69">no route leads to the segment—no rule that could be misconfigured</text>
+                  <path class="abra__tiltas" d="M832 44 L856 64 M856 44 L832 64" />
+
+                  <rect class="abra__sav" x="0" y="82" width="250" height="48" rx="3" />
+                  <text class="abra__mono" x="16" y="111">RESEARCHER ACCESS</text>
+                  <rect class="abra__kiemelt" x="258" y="82" width="622" height="48" rx="3" />
+                  <text class="abra__cimke" x="276" y="104">Separate VPN endpoint</text>
+                  <text class="abra__kicsi" x="276" y="121">own endpoint per client—IPsec, WireGuard, OpenVPN or SSTP</text>
+
+                  <rect class="abra__sav" x="0" y="134" width="250" height="48" rx="3" />
+                  <text class="abra__mono" x="16" y="163">COMPUTE AND STORAGE</text>
+                  <rect class="abra__doboz" x="258" y="134" width="622" height="48" rx="3" />
+                  <text class="abra__cimke" x="276" y="156">Private subnet on its own switch</text>
+                  <text class="abra__kicsi" x="276" y="173">workloads handling large data volumes, with resources sized to actual need</text>
+
+                  <rect class="abra__sav" x="0" y="186" width="250" height="48" rx="3" />
+                  <text class="abra__mono" x="16" y="215">BACKUP</text>
+                  <rect class="abra__doboz" x="258" y="186" width="622" height="48" rx="3" />
+                  <text class="abra__cimke" x="276" y="208">Multiple independent targets</text>
+                  <text class="abra__kicsi" x="276" y="225">backup targets sit in the closed environment too—not on the same storage</text>
+
+                  <rect class="abra__sav" x="0" y="238" width="250" height="48" rx="3" />
+                  <text class="abra__mono" x="16" y="267">MANAGEMENT</text>
+                  <rect class="abra__kiemelt" x="258" y="238" width="622" height="48" rx="3" />
+                  <text class="abra__cimke" x="276" y="260">Out-of-band, no route from the internet</text>
+                  <text class="abra__kicsi" x="276" y="277">a password doesn't guard the interface—not being exposed does</text>
+
+                  <text class="abra__mono" x="440" y="312" text-anchor="middle">ISOLATION IS TOPOLOGY, NOT A SETTING</text>
+                </svg>
+              </figure>
+            )}
+
+            {e.abra === 'ketszintu' && (
+              <figure class="abra">
+                <svg viewBox="0 0 880 344" role="img" aria-labelledby="abra-ketszintu">
+                  <title id="abra-ketszintu">
+                    The structure of the two-tier, segmented application stack. Traffic from the
+                    internet passes through a dedicated gateway per client, which handles the
+                    firewall, NAT and VPN. Behind the gateway is the client's dedicated segment, on
+                    two tiers. The public layer runs web, API and email, with its own public IPv4
+                    address from Triox's address range. A segment boundary runs between the two
+                    tiers, and only necessary traffic crosses it. The internal layer holds the
+                    application server and the database, which are not reachable from outside. At
+                    the bottom are backup and replication: independent targets at two sites, with
+                    off-site replication. A compromise of the public layer gives no visibility into
+                    the database.
+                  </title>
+
+                  <text class="abra__mono" x="350" y="14">DEDICATED CLIENT SEGMENT—TWO-TIER LAYOUT</text>
+
+                  <rect class="abra__doboz" x="0" y="140" width="100" height="50" rx="4" />
+                  <text class="abra__cimke" x="50" y="170" text-anchor="middle">Internet</text>
+                  <path class="abra__vonal" d="M100 165 H128" />
+                  <path class="abra__nyil" d="M134 165 L126 160 L126 170 Z" />
+
+                  <rect class="abra__doboz" x="140" y="128" width="170" height="74" rx="4" />
+                  <text class="abra__cimke" x="225" y="158" text-anchor="middle">Client gateway</text>
+                  <text class="abra__mono" x="225" y="178" text-anchor="middle">FIREWALL, NAT, VPN</text>
+                  <path class="abra__vonal" d="M310 165 H338" />
+                  <path class="abra__nyil" d="M344 165 L336 160 L336 170 Z" />
+
+                  <rect class="abra__kiemelt" x="350" y="20" width="530" height="292" rx="4" />
+
+                  <rect class="abra__sav" x="370" y="40" width="490" height="76" rx="3" />
+                  <text class="abra__cimke" x="390" y="66">Public layer</text>
+                  <text class="abra__kicsi" x="390" y="86">web, API and email—the part reachable from outside</text>
+                  <text class="abra__kicsi" x="390" y="104">own public IPv4 address from Triox's IP range</text>
+
+                  <text class="abra__mono" x="615" y="134" text-anchor="middle">SEGMENT BOUNDARY—ONLY NECESSARY TRAFFIC</text>
+                  <path class="abra__hatar" d="M370 142 H860" />
+
+                  <rect class="abra__sav" x="370" y="160" width="490" height="76" rx="3" />
+                  <text class="abra__cimke" x="390" y="186">Inner layer</text>
+                  <text class="abra__kicsi" x="390" y="206">app server and database—not reachable from outside</text>
+                  <text class="abra__kicsi" x="390" y="224">no direct path from the public layer to the data</text>
+
+                  <rect class="abra__sav" x="370" y="254" width="490" height="52" rx="3" />
+                  <text class="abra__cimke" x="390" y="278">Backup &amp; replication</text>
+                  <text class="abra__kicsi" x="390" y="296">independent targets at two sites, off-site replication</text>
+
+                  <text class="abra__mono" x="440" y="336" text-anchor="middle">A COMPROMISED PUBLIC LAYER GIVES NO VISIBILITY INTO THE DATABASE</text>
+                </svg>
+              </figure>
+            )}
+
+            <ul class="ekartya__hiv">
+              {e.hivatkozasok.map((h) => (
+                <li><a href={h.url}>{h.szoveg} →</a></li>
+              ))}
+            </ul>
+
+            <details class="reszletek">
+              <summary>Technical details</summary>
+              <ul>
+                {e.reszletek.map((r) => (
+                  <li>
+                    {r.cimke && <strong>{r.cimke}:</strong>}
+                    {' '}{r.szoveg}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="band band--mist">
+    <div class="wrap">
+      <h2 class="szekcio__cim">What is the same in all four environments</h2>
+      <p class="szekcio__lead">
+        The four tasks are very different from each other, but the foundation is not. It is not an
+        option on a price list, but the baseline every environment starts from with us—everything
+        else is customization on top of it.
+      </p>
+
+      <figure class="abra">
+        <svg viewBox="0 0 880 316" role="img" aria-labelledby="abra-kozos">
+          <title id="abra-kozos">
+            On the left, what is the same in all four environments: two Budapest data center
+            sites, a dedicated gateway per client, a separate network segment, multiple independent
+            backup targets, out-of-band management, and up-to-date, transferable documentation.
+            On the right, what varies from case to case: the virtualization platform, the level of
+            isolation, where the hardware sits, what application runs on it, who manages the
+            endpoints, and what kind of migration the project started with.
+          </title>
+
+          <text class="abra__mono" x="0" y="14">THE SAME IN EVERY ENVIRONMENT</text>
+          <text class="abra__mono" x="450" y="14">WHAT VARIES CASE BY CASE</text>
+
+          <rect class="abra__kiemelt" x="0" y="30" width="430" height="36" rx="3" />
+          <text class="abra__cimke" x="18" y="53">Two Budapest data center sites</text>
+          <rect class="abra__doboz" x="450" y="30" width="430" height="36" rx="3" />
+          <text class="abra__cimke" x="468" y="53">Virtualization platform</text>
+
+          <rect class="abra__kiemelt" x="0" y="74" width="430" height="36" rx="3" />
+          <text class="abra__cimke" x="18" y="97">Dedicated gateway per client</text>
+          <rect class="abra__doboz" x="450" y="74" width="430" height="36" rx="3" />
+          <text class="abra__cimke" x="468" y="97">Level of isolation</text>
+
+          <rect class="abra__kiemelt" x="0" y="118" width="430" height="36" rx="3" />
+          <text class="abra__cimke" x="18" y="141">Separate network segment</text>
+          <rect class="abra__doboz" x="450" y="118" width="430" height="36" rx="3" />
+          <text class="abra__cimke" x="468" y="141">Hardware: at our site or yours</text>
+
+          <rect class="abra__kiemelt" x="0" y="162" width="430" height="36" rx="3" />
+          <text class="abra__cimke" x="18" y="185">Multiple independent backups</text>
+          <rect class="abra__doboz" x="450" y="162" width="430" height="36" rx="3" />
+          <text class="abra__cimke" x="468" y="185">What applications run on it</text>
+
+          <rect class="abra__kiemelt" x="0" y="206" width="430" height="36" rx="3" />
+          <text class="abra__cimke" x="18" y="229">Out-of-band management</text>
+          <rect class="abra__doboz" x="450" y="206" width="430" height="36" rx="3" />
+          <text class="abra__cimke" x="468" y="229">Who manages the endpoints</text>
+
+          <rect class="abra__kiemelt" x="0" y="250" width="430" height="36" rx="3" />
+          <text class="abra__cimke" x="18" y="273">Handover-ready documentation</text>
+          <rect class="abra__doboz" x="450" y="250" width="430" height="36" rx="3" />
+          <text class="abra__cimke" x="468" y="273">Type of initial migration</text>
+
+          <text class="abra__mono" x="440" y="308" text-anchor="middle">LEFT COLUMN IS NOT A PRICED OPTION—EVERY ENVIRONMENT STARTS HERE</text>
+        </svg>
+      </figure>
+
+      <p class="kulcs">
+        That is why you don't need to order a separate “security package”: the foundation is not an
+        extra charge, it is the starting point. The details are on the <a href="/en/technology/">Technology</a>
+        and <a href="/en/security/">Security</a> pages.
+      </p>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <h2 class="szekcio__cim">What you get on paper</h2>
+      <p class="szekcio__lead">
+        A project is only worth something if, at the end, things not only work but are also written
+        down. The documents below were produced the same way in all four environments—these are the
+        ones that matter in an audit, when changing providers, or after an incident.
+      </p>
+
+      <div class="tabla-doboz">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th scope="col">Document</th>
+              <th scope="col">What it contains</th>
+              <th scope="col">When it is produced</th>
+            </tr>
+          </thead>
+          <tbody>
+            {dokumentumok.map((d) => (
+              <tr>
+                <th scope="row">{d.dokumentum}</th>
+                <td>{d.tartalom}</td>
+                <td>{d.mikor}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="paros">
+        <div>
+          <h3>Why we always start with an assessment</h3>
+          <p>
+            In none of the four environments was our first step to send a quote. First we have to map
+            what runs today, what it runs on, what is missing, and what could break tomorrow morning.
+            Without that, the quote would be an estimate, and the migration plan guesswork.
+          </p>
+          <ul>
+            <li>servers, applications, data volume, network and the actual resource needs</li>
+            <li>the real state of the backups—not whether they start, but whether they restore</li>
+            <li>the permission structure and a record of access rights</li>
+            <li>RPO and RTO per system: how much downtime and how much data loss is acceptable</li>
+          </ul>
+          <p class="paros__hiv">
+            <a href="/en/services/managed-it-operations/">The assessment is not a commitment →</a>
+          </p>
+        </div>
+        <div>
+          <h3>What stays with you if we ever part ways</h3>
+          <p>
+            This rarely comes up when requesting a quote, yet it is the best measure of how
+            transparent an IT operations provider is. With us, the environment is documented and
+            transferable, permissions are recorded, and the recoverability of backups is proven with
+            a written report.
+          </p>
+          <ul>
+            <li>up-to-date system documentation—not in the operator's head</li>
+            <li>change tracking: what changed in the environment, when and why</li>
+            <li>access and escalation paths written down</li>
+            <li>the data is always yours—we provide storage and operations services for it</li>
+          </ul>
+          <p class="paros__hiv">
+            <a href="/en/services/audit-restore-validation/">Proven restores, with a written report →</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band band--mist">
+    <div class="wrap">
+      <h2 class="szekcio__cim">Sound familiar?</h2>
+      <p class="szekcio__lead">
+        These are the sentences we hear most often during assessments. Behind each of them is the same
+        thing: a risk that everyone in the company knows about, but that just happens to be nobody's
+        job. The link on the right takes you to where we have already solved it.
+      </p>
+
+      <div class="tabla-doboz">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th scope="col">What you see today</th>
+              <th scope="col">What it means</th>
+              <th scope="col">Where we have looked at this before</th>
+            </tr>
+          </thead>
+          <tbody>
+            {helyzetek.map((h) => (
+              <tr>
+                <th scope="row">{h.tapasztalat}</th>
+                <td>{h.jelentes}</td>
+                <td><a href={h.hova.url}>{h.hova.szoveg} →</a></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <p class="labjegyzet">
+        If several rows in this list sound familiar, that is not unusual: in most environments they go
+        together. The <a href="/en/faq/">FAQ</a> page has short answers to the most common
+        questions—including who has access to your data.
+      </p>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <h2 class="szekcio__cim">What we deliberately left off this page</h2>
+      <p class="szekcio__lead">
+        On a case study page, the easiest thing to do is overpromise. So we also state what we do not
+        write down—that is as much information as everything else.
+      </p>
+
+      <div class="tartozkodas">
+        {tartozkodas.map((t) => (
+          <article>
+            <h3>{t.cim}</h3>
+            <p>{t.szoveg}</p>
+          </article>
+        ))}
+      </div>
+
+      <p class="labjegyzet" id="nevekrol">
+        <span class="csillag" aria-hidden="true">*</span> The four environments above are real,
+        completed projects. We do not publish our clients' names—neither here nor anywhere else on this
+        website. For an IT operations provider, who its clients are is in itself information about
+        where a given company's infrastructure is; we do not make that public. The descriptions
+        therefore name the sector and the task solved, not the company. For the same reason, this page
+        contains no measured performance, size or savings data. The figures on the
+        <a href="/en/about/">About us</a> page—20+ years of experience, two Budapest data center sites,
+        a redundant 2×10 Gbps backbone—refer to our own infrastructure, not to our clients'
+        environments.
+      </p>
+    </div>
+  </section>
+
+  <section class="band band--sotet">
+    <img class="vizjel vizjel--cta" src="/logo-feher.svg" alt="" aria-hidden="true" />
+    <div class="wrap cta">
+      <h2>The fifth case could be yours</h2>
+      <p class="lead">
+        Let's start where we started with the other four: with an assessment. At the end, you get a
+        documented snapshot of where things stand and a risk list—even if you don't continue working
+        with us.
+      </p>
+      <a class="btn" href="/en/contact/">Request an assessment</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* --- szekciófejek: azonos a Biztonság és a Partnerek oldaléval --- */
+
+  .szekcio__cim {
+    margin-bottom: 0.5rem;
+  }
+  .szekcio__lead {
+    max-width: 62ch;
+    color: var(--c-steel);
+    margin-bottom: 2rem;
+  }
+
+  /* --- hero és gyorsnézet --- */
+
+  .hero .lead {
+    max-width: 60ch;
+  }
+
+  .gyorsnezet {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 1.25rem;
+    margin: 2.5rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .gyorsnezet li {
+    border-top: 3px solid var(--c-brand);
+    padding-top: 0.9rem;
+  }
+  .gyorsnezet__ertek {
+    display: block;
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 1.15rem;
+    line-height: 1.2;
+    margin-bottom: 0.35rem;
+  }
+  .gyorsnezet__szoveg {
+    display: block;
+    color: var(--c-steel);
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  /* --- csillag: a diszkréció jelölése ---
+     Apró és visszafogott, mert nem ez az oldal mondanivalója. A jel a lap
+     alján lévő lábjegyzetre ugrik; a lábjegyzetben ugyanez a jel áll, ott
+     viszont aria-hidden, mert a szöveg magától érthető. */
+
+  .csillag {
+    color: var(--c-brand);
+    font-size: 0.75em;
+  }
+  .csillag a {
+    text-decoration: none;
+  }
+  .csillag a:hover {
+    text-decoration: underline;
+  }
+  .csillag-hiv {
+    text-decoration: none;
+    border-bottom: 1px solid var(--c-brand-wash);
+  }
+  .csillag-hiv:hover {
+    border-bottom-color: var(--c-brand);
+  }
+
+  /* --- esetkártyák (a /technologia/ és a /biztonsag/ kártyáival egyező) --- */
+
+  .ekartyak {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .ekartya {
+    /* Grid-elem alapból min-width: auto, ezért az ábra min-width-je szétfeszítené
+       a rácsot. Nullázva az ábra a saját konténerében görgethető. */
+    min-width: 0;
+    background: var(--c-paper);
+    border: 1px solid var(--c-line);
+    border-left: 4px solid var(--c-brand);
+    border-radius: var(--r);
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+  }
+  .ekartya__fej {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.6rem;
+  }
+  .ekartya__idx,
+  .ekartya__cimke {
+    font-family: var(--f-util);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .ekartya__idx {
+    color: var(--c-brand);
+  }
+  .ekartya__cimke {
+    color: var(--c-steel);
+  }
+  /* A környezet megnevezése a cím fölött áll, nem címsorként: a címsor a
+     megoldott feladatot mondja ki, az ágazat csak besorolás. */
+  .ekartya__nev {
+    margin-bottom: 0.35rem;
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  .ekartya h3 {
+    font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+    margin-bottom: 0.7rem;
+  }
+  .ekartya p {
+    color: var(--c-steel);
+    font-size: 0.98rem;
+  }
+  /* Sorkizárt törzsszöveg, elválasztással — enélkül a hosszú magyar szavak
+     folyókat nyitnának a széles hasábban. */
+  .ekartya p:not(.ekartya__kulcs):not(.ekartya__nev) {
+    text-align: justify;
+    hyphens: auto;
+  }
+  .ekartya__kulcs {
+    border-left: 2px solid var(--c-brand);
+    padding-left: 1rem;
+    margin: 1.4rem 0;
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 1.02rem;
+    line-height: 1.45;
+  }
+  .ekartya__hiv {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.75rem;
+    margin: 1.4rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.9rem;
+  }
+  .ekartya__hiv a,
+  .paros__hiv a {
+    text-decoration: none;
+  }
+  .ekartya__hiv a:hover,
+  .paros__hiv a:hover {
+    text-decoration: underline;
+  }
+
+  /* --- lenyitható technikai részletek (a /technologia/ accordionjával egyező) --- */
+
+  .reszletek {
+    border-top: 1px solid var(--c-line);
+    padding-top: 1rem;
+    margin-top: 1.4rem;
+  }
+  .reszletek summary {
+    font-family: var(--f-util);
+    font-size: 0.74rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-brand);
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .reszletek summary::-webkit-details-marker {
+    display: none;
+  }
+  .reszletek summary::before {
+    content: '+';
+    font-size: 1rem;
+    line-height: 1;
+    width: 1rem;
+    text-align: center;
+  }
+  .reszletek[open] summary::before {
+    content: '–';
+  }
+  .reszletek summary:hover {
+    color: var(--c-brand-deep);
+  }
+  .reszletek ul {
+    margin: 1rem 0 0;
+    padding-left: 1.1rem;
+  }
+  .reszletek li {
+    color: var(--c-steel);
+    font-size: 0.94rem;
+    margin-bottom: 0.45rem;
+  }
+  .reszletek li strong {
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-weight: 600;
+    margin-right: 0.3rem;
+  }
+
+  /* --- ábra-kiegészítők ---
+     Két elem hiányzik a globális készletből: a „nincs útvonal" jelölés és a
+     szegmenshatár. Mindkettő szaggatott, mert nem forgalmat ábrázol. */
+
+  .abra__tiltas {
+    stroke: var(--c-steel);
+    stroke-width: 2;
+    fill: none;
+  }
+  /* Az átállás-ábra sávjai.
+
+     Sávdiagram, nem táblázat — ezért egyetlen elemnek sincs kerete. A
+     keretes változat úgy nézett ki, mintha minden sor egy nagy dobozból és
+     egy bele nem illeszkedő kisebb dobozból állna: a két keret elcsúszott
+     cellának látszott. Kerettel csak akkor működne, ha a sáv kitöltené a
+     sort — de éppen az a lényeg, hogy nem tölti ki.
+
+     Minden sor azonos szerkezetű: bal oldalon a felirat, jobb oldalon a
+     halvány sín a teljes idősávval, rajta a tömör sáv. Ezért került a két
+     környezet-sor felirata is a bal oszlopba: amíg a sávon belül állt,
+     kétféle sávszerkezet keveredett egy ábrán.
+
+     A szín jelentést hordoz: a szürke a meglévő környezet, a márkakék a
+     most zajló munka. */
+  .abra__sin {
+    fill: var(--c-mist);
+  }
+  .abra__mult {
+    fill: var(--c-steel);
+  }
+  .abra__fazis {
+    fill: var(--c-brand);
+  }
+  /* Az éles átállás az egyetlen visszafordíthatatlan lépés a sorban, ezért
+     a gradiens sötét vége jelöli. */
+  .abra__zaro {
+    fill: var(--c-brand-deep);
+  }
+  .abra__hatar {
+    stroke: var(--c-brand);
+    stroke-width: 1.5;
+    stroke-dasharray: 6 4;
+    fill: none;
+  }
+
+  /* --- táblázatok: a Biztonság oldaléval egyezően --- */
+
+  .tabla-doboz {
+    overflow-x: auto;
+  }
+  .tabla {
+    width: 100%;
+    min-width: 44rem;
+    border-collapse: collapse;
+    font-size: 0.93rem;
+  }
+  .tabla th,
+  .tabla td {
+    text-align: left;
+    padding: 0.6rem 0.9rem;
+    border: 1px solid var(--c-line);
+    vertical-align: top;
+  }
+  .tabla thead th {
+    background: var(--c-ink);
+    color: #e9ecf2;
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+  }
+  .tabla thead th .csillag a {
+    color: #e9ecf2;
+  }
+  .tabla tbody th {
+    background: var(--c-paper);
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: var(--c-ink);
+    width: 15rem;
+  }
+  .tabla td {
+    background: var(--c-paper);
+    color: var(--c-steel);
+  }
+  .tabla tbody tr:nth-child(even) th,
+  .tabla tbody tr:nth-child(even) td {
+    background: var(--c-mist);
+  }
+  .tabla a {
+    text-decoration: none;
+  }
+  .tabla a:hover {
+    text-decoration: underline;
+  }
+  /* Sorszám az áttekintő táblázatban — ugyanaz a szám, mint az esetkártyán,
+     hogy a két nézet összekapcsolható legyen. */
+  .tabla__idx {
+    display: block;
+    margin-bottom: 0.2rem;
+    font-family: var(--f-util);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    color: var(--c-brand);
+  }
+
+  /* --- kétoszlopos szövegblokk --- */
+
+  .paros {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-top: 2.5rem;
+  }
+  @media (min-width: 46rem) {
+    .paros {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .paros h3 {
+    font-size: 1.08rem;
+    margin-bottom: 0.6rem;
+  }
+  .paros p {
+    color: var(--c-steel);
+    font-size: 0.96rem;
+  }
+  .paros ul {
+    margin: 0 0 1rem;
+    padding-left: 1rem;
+    list-style: none;
+  }
+  .paros li {
+    position: relative;
+    margin-bottom: 0.4rem;
+    color: var(--c-steel);
+    font-size: 0.92rem;
+    line-height: 1.45;
+  }
+  .paros li::before {
+    content: '';
+    position: absolute;
+    left: -1rem;
+    top: 0.58em;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--c-brand);
+  }
+  .paros__hiv {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+
+  /* --- „amit kihagytunk" kártyák --- */
+
+  .tartozkodas {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  @media (min-width: 46rem) {
+    .tartozkodas {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  /* Szándékosan visszafogott: nem hirdetés, hanem kiegészítés — ezért nincs
+     rajta márkakék hangsúly. */
+  .tartozkodas article {
+    background: var(--c-mist);
+    border: 1px solid var(--c-line);
+    border-radius: var(--r);
+    padding: 1.5rem;
+  }
+  .tartozkodas h3 {
+    font-size: 1.05rem;
+    margin-bottom: 0.5rem;
+  }
+  .tartozkodas p {
+    margin: 0;
+    color: var(--c-steel);
+    font-size: 0.94rem;
+  }
+
+  /* --- kiemelt mondat és lábjegyzet --- */
+
+  .kulcs {
+    max-width: 62ch;
+    border-left: 2px solid var(--c-brand);
+    padding-left: 1rem;
+    margin: 2.5rem 0 0;
+    color: var(--c-ink);
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 1.05rem;
+    line-height: 1.45;
+  }
+
+  .labjegyzet {
+    max-width: 72ch;
+    margin: 2rem 0 0;
+    color: var(--c-steel);
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+  /* A lábjegyzetre ugrás után a szöveg ne tapadjon a fejléc alá. */
+  #nevekrol {
+    scroll-margin-top: 6rem;
+  }
+
+  .vizjel--cta {
+    right: -4rem;
+    bottom: -6rem;
+    width: 22rem;
+    opacity: 0.07;
+  }
+  .cta {
+    text-align: center;
+  }
+  .cta .lead {
+    margin-inline: auto;
+    max-width: 58ch;
+  }
+
+  /* Keskeny hasábon a sorkizárás tátongó szóközöket nyit. */
+  @media (max-width: 40rem) {
+    .ekartya p:not(.ekartya__kulcs):not(.ekartya__nev) {
+      text-align: left;
+    }
+  }
+  @media (max-width: 34rem) {
+    .ekartya__kulcs,
+    .kulcs {
+      font-size: 0.98rem;
+      padding-left: 0.8rem;
+    }
+    .gyorsnezet {
+      gap: 1rem;
+    }
+    .ekartya__hiv {
+      gap: 0.4rem;
+      flex-direction: column;
+    }
+    .cta .btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>

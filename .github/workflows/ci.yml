@@ -42,3 +42,6 @@ jobs:
       # A levélküldés a functions/ alatti Pages Functionben van, azt az Astro
       # build nem fordítja. A típusait a check lépés nézi át.
       - run: npm run check
+      # A magyar és az angol (/en/) oldalpárok: azonos <style>, teljes fordítás.
+      # Lásd scripts/nyelvparok.mjs és docs/angol-forditasi-utmutato.md
+      - run: npm run check:nyelv

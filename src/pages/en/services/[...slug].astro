@@ -1,0 +1,13 @@
+---
+import { getCollection } from 'astro:content';
+import SzolgaltatasOldal from '../../../components/SzolgaltatasOldal.astro';
+
+export async function getStaticPaths() {
+  const lista = await getCollection('szolgaltatasokEn');
+  return lista.map((sz) => ({ params: { slug: sz.id }, props: { sz } }));
+}
+
+const { sz } = Astro.props;
+---
+
+<SzolgaltatasOldal sz={sz} />
