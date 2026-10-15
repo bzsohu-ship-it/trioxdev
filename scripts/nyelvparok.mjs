@@ -27,6 +27,7 @@ const OLDALPAROK = {
   'rolunk.astro': 'en/about.astro',
   'tamogatas.astro': 'en/support.astro',
   'technologia.astro': 'en/technology.astro',
+  'adatvedelmi-nyilatkozat.astro': 'en/privacy.astro',
   'szolgaltatasok/index.astro': 'en/services/index.astro',
   'szolgaltatasok/[...slug].astro': 'en/services/[...slug].astro',
   'blog/index.astro': 'en/blog/index.astro',

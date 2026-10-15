@@ -23,6 +23,9 @@ const t = {
     sikertelen: 'A küldés nem sikerült.',
     irjonIde: 'Ha nem oldódik meg, írjon ide: info@triox.hu',
     irjonKozvetlenul: 'A küldés nem sikerült. Írjon közvetlenül: info@triox.hu',
+    adatkezelesElotte: 'Az adatait kizárólag a megkeresése megválaszolására használjuk —',
+    adatkezelesLink: 'adatkezelési tájékoztató',
+    adatkezelesUrl: '/adatvedelmi-nyilatkozat/',
   },
   en: {
     nev: 'Name',
@@ -38,6 +41,9 @@ const t = {
     sikertelen: 'Sending failed.',
     irjonIde: 'If the problem persists, email us at info@triox.hu',
     irjonKozvetlenul: 'Sending failed. Email us directly at info@triox.hu',
+    adatkezelesElotte: 'We use your data only to answer your inquiry—see our',
+    adatkezelesLink: 'privacy notice',
+    adatkezelesUrl: '/en/privacy/',
   },
 }[nyelv];
 ---
@@ -87,6 +93,10 @@ const t = {
 
   <button class="btn" type="submit">{t.gomb}</button>
   <p class="formnote" role="status" aria-live="polite"></p>
+  {/* Tájékoztatás az adatfelvétel helyén (GDPR 13. cikk) — rövid, a részletek a tájékoztatóban. */}
+  <p class="urlap__adatkezeles">
+    {t.adatkezelesElotte} <a href={t.adatkezelesUrl}>{t.adatkezelesLink}</a>.
+  </p>
 </form>
 
 <script>
@@ -153,5 +163,10 @@ const t = {
 <style>
   .urlap {
     max-width: 34rem;
+  }
+  .urlap__adatkezeles {
+    margin: 0.9rem 0 0;
+    font-size: 0.82rem;
+    color: var(--c-steel);
   }
 </style>
