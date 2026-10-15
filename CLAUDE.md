@@ -67,6 +67,12 @@ után az angol párját is frissíteni kell, ugyanabban a PR-ban.
 - Az angol oldal `<style>` blokkja **betűre azonos** a magyaréval. Stílusmódosítás
   mindkét fájlba; a `npm run check:nyelv` (CI-ban is fut) eltérésnél elbukik.
 - Az angol menü a `Header.astro` `menuEn` tömbje — új blogbejegyzésnél oda is.
+- **Nyelvválasztás:** a fejlécben két zászló (`Header.astro`), mindkettő `?nyelv=hu|en`
+  paraméterrel az oldal párjára visz. A `Base.astro` `<head>`-szkriptje ezt eltárolja
+  (localStorage `triox-nyelv`), és ha nincs eltárolt döntés, a böngésző nyelve dönt:
+  bármelyik magyar nyelv → magyar, minden más → angol. **Keresőrobotot soha nem
+  irányít át** (különben a magyar oldalak kiesnének az indexből) — a robot-mintát
+  ne szűkítsd.
 - Az angol űrlap `nyelv: 'en'` mezőt küld; a `functions/api/kapcsolat.ts` ettől
   angol hibaszöveget és angol visszaigazolót ad, a belső értesítő tárgyában `[EN]`.
 

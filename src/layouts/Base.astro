@@ -23,6 +23,8 @@ const nyelv = nyelvAz(ut);
 // hreflang csak valódi párnál: a 404 vagy egy pár nélküli oldal ne hivatkozzon
 // a másik nyelv kezdőlapjára mint saját fordítására.
 const parUrl = vanParja(ut) ? new URL(parja(ut), Astro.site) : undefined;
+// Az automatikus nyelvválasztás célja: a pár útvonala, vagy null, ha nincs pár.
+const parUt = vanParja(ut) ? parja(ut) : null;
 const huUrl = nyelv === 'hu' ? kanonikus : parUrl;
 const enUrl = nyelv === 'en' ? kanonikus : parUrl;
 
@@ -49,6 +51,47 @@ const nyelvi = {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {/*
+      Automatikus nyelvválasztás — a <head> elején, hogy rossz nyelvű oldal ne
+      villanjon fel. Sorrend:
+        1. `?nyelv=hu|en` a címben (a fejléc zászlói ezt küldik): ez a látogató
+           döntése, eltesszük, és ezen a betöltésen nem irányítunk át.
+        2. Eltett döntés (localStorage `triox-nyelv`): az nyer.
+        3. Különben a böngésző nyelvei: ha bármelyik magyar, magyar; minden más
+           nyelvű látogató az angol oldalt kapja.
+      Keresőrobotot és automatizált böngészőt soha nem irányítunk át — különben
+      a Google a magyar oldalakat angolra ugrónak látná, és kiesnének az
+      indexből. Pár nélküli oldalon (404) sincs átirányítás.
+      Ha a tárolás tiltott (privát mód), a zászlós link akkor is a választott
+      nyelvre visz, csak a következő oldalon újra a böngésző nyelve dönt.
+    */}
+    <script is:inline define:vars={{ sajatNyelv: nyelv, parUt }}>
+      (function () {
+        var KULCS = 'triox-nyelv';
+        try {
+          var cim = new URL(location.href);
+          var kert = cim.searchParams.get('nyelv');
+          if (kert === 'hu' || kert === 'en') {
+            try { localStorage.setItem(KULCS, kert); } catch (e) {}
+            cim.searchParams.delete('nyelv');
+            history.replaceState(history.state, '', cim.pathname + cim.search + cim.hash);
+            return;
+          }
+          if (!parUt) return;
+          if (navigator.webdriver || /bot|crawl|spider|slurp|mediapartners|lighthouse|headless|preview|facebookexternalhit|embedly|whatsapp|telegram|skype|discord|slack/i.test(navigator.userAgent)) return;
+          var valasztott = null;
+          try { valasztott = localStorage.getItem(KULCS); } catch (e) {}
+          if (valasztott !== 'hu' && valasztott !== 'en') {
+            var nyelvek = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ''];
+            valasztott = 'en';
+            for (var i = 0; i < nyelvek.length; i++) {
+              if (/^hu(-|$)/i.test(nyelvek[i])) { valasztott = 'hu'; break; }
+            }
+          }
+          if (valasztott !== sajatNyelv) location.replace(parUt + location.search + location.hash);
+        } catch (e) {}
+      })();
+    </script>
     <title>{cim} — Triox Informatika Kft.</title>
     <meta name="description" content={leiras} />
     <link rel="canonical" href={kanonikus} />
