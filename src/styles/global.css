@@ -15,6 +15,11 @@
   --c-mist: #f5f7fa;
   --c-paper: #ffffff;
   --c-up: #2e9e6b; /* "fut" állapot — a monitoring világából */
+  /* Nyelvválasztó zászlók (fejléc) — a hivatalos zászlószínek, nem márkaszínek. */
+  --c-zaszlo-hu-piros: #ce2939;
+  --c-zaszlo-hu-zold: #477050;
+  --c-zaszlo-us-piros: #b22234;
+  --c-zaszlo-us-kek: #3c3b6e;
 
   /* Betű */
   --f-display: 'Montserrat Variable', 'Montserrat', system-ui, sans-serif;

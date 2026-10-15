@@ -148,9 +148,31 @@ const aktivMenu = nyelv === 'en' ? menuEn : menu;
 
 /** A fejléc nem menüs feliratai, nyelvenként. A burger-feliratokat a szkript a data-attribútumokból veszi. */
 const felirat = {
-  hu: { logo: 'Triox logó', fomenu: 'Fő menü', nyit: 'Menü megnyitása', zar: 'Menü bezárása', valto: 'EN', valtoCim: 'English version', valtoNyelv: 'en' },
-  en: { logo: 'Triox logo', fomenu: 'Main menu', nyit: 'Open menu', zar: 'Close menu', valto: 'HU', valtoCim: 'Magyar változat', valtoNyelv: 'hu' },
+  hu: { logo: 'Triox logó', fomenu: 'Fő menü', nyit: 'Menü megnyitása', zar: 'Menü bezárása', nyelvek: 'Nyelv' },
+  en: { logo: 'Triox logo', fomenu: 'Main menu', nyit: 'Open menu', zar: 'Close menu', nyelvek: 'Language' },
 }[nyelv];
+
+/**
+ * Nyelvválasztó zászlók. Mindkét zászló link: a saját nyelvé az aktuális
+ * oldalra, a másiké az oldal párjára mutat. A `?nyelv=` paraméter rögzíti a
+ * látogató választását (Base.astro fejszkriptje teszi el), így a böngésző
+ * nyelvén alapuló automatikus átirányítás onnantól nem írja felül.
+ * A felirat mindig az adott nyelven áll — aki nem érti az oldalt, a saját
+ * nyelvén olvassa a választást.
+ */
+const zaszlok = [
+  { kod: 'hu', felirat: 'Magyar', href: nyelv === 'hu' ? most : parja(most) },
+  { kod: 'en', felirat: 'English (US)', href: nyelv === 'en' ? most : parja(most) },
+].map((z) => ({ ...z, href: `${z.href}?nyelv=${z.kod}`, aktiv: z.kod === nyelv }));
+
+// Az amerikai zászló 50 csillaga: 5 hatos és 4 ötös sor, váltakozva.
+const csillagok: [number, number][] = [];
+for (let sor = 0; sor < 9; sor++) {
+  const db = sor % 2 === 0 ? 6 : 5;
+  for (let i = 0; i < db; i++) {
+    csillagok.push([0.633 + (sor % 2 === 0 ? 0 : 0.633) + i * 1.266, 0.538 + sor * 0.538]);
+  }
+}
 
 /**
  * Egy panelen belül a legpontosabban illeszkedő menüpont kap kiemelést, nem
@@ -220,14 +242,37 @@ function aktivHref(al: Almenu[]): string | undefined {
       })}
     </nav>
 
-    <a
-      class="nyelvvalto"
-      href={parja(most)}
-      hreflang={felirat.valtoNyelv}
-      lang={felirat.valtoNyelv}
-      aria-label={felirat.valtoCim}
-      title={felirat.valtoCim}
-    >{felirat.valto}</a>
+    <div class="nyelvek" role="group" aria-label={felirat.nyelvek}>
+      {zaszlok.map((z) => (
+        <a
+          class="zaszlo"
+          href={z.href}
+          hreflang={z.kod}
+          lang={z.kod}
+          title={z.felirat}
+          aria-label={z.felirat}
+          aria-current={z.aktiv ? 'true' : undefined}
+          data-nyelv={z.kod}
+        >
+          {z.kod === 'hu' ? (
+            <svg viewBox="0 0 6 3" aria-hidden="true">
+              <rect class="hu-piros" width="6" height="1" />
+              <rect fill="#fff" y="1" width="6" height="1" />
+              <rect class="hu-zold" y="2" width="6" height="1" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 19 10" aria-hidden="true">
+              <rect fill="#fff" width="19" height="10" />
+              {[0, 2, 4, 6, 8, 10, 12].map((s) => (
+                <rect class="us-piros" y={(s * 10) / 13} width="19" height={10 / 13} />
+              ))}
+              <rect class="us-kek" width="7.6" height={70 / 13} />
+              {csillagok.map(([x, y]) => <circle fill="#fff" cx={x} cy={y} r="0.19" />)}
+            </svg>
+          )}
+        </a>
+      ))}
+    </div>
 
     <button
       class="burger"
@@ -359,25 +404,52 @@ function aktivHref(al: Almenu[]): string | undefined {
     margin-right: auto;
   }
 
-  /* --- nyelvváltó: HU ⇄ EN, a burger mellett mobilon is látszik --- */
+  /* --- nyelvválasztó zászlók: a burger mellett mobilon is látszanak --- */
 
-  .nyelvvalto {
+  .nyelvek {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
     flex-shrink: 0;
-    font-family: var(--f-util);
-    font-size: 0.74rem;
-    letter-spacing: 0.12em;
-    color: var(--c-ink);
-    text-decoration: none;
-    border: 1px solid var(--c-line);
-    border-radius: var(--r);
-    padding: 0.32rem 0.55rem;
-    transition: color 0.15s, border-color 0.15s, background 0.15s;
   }
-  .nyelvvalto:hover {
-    color: var(--c-brand);
-    border-color: var(--c-brand);
+  .zaszlo {
+    display: grid;
+    place-items: center;
+    /* A kattintható felület nagyobb a zászlónál — érintőképernyőn is elérhető. */
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--r);
+    transition: background 0.15s;
+  }
+  .zaszlo svg {
+    display: block;
+    width: 1.35rem;
+    height: 0.9rem;
+    border-radius: 2px;
+    /* Vékony keret, hogy a fehér sáv fehér fejlécen se olvadjon bele. */
+    box-shadow: 0 0 0 1px rgba(22, 24, 29, 0.18);
+    opacity: 0.5;
+    filter: saturate(0.6);
+    transition: opacity 0.15s, filter 0.15s;
+  }
+  .zaszlo:hover svg,
+  .zaszlo:focus-visible svg,
+  .zaszlo[aria-current='true'] svg {
+    opacity: 1;
+    filter: none;
+  }
+  .zaszlo:hover {
     background: var(--c-brand-wash);
   }
+  /* Az aktuális nyelv: teljes szín és márkakék aláhúzás. */
+  .zaszlo[aria-current='true'] {
+    box-shadow: inset 0 -2px 0 var(--c-brand);
+    border-radius: var(--r) var(--r) 0 0;
+  }
+  .hu-piros { fill: var(--c-zaszlo-hu-piros); }
+  .hu-zold { fill: var(--c-zaszlo-hu-zold); }
+  .us-piros { fill: var(--c-zaszlo-us-piros); }
+  .us-kek { fill: var(--c-zaszlo-us-kek); }
   .fej__logo {
     width: 2rem;
     height: 2rem;
