@@ -1,0 +1,315 @@
+---
+// A SOX-oldal angol változata — a magyar párja: src/pages/sox-megfeleles.astro.
+// Ugyanazok a szabályok: csak a user által megerősített tapasztalat, a korábbi
+// ügyfél csak „international, publicly listed group", új állítás csak
+// megerősítéssel. A két lap tartalma együtt változik.
+import Base from '../../layouts/Base.astro';
+
+const teruletek = [
+  {
+    cimke: 'Access',
+    cim: 'Access management',
+    szoveg:
+      'Documented granting and revoking of access, and periodic user access reviews—so that at any time we can show who has access to what, and who approved it.',
+    hiv: { szoveg: 'The identity layer on our Security page', url: '/en/security/' },
+  },
+  {
+    cimke: 'Change',
+    cim: 'Change management',
+    szoveg:
+      'Documented request, approval and tracking of system changes—every change has an owner, an approver and a trail you can follow.',
+    hiv: { szoveg: 'Change tracking and infrastructure audits', url: '/en/security/' },
+  },
+  {
+    cimke: 'Operations',
+    cim: 'Backup and restore',
+    szoveg:
+      'Daily verification of backups, restore tests with evidence, and operations logs—the question is not whether there is a backup, but whether it can be shown to restore.',
+    hiv: { szoveg: 'Audit Restore Validation', url: '/en/services/audit-restore-validation/' },
+  },
+  {
+    cimke: 'Evidence',
+    cim: 'Audit evidence',
+    szoveg:
+      'Producing evidence, reports and logs for the external auditor’s ITGC testing, according to the auditor’s request lists (PBC lists) and on schedule.',
+    hiv: { szoveg: 'Let’s go through your auditor’s requirements', url: '/en/contact/' },
+  },
+];
+
+const illeszkedes = [
+  'A dedicated, isolated network environment and a dedicated gateway for each client—the network of your financial systems is shared with no one.',
+  'Multi-factor authentication, central access management, and a documented joiner and leaver process.',
+  'A management network that cannot be reached from the internet—only our authorized staff have access to the management interfaces.',
+  'Continuous monitoring, regular automated infrastructure audits and change tracking.',
+  'Documented restore tests with an audit-ready report.',
+  'Responsibility boundaries agreed up front: which controls are ours, which are shared, and which stay on your side.',
+];
+---
+
+<Base
+  cim="IT operations under SOX"
+  leiras="IT operations for US-listed companies and their subsidiaries: access and change management, backup and restore, and audit evidence for SOX ITGC testing."
+>
+  <section class="band">
+    <div class="wrap">
+      <div class="hero">
+        <p class="eyebrow">Compliance · SOX</p>
+        <h1>IT operations under SOX</h1>
+        <p class="lead">
+          Companies listed on a US stock exchange must prove that the IT systems behind their
+          financial reporting run under control. This can extend to the systems of their
+          Hungarian subsidiaries as well. This is not new territory for us: we have also worked
+          in a SOX-scoped environment of an international, publicly listed group.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band band--mist">
+    <div class="wrap">
+      <h2 class="szekcio__cim">What SOX expects from IT</h2>
+      <div class="ketoszlop">
+        <p>
+          Under Section 404 of the Sarbanes-Oxley Act (SOX), management must assess the internal
+          controls over financial reporting every year, and at larger companies an external
+          auditor attests to this as well. On the IT side, these are the IT general controls
+          (ITGC): who can access the systems and the data, how a change gets into production,
+          and how continuous, recoverable operation of the systems is ensured.
+        </p>
+        <p>
+          The auditor does not ask for statements of intent, but for evidence: approvals, logs,
+          review records, tested restores—for the entire period under review. So the question for
+          an IT operator is not whether it does good work, but <strong>whether that work can be
+          proven after the fact</strong>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <h2 class="szekcio__cim">Where we have experience</h2>
+      <p class="szekcio__lead">
+        In the SOX-scoped environment of an international, publicly listed group, we worked in
+        the following four areas—from day-to-day operations to handling the external auditor’s
+        requests.
+      </p>
+      <div class="kartyak">
+        {teruletek.map((t) => (
+          <article class="kartya">
+            <p class="kartya__cimke">{t.cimke}</p>
+            <h3>{t.cim}</h3>
+            <p>{t.szoveg}</p>
+            <p class="kartya__hiv"><a href={t.hiv.url}>{t.hiv.szoveg} →</a></p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="band band--mist">
+    <div class="wrap">
+      <h2 class="szekcio__cim">What is already built into our services</h2>
+      <p class="szekcio__lead">
+        For us, a SOX-scoped environment is not a separate product. It is built on the same
+        foundations that every client environment runs on:
+      </p>
+      <ul class="pipak">
+        {illeszkedes.map((s) => <li>{s}</li>)}
+      </ul>
+      <p class="tovabb">
+        The details are on our <a href="/en/security/">Security</a> page, together with the
+        responsibility matrix.
+      </p>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <h2 class="szekcio__cim">What we do not claim</h2>
+      <div class="tagadas">
+        <article>
+          <h3>We do not issue our own SOC 1 / ISAE 3402 report</h3>
+          <p>
+            We do not have an independent service organization control report. Instead, we offer
+            what we have done before: we hand the evidence that the controls operate directly to
+            your internal audit team and your external auditor, following their request lists.
+          </p>
+        </article>
+        <article>
+          <h3>Compliance is yours, the evidence is a joint effort</h3>
+          <p>
+            Your company’s management is responsible for SOX compliance. What we commit to is that
+            the controls we operate work in a documented way, and that we can prove this to the
+            auditor in full. Which control belongs to whom is set out in the contract up front.
+          </p>
+        </article>
+      </div>
+      <p class="zaro">We do not publish the names of our clients.</p>
+    </div>
+  </section>
+
+  <section class="band band--sotet">
+    <img class="vizjel vizjel--cta" src="/logo-feher.svg" alt="" aria-hidden="true" />
+    <div class="wrap cta">
+      <h2>Let’s talk about what your auditor asks for</h2>
+      <p class="lead">
+        In an assessment, we go through which systems are in SOX scope, which controls we take
+        on, and what evidence we need to deliver, and on what schedule.
+      </p>
+      <a class="btn" href="/en/contact/">Request an assessment</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero .lead {
+    max-width: 60ch;
+  }
+  .szekcio__cim {
+    margin-bottom: 0.5rem;
+  }
+  .szekcio__lead {
+    max-width: 62ch;
+    color: var(--c-steel);
+    margin-bottom: 2rem;
+  }
+
+  .ketoszlop {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0 2.5rem;
+    margin-top: 1rem;
+  }
+  @media (min-width: 52rem) {
+    .ketoszlop {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .ketoszlop p {
+    color: var(--c-steel);
+  }
+
+  .kartyak {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  @media (min-width: 46rem) {
+    .kartyak {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .kartya {
+    min-width: 0;
+    background: var(--c-paper);
+    border: 1px solid var(--c-line);
+    border-top: 3px solid var(--c-brand);
+    border-radius: var(--r);
+    padding: 1.5rem;
+  }
+  .kartya__cimke {
+    font-family: var(--f-util);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--c-brand);
+    margin: 0 0 0.5rem;
+  }
+  .kartya h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+  .kartya p {
+    color: var(--c-steel);
+    font-size: 0.95rem;
+  }
+  .kartya__hiv {
+    margin: 0.9rem 0 0;
+    font-size: 0.9rem !important;
+  }
+  .kartya__hiv a {
+    text-decoration: none;
+  }
+  .kartya__hiv a:hover {
+    text-decoration: underline;
+  }
+
+  .pipak {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.6rem 2.5rem;
+  }
+  @media (min-width: 52rem) {
+    .pipak {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .pipak li {
+    position: relative;
+    padding-left: 1.6rem;
+    margin: 0;
+    color: var(--c-steel);
+    font-size: 0.95rem;
+  }
+  .pipak li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--c-brand);
+    font-weight: 700;
+  }
+  .tovabb {
+    margin-top: 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  .tagadas {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    margin-top: 1rem;
+  }
+  @media (min-width: 46rem) {
+    .tagadas {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .tagadas article {
+    background: var(--c-mist);
+    border: 1px solid var(--c-line);
+    border-radius: var(--r);
+    padding: 1.5rem;
+  }
+  .tagadas h3 {
+    font-size: 1.05rem;
+    margin-bottom: 0.5rem;
+  }
+  .tagadas p {
+    margin: 0;
+    color: var(--c-steel);
+    font-size: 0.94rem;
+  }
+  .zaro {
+    margin-top: 1.5rem;
+    color: var(--c-steel);
+    font-size: 0.9rem;
+  }
+
+  .vizjel--cta {
+    right: -4rem;
+    bottom: -6rem;
+    width: 22rem;
+    opacity: 0.07;
+  }
+  .cta {
+    text-align: center;
+  }
+  .cta .lead {
+    margin-inline: auto;
+  }
+</style>
